@@ -1,0 +1,105 @@
+"use client";
+
+import { HoldAction } from "@/components/fichas";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { type Appearance, DEFAULT_APPEARANCE, type Series } from "@/lib/store";
+import { AppearanceFields, NomenclatureField } from "./appearance-fields";
+
+export function InlineEdit({
+  series,
+  onClose,
+  onUpdate,
+  onAppearance,
+  onDelete,
+  onEditingChange,
+}: {
+  series: Series;
+  onClose: () => void;
+  onUpdate: (patch: Partial<Series>) => void;
+  onAppearance: (appearance: Appearance) => void;
+  onDelete: () => void;
+  onEditingChange?: (editing: boolean) => void;
+}) {
+  const appearance = series.appearance ?? DEFAULT_APPEARANCE;
+
+  return (
+    <div
+      className="flex min-h-full flex-col gap-4 pb-10"
+      onKeyDown={(event) => {
+        if (event.key === "Escape") {
+          onEditingChange?.(false);
+          onClose();
+        }
+      }}
+      onPointerDown={(event) => event.stopPropagation()}
+    >
+      <div className="flex items-center justify-between border-b border-current/20 pb-3">
+        <h3 className="font-display text-xl">Editar ficha</h3>
+        <Button
+          onClick={() => {
+            onEditingChange?.(false);
+            onClose();
+          }}
+          size="sm"
+          type="button"
+          variant="ghost"
+        >
+          Concluir
+        </Button>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="inline-title">Título</Label>
+        <Input
+          defaultValue={series.title}
+          id="inline-title"
+          onBlur={(event) => {
+            if (event.target.value.trim()) {
+              onUpdate({ title: event.target.value.trim() });
+            }
+          }}
+        />
+      </div>
+
+      <NomenclatureField
+        onChange={(nomenclature) => onUpdate({ nomenclature })}
+        value={series.nomenclature ?? "Volume"}
+      />
+
+      <div className="space-y-2">
+        <Label htmlFor="inline-total">
+          Total de {series.nomenclature === "Edição" ? "edições" : "volumes"}
+        </Label>
+        <Input
+          defaultValue={series.total}
+          id="inline-total"
+          min={1}
+          onBlur={(event) => {
+            const total = Math.max(
+              1,
+              Math.floor(Number(event.target.value) || series.total),
+            );
+            onUpdate({
+              total,
+              missing: [
+                ...series.missing.filter((volume) => volume <= total),
+                ...Array.from(
+                  { length: Math.max(0, total - series.total) },
+                  (_, index) => series.total + index + 1,
+                ),
+              ],
+            });
+          }}
+          step={1}
+          type="number"
+        />
+      </div>
+
+      <AppearanceFields onChange={onAppearance} value={appearance} />
+
+      <HoldAction label="Excluir ficha" onComplete={onDelete} />
+    </div>
+  );
+}

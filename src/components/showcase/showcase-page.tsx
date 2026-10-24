@@ -31,7 +31,7 @@ export function ShowcasePage() {
   return (
     <LayoutBase>
       <div className="mx-auto flex w-full max-w-[1500px] gap-10 px-6 py-10">
-        <aside className="sticky top-6 hidden h-[calc(100vh-3rem)] w-60 shrink-0 flex-col overflow-y-auto pr-2 lg:flex">
+        <aside className="sticky top-6 hidden h-[calc(100dvh-3rem)] w-60 shrink-0 flex-col overflow-y-auto pr-2 lg:flex">
           <Input
             aria-label="Buscar componente"
             className="mb-4"

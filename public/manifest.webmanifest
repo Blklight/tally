@@ -1,0 +1,17 @@
+{
+  "name": "Tally",
+  "short_name": "Tally",
+  "description": "Listas e coleções em fichas de papel",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f7f7f7",
+  "icons": [
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

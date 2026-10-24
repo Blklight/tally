@@ -1,18 +1,18 @@
 export const LayoutBase = ({ children }: { children: React.ReactNode }) => {
   return (
     <>
-      <div className="w-full min-h-screen lg:p-2.25 flex flex-col relative rounded-b-lg main-background bg-light book:bg-sepia dark:bg-dark">
-        <main className="w-full relative flex flex-col grow">{children} </main>
+      <div className="relative box-border flex min-h-dvh w-full flex-col rounded-b-lg bg-light main-background lg:p-2.25 book:bg-sepia dark:bg-dark">
+        <main className="relative flex w-full grow flex-col">{children} </main>
       </div>
       <div
         id="padding"
-        className="lg:block hidden w-full h-full p-2 fixed z-99 top-0 left-0 pointer-events-none"
+        className="pointer-events-none fixed top-0 left-0 z-99 hidden h-dvh w-full p-2 lg:block"
       >
-        <div className="w-full h-full border border-[#121212] dark:border-[#f7f7f7]"></div>
+        <div className="h-full w-full border border-[#121212] dark:border-[#f7f7f7]"></div>
       </div>
       <div
         id="frame"
-        className="lg:block hidden w-full h-screen fixed top-0 right-0 z-100 background-frame pointer-events-none "
+        className="background-frame pointer-events-none fixed top-0 right-0 z-100 hidden h-dvh w-full lg:block"
       ></div>
     </>
   );
