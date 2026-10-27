@@ -21,17 +21,18 @@ import {
   CarouselContent,
   CarouselItem,
 } from "@/components/ui/carousel";
+import { TextureOverlay } from "@/components/ui/texture-overlay";
 import {
   type Appearance,
   type Category,
   DEFAULT_APPEARANCE,
   type Nomenclature,
+  normalizeAppearance,
   type Series,
   toggleMissing,
   uid,
   useData,
 } from "@/lib/store";
-import { TextureOverlay } from "@/components/ui/texture-overlay";
 
 export default function HomePage() {
   const [data, setData, loaded] = useData();
@@ -89,9 +90,13 @@ export default function HomePage() {
     (id: string, patch: Partial<Series>) => {
       setData((currentData) => ({
         ...currentData,
-        series: currentData.series.map((series) =>
-          series.id === id ? { ...series, ...patch } : series,
-        ),
+        series: currentData.series.map((series) => {
+          if (series.id !== id) return series;
+          const next = { ...series, ...patch };
+          return patch.appearance
+            ? { ...next, appearance: normalizeAppearance(patch.appearance) }
+            : next;
+        }),
       }));
     },
     [setData],
@@ -148,7 +153,10 @@ export default function HomePage() {
 
   const setLooseAppearance = useCallback(
     (looseAppearance: Appearance) => {
-      setData((currentData) => ({ ...currentData, looseAppearance }));
+      setData((currentData) => ({
+        ...currentData,
+        looseAppearance: normalizeAppearance(looseAppearance),
+      }));
     },
     [setData],
   );
@@ -180,7 +188,7 @@ export default function HomePage() {
               (_, position) => position + 1,
             ),
             nomenclature,
-            appearance,
+            appearance: normalizeAppearance(appearance),
           },
           ...currentData.series,
         ],
@@ -349,13 +357,13 @@ export default function HomePage() {
         />
       ) : (
         <Carousel
-          className="mx-auto min-h-0 w-full max-w-md flex-1"
+          className="carousel-ficha mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col"
           opts={{ align: "center", loop: true }}
           setApi={setCarouselApi}
         >
-          <CarouselContent className="-ml-0 h-full">
+          <CarouselContent className="-ml-0 w-full">
             {cards.map((card) => (
-              <CarouselItem className="h-full pl-0" key={card.id}>
+              <CarouselItem className="pl-0" key={card.id}>
                 {renderCard(card, true)}
               </CarouselItem>
             ))}

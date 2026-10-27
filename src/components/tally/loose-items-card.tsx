@@ -17,24 +17,29 @@ function LooseItemsEdit({
   appearance,
   onChange,
   onEditingChange,
+  onClose,
 }: {
   appearance: Appearance;
   onChange: (appearance: Appearance) => void;
   onEditingChange?: (editing: boolean) => void;
+  onClose?: () => void;
 }) {
+  const finish = () => {
+    onEditingChange?.(false);
+    onClose?.();
+  };
+
   return (
     <div
-      className="flex min-h-full flex-col gap-4 pb-10"
+      className="scrollbar-none flex min-h-full flex-col gap-4 overflow-y-auto pb-10"
+      onKeyDown={(event) => {
+        if (event.key === "Escape") finish();
+      }}
       onPointerDown={(event) => event.stopPropagation()}
     >
       <div className="flex items-center justify-between border-b border-current/20 pb-3">
         <h3 className="font-display text-xl">Editar Avulsos</h3>
-        <Button
-          onClick={() => onEditingChange?.(false)}
-          size="sm"
-          type="button"
-          variant="ghost"
-        >
+        <Button onClick={finish} size="sm" type="button" variant="ghost">
           Concluir
         </Button>
       </div>

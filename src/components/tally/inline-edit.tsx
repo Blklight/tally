@@ -4,7 +4,20 @@ import { HoldAction } from "@/components/fichas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { type Appearance, DEFAULT_APPEARANCE, type Series } from "@/lib/store";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  type Appearance,
+  CATEGORIES,
+  type Category,
+  DEFAULT_APPEARANCE,
+  type Series,
+} from "@/lib/store";
 import { AppearanceFields, NomenclatureField } from "./appearance-fields";
 
 export function InlineEdit({
@@ -63,6 +76,27 @@ export function InlineEdit({
         />
       </div>
 
+      <div className="space-y-2">
+        <Label>Categoria</Label>
+        <Select
+          onValueChange={(category) =>
+            onUpdate({ category: category as Category })
+          }
+          value={series.category}
+        >
+          <SelectTrigger aria-label="Categoria">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CATEGORIES.map((category) => (
+              <SelectItem key={category} value={category}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       <NomenclatureField
         onChange={(nomenclature) => onUpdate({ nomenclature })}
         value={series.nomenclature ?? "Volume"}
@@ -99,7 +133,13 @@ export function InlineEdit({
 
       <AppearanceFields onChange={onAppearance} value={appearance} />
 
-      <HoldAction label="Excluir ficha" onComplete={onDelete} />
+      <HoldAction
+        label="Excluir ficha"
+        onComplete={() => {
+          onEditingChange?.(false);
+          onDelete();
+        }}
+      />
     </div>
   );
 }

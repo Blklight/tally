@@ -1,5 +1,13 @@
 import { describe, expect, it } from "vitest";
-import { initializeData, toggleMissing, uid, volumeLabel } from "@/lib/store";
+import {
+  DEFAULT_APPEARANCE,
+  getContrastInk,
+  initializeData,
+  normalizeAppearance,
+  toggleMissing,
+  uid,
+  volumeLabel,
+} from "@/lib/store";
 
 describe("Collection rules", () => {
   it("initializes Dragon Ball with 42 volumes and the expected missing list", () => {
@@ -12,6 +20,10 @@ describe("Collection rules", () => {
       ...Array.from({ length: 28 }, (_, index) => index + 1),
       30,
     ]);
+    expect(dragonBall?.appearance).toEqual({
+      paper: "#d7bc8b",
+      ink: "graphite",
+    });
   });
 
   it("preserves existing loose items and does not re-add deleted defaults", () => {
@@ -36,7 +48,9 @@ describe("Collection rules", () => {
     };
     const initialized = initializeData({ series: [series], items: [] });
 
-    expect(initialized.series).toEqual([series]);
+    expect(initialized.series).toEqual([
+      { ...series, appearance: DEFAULT_APPEARANCE },
+    ]);
   });
 
   it("uses Volume nomenclature for numbered manga", () => {
@@ -58,5 +72,57 @@ describe("Collection rules", () => {
 
   it("generates unique ids", () => {
     expect(uid()).not.toBe(uid());
+  });
+});
+
+describe("Appearance", () => {
+  it("maps legacy paper names and derives the contrasting ink", () => {
+    expect(normalizeAppearance({ paper: "white" })).toEqual({
+      paper: "#fffdf7",
+      ink: "graphite",
+    });
+    expect(normalizeAppearance({ paper: "sepia", ink: "graphite" })).toEqual({
+      paper: "#a98968",
+      ink: "light",
+    });
+  });
+
+  it("derives ink color from custom paper colors", () => {
+    expect(normalizeAppearance({ paper: "#000000" })).toEqual({
+      paper: "#000000",
+      ink: "light",
+    });
+    expect(normalizeAppearance({ paper: "#ffffff" })).toEqual({
+      paper: "#ffffff",
+      ink: "graphite",
+    });
+  });
+
+  it("falls back to graphite for invalid colors", () => {
+    expect(getContrastInk("not-a-color")).toBe("graphite");
+  });
+
+  it("normalizes stored appearances when initializing data", () => {
+    const initialized = initializeData({
+      initialized: true,
+      series: [
+        {
+          id: "legacy",
+          title: "Legacy",
+          category: "Livro",
+          total: 1,
+          missing: [1],
+          appearance: { paper: "craft", ink: "light" },
+        },
+      ],
+      items: [],
+      looseAppearance: { paper: "white", ink: "light" },
+    });
+
+    expect(initialized.series[0]?.appearance).toEqual({
+      paper: "#d7bc8b",
+      ink: "graphite",
+    });
+    expect(initialized.looseAppearance).toEqual(DEFAULT_APPEARANCE);
   });
 });

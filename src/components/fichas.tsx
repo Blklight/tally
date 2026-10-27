@@ -2,6 +2,7 @@
 
 import { Check, ChevronLeft, Settings2, Trash2 } from "lucide-react";
 import {
+  type CSSProperties,
   cloneElement,
   isValidElement,
   type ReactNode,
@@ -15,6 +16,7 @@ import {
   type Appearance,
   DEFAULT_APPEARANCE,
   HOLD_DURATION,
+  normalizeAppearance,
 } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
@@ -353,12 +355,19 @@ export function Ficha({
       <Settings2 />
     </Button>
   );
+  const resolvedAppearance = normalizeAppearance(appearance);
+  const paperStyle = { "--paper": resolvedAppearance.paper } as CSSProperties;
   const face =
     "ficha relative flex h-full flex-col overflow-hidden bg-paper p-6 pb-7 text-paper-ink sm:p-8";
 
   if (!big) {
     return (
-      <div data-paper={appearance.paper} data-ink={appearance.ink}>
+      <div
+        style={paperStyle}
+        data-paper={resolvedAppearance.paper}
+        data-ink={resolvedAppearance.ink}
+        className="flip-scene h-full w-full"
+      >
         <Fillet corner="br" className={face}>
           {editing && editContent ? (
             <div className="relative min-h-0">
@@ -403,8 +412,9 @@ export function Ficha({
 
   return (
     <div
-      data-paper={appearance.paper}
-      data-ink={appearance.ink}
+      style={paperStyle}
+      data-paper={resolvedAppearance.paper}
+      data-ink={resolvedAppearance.ink}
       className="flip-scene h-full w-full"
     >
       <div
@@ -453,7 +463,7 @@ export function Ficha({
               </Button>
             </div>
             {editing && editContent && (
-              <div className="ficha absolute inset-0 z-10 overflow-y-auto bg-paper p-6 pb-7 text-paper-ink sm:p-8">
+              <div className="ficha ficha-form scrollbar-none absolute inset-0 z-10 overflow-y-auto bg-paper p-6 pb-7 text-paper-ink sm:p-8">
                 {isValidElement(editContent)
                   ? cloneElement(
                       editContent as React.ReactElement<{

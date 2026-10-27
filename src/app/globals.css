@@ -1097,7 +1097,8 @@
   box-shadow: var(--shadow-paper);
 }
 
-.ficha::before {
+.ficha::before,
+.ficha-form::before {
   content: "";
   position: absolute;
   inset: 0;
@@ -1186,4 +1187,29 @@
 .flip-back,
 .flipped {
   transform: rotateY(180deg);
+}
+
+.carousel-ficha > [data-slot="carousel-content"] {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+.carousel-ficha > [data-slot="carousel-content"] > div {
+  width: 100%;
+  height: auto;
+  align-self: stretch;
+}
+.carousel-ficha [data-slot="carousel-item"] {
+  display: flex;
+  height: auto;
+  align-self: stretch;
+}
+.carousel-ficha [data-slot="carousel-item"] .flip-scene {
+  display: flex;
+  height: auto;
+  align-self: stretch;
+}
+.carousel-ficha [data-slot="carousel-item"] .flip-inner {
+  height: auto;
+  align-self: stretch;
 }
