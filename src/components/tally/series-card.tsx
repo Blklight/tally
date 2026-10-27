@@ -29,8 +29,8 @@ export function SeriesCard({
   const ordered =
     sort === "missing"
       ? [
-          ...volumes.filter((volume) => series.missing.includes(volume)),
-          ...volumes.filter((volume) => !series.missing.includes(volume)),
+          ...volumes.filter((volume) => !series.acquired?.includes(volume)),
+          ...volumes.filter((volume) => series.acquired?.includes(volume)),
         ]
       : volumes;
 
@@ -42,7 +42,7 @@ export function SeriesCard({
       category={`${series.category} / ${
         series.nomenclature === "Edição" ? "edições" : "volumes"
       }`}
-      count={series.missing.length}
+      count={series.total - (series.acquired?.length ?? 0)}
       editContent={
         <InlineEdit
           onAppearance={onAppearance}
@@ -53,14 +53,14 @@ export function SeriesCard({
         />
       }
       onEdit={() => undefined}
-      summary={`${series.missing.length} faltantes · ${
-        series.total - series.missing.length
+      summary={`${series.total - (series.acquired?.length ?? 0)} faltantes · ${
+        series.acquired?.length ?? 0
       } na coleção · ${series.total} no total`}
       title={series.title}
     >
       {ordered.map((volume) => (
         <HoldRow
-          checked={!series.missing.includes(volume)}
+          checked={series.acquired?.includes(volume) ?? false}
           key={volume}
           label={volumeLabel(series, volume)}
           onToggle={() => onToggleVolume(volume)}

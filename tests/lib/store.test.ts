@@ -10,15 +10,14 @@ import {
 } from "@/lib/store";
 
 describe("Collection rules", () => {
-  it("initializes Dragon Ball with 42 volumes and the expected missing list", () => {
+  it("initializes Dragon Ball with 42 volumes and the expected acquired list", () => {
     const dragonBall = initializeData().series.find(
       (series) => series.title === "Dragon Ball",
     );
 
     expect(dragonBall?.total).toBe(42);
-    expect(dragonBall?.missing).toEqual([
-      ...Array.from({ length: 28 }, (_, index) => index + 1),
-      30,
+    expect(dragonBall?.acquired).toEqual([
+      29, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
     ]);
     expect(dragonBall?.appearance).toEqual({
       paper: "#d7bc8b",
@@ -48,9 +47,15 @@ describe("Collection rules", () => {
     };
     const initialized = initializeData({ series: [series], items: [] });
 
-    expect(initialized.series).toEqual([
-      { ...series, appearance: DEFAULT_APPEARANCE },
-    ]);
+    expect(initialized.series[0]).toMatchObject({
+      ...series,
+      acquired: [
+        1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20,
+        21, 22, 23, 24, 25, 26, 27, 28, 29, 31, 32, 33, 34, 35, 36, 37, 38, 39,
+        40, 41, 42,
+      ],
+      appearance: DEFAULT_APPEARANCE,
+    });
   });
 
   it("uses Volume nomenclature for numbered manga", () => {

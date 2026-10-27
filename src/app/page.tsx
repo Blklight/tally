@@ -118,7 +118,10 @@ export default function HomePage() {
         ...currentData,
         series: currentData.series.map((series) =>
           series.id === id
-            ? { ...series, missing: toggleMissing(series.missing, volume) }
+            ? {
+                ...series,
+                acquired: toggleMissing(series.acquired ?? [], volume),
+              }
             : series,
         ),
       }));
@@ -131,7 +134,7 @@ export default function HomePage() {
       setData((currentData) => ({
         ...currentData,
         items: currentData.items.map((item) =>
-          item.id === id ? { ...item, found: !item.found } : item,
+          item.id === id ? { ...item, found: !(item.found ?? false) } : item,
         ),
       }));
     },
@@ -144,7 +147,7 @@ export default function HomePage() {
         ...currentData,
         items: [
           ...currentData.items,
-          { id: uid(), title, category: "Livro" as Category },
+          { id: uid(), title, category: "Livro" as Category, found: false },
         ],
       }));
     },
@@ -183,10 +186,7 @@ export default function HomePage() {
             title,
             category,
             total,
-            missing: Array.from(
-              { length: total },
-              (_, position) => position + 1,
-            ),
+            acquired: [],
             nomenclature,
             appearance: normalizeAppearance(appearance),
           },
