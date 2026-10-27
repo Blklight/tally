@@ -357,13 +357,16 @@ export default function HomePage() {
         />
       ) : (
         <Carousel
-          className="carousel-ficha mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col"
-          opts={{ align: "center", loop: true }}
+          className="carousel-ficha flex min-h-0 w-full flex-1 flex-col"
+          opts={{ align: "start", loop: true }}
           setApi={setCarouselApi}
         >
-          <CarouselContent className="-ml-0 w-full">
+          <CarouselContent className="-ml-4 w-full">
             {cards.map((card) => (
-              <CarouselItem className="pl-0" key={card.id}>
+              <CarouselItem
+                className="basis-[min(28rem,calc(100vw-2rem))] pl-4"
+                key={card.id}
+              >
                 {renderCard(card, true)}
               </CarouselItem>
             ))}
