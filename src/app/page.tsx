@@ -81,8 +81,11 @@ export default function HomePage() {
 
   const missingCount = useMemo(
     () =>
-      data.series.reduce((total, series) => total + series.missing.length, 0) +
-      data.items.filter((item) => !item.found).length,
+      data.series.reduce(
+        (total, series) =>
+          total + Math.max(0, series.total - (series.acquired?.length ?? 0)),
+        0,
+      ) + data.items.filter((item) => !item.found).length,
     [data.series, data.items],
   );
 
