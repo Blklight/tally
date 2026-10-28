@@ -451,18 +451,18 @@ export function Ficha({
                 <p className="mt-3 text-xs opacity-60">{summary}</p>
               </div>
             </div>
-            <Fillet corner="br" className="self-end">
-              <Button
-                ref={frontBtnRef}
-                type="button"
-                variant="outline"
-                size="sm"
-                className="rounded-none border-current/40 bg-transparent pr-5 text-inherit hover:bg-current/10 hover:text-inherit"
-                onClick={flip}
-              >
-                Ver itens ↻
-              </Button>
-            </Fillet>
+              <Fillet corner="br" className="self-end bg-current/40 p-px">
+                <Button
+                  ref={frontBtnRef}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="rounded-none border-0 bg-paper px-3 pr-5 text-inherit hover:bg-paper/90 hover:text-inherit"
+                  onClick={flip}
+                >
+                  Ver itens ↻
+                </Button>
+              </Fillet>
             {editing && editContent && (
               <div className="ficha ficha-form scrollbar-none absolute inset-0 z-10 overflow-y-auto bg-paper p-6 pb-7 text-paper-ink sm:p-8">
                 {isValidElement(editContent)
