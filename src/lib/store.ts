@@ -32,12 +32,19 @@ const LEGACY_PAPER_COLORS: Record<string, string> = {
   blue: "#c9d9e8",
 };
 
+function isHexColor(value: string): value is PaperColor {
+  return /^#[\da-f]{6}$/i.test(value);
+}
+
 export function normalizeAppearance(
   appearance?: Partial<Appearance>,
 ): Appearance {
   const paper = appearance?.paper ?? DEFAULT_APPEARANCE.paper;
   const normalizedPaper = LEGACY_PAPER_COLORS[paper] ?? paper;
-  return { paper: normalizedPaper, ink: getContrastInk(normalizedPaper) };
+  const safePaper = isHexColor(normalizedPaper)
+    ? normalizedPaper
+    : DEFAULT_APPEARANCE.paper;
+  return { paper: safePaper, ink: getContrastInk(safePaper) };
 }
 
 export function getContrastInk(color: string): InkColor {
@@ -55,7 +62,8 @@ export interface Series {
   title: string;
   category: Category;
   total: number;
-  missing: number[];
+  acquired?: number[];
+  missing?: number[];
   nomenclature?: Nomenclature;
   appearance?: Appearance;
 }
@@ -64,7 +72,7 @@ export interface LooseItem {
   id: string;
   title: string;
   category: Category;
-  note?: string | undefined;
+  note?: string;
   found?: boolean;
 }
 
@@ -78,7 +86,50 @@ export interface Data {
 const DB_NAME = "tally-db";
 const STORE_NAME = "data";
 const DATA_KEY = "current";
-const empty: Data = { series: [], items: [] };
+const empty: Data = { series: [], items: [], initialized: false };
+
+function normalizeSeries(
+  series: Partial<Series> & { missing?: number[] },
+): Series {
+  const total = Math.max(0, Math.trunc(series.total ?? 0));
+  const legacyMissing = series.missing ?? [];
+  const acquired =
+    series.acquired ??
+    Array.from({ length: total }, (_, index) => index + 1).filter(
+      (volume) => !legacyMissing.includes(volume),
+    );
+
+  return {
+    id: series.id ?? uid(),
+    title: series.title ?? "Sem título",
+    category: series.category ?? "Outro",
+    total,
+    acquired: [...new Set(acquired)]
+      .filter(
+        (volume) => Number.isInteger(volume) && volume > 0 && volume <= total,
+      )
+      .sort((a, b) => a - b),
+    nomenclature: series.nomenclature ?? "Volume",
+    appearance: normalizeAppearance(series.appearance),
+  };
+}
+
+function normalizeData(
+  data: Data & { series?: Array<Partial<Series> & { missing?: number[] }> },
+): Data {
+  return {
+    series: (data.series ?? []).map(normalizeSeries),
+    items: (data.items ?? []).map((item) => ({
+      id: item.id ?? uid(),
+      title: item.title ?? "Sem título",
+      category: item.category ?? "Outro",
+      ...(item.note === undefined ? {} : { note: item.note }),
+      found: item.found ?? false,
+    })),
+    looseAppearance: normalizeAppearance(data.looseAppearance),
+    initialized: data.initialized ?? false,
+  };
+}
 
 function readData(): Promise<Data | null> {
   return new Promise((resolve, reject) => {
@@ -120,14 +171,11 @@ export function volumeLabel(
 
 export function initializeData(existing: Data = empty): Data {
   if (existing.initialized)
-    return {
+    return normalizeData({
       ...existing,
-      series: existing.series.map((series) => ({
-        ...series,
-        appearance: normalizeAppearance(series.appearance),
-      })),
+      series: existing.series.map(normalizeSeries),
       looseAppearance: normalizeAppearance(existing.looseAppearance),
-    };
+    });
 
   const hasDragonBall = existing.series.some(
     (s) => s.title.trim().toLowerCase() === "dragon ball",
@@ -138,9 +186,7 @@ export function initializeData(existing: Data = empty): Data {
     title: "Dragon Ball",
     category: "Mangá",
     total: 42,
-    missing: Array.from({ length: 42 }, (_, k) => k + 1).filter(
-      (v) => v !== 29 && v < 31,
-    ),
+    acquired: [29, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42],
     nomenclature: "Volume",
     appearance: { paper: "craft", ink: "graphite" },
   };

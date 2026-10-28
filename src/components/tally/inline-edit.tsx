@@ -117,13 +117,7 @@ export function InlineEdit({
             );
             onUpdate({
               total,
-              missing: [
-                ...series.missing.filter((volume) => volume <= total),
-                ...Array.from(
-                  { length: Math.max(0, total - series.total) },
-                  (_, index) => series.total + index + 1,
-                ),
-              ],
+              acquired: series.acquired.filter((volume) => volume <= total),
             });
           }}
           step={1}

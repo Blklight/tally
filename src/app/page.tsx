@@ -81,8 +81,11 @@ export default function HomePage() {
 
   const missingCount = useMemo(
     () =>
-      data.series.reduce((total, series) => total + series.missing.length, 0) +
-      data.items.filter((item) => !item.found).length,
+      data.series.reduce(
+        (total, series) =>
+          total + Math.max(0, series.total - (series.acquired?.length ?? 0)),
+        0,
+      ) + data.items.filter((item) => !item.found).length,
     [data.series, data.items],
   );
 
@@ -118,7 +121,10 @@ export default function HomePage() {
         ...currentData,
         series: currentData.series.map((series) =>
           series.id === id
-            ? { ...series, missing: toggleMissing(series.missing, volume) }
+            ? {
+                ...series,
+                acquired: toggleMissing(series.acquired ?? [], volume),
+              }
             : series,
         ),
       }));
@@ -131,7 +137,7 @@ export default function HomePage() {
       setData((currentData) => ({
         ...currentData,
         items: currentData.items.map((item) =>
-          item.id === id ? { ...item, found: !item.found } : item,
+          item.id === id ? { ...item, found: !(item.found ?? false) } : item,
         ),
       }));
     },
@@ -144,7 +150,7 @@ export default function HomePage() {
         ...currentData,
         items: [
           ...currentData.items,
-          { id: uid(), title, category: "Livro" as Category },
+          { id: uid(), title, category: "Livro" as Category, found: false },
         ],
       }));
     },
@@ -183,10 +189,7 @@ export default function HomePage() {
             title,
             category,
             total,
-            missing: Array.from(
-              { length: total },
-              (_, position) => position + 1,
-            ),
+            acquired: [],
             nomenclature,
             appearance: normalizeAppearance(appearance),
           },
@@ -357,13 +360,16 @@ export default function HomePage() {
         />
       ) : (
         <Carousel
-          className="carousel-ficha mx-auto flex min-h-0 w-full max-w-md flex-1 flex-col"
-          opts={{ align: "center", loop: true }}
+          className="carousel-ficha flex min-h-0 w-full flex-1 flex-col"
+          opts={{ align: "start", loop: true }}
           setApi={setCarouselApi}
         >
-          <CarouselContent className="-ml-0 w-full">
+          <CarouselContent className="-ml-4 w-full">
             {cards.map((card) => (
-              <CarouselItem className="pl-0" key={card.id}>
+              <CarouselItem
+                className="basis-[min(28rem,calc(100vw-2rem))] pl-4"
+                key={card.id}
+              >
                 {renderCard(card, true)}
               </CarouselItem>
             ))}
