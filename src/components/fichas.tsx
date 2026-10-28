@@ -19,6 +19,8 @@ import {
   normalizeAppearance,
 } from "@/lib/store";
 import { cn } from "@/lib/utils";
+import { ChamferButton } from "./ui/chamfer-button";
+import { CornerFrame, CornerMarkers } from "./corner-frame";
 
 export function HoldRow({
   label,
@@ -339,7 +341,7 @@ export function Ficha({
     });
   };
 
-  const gear = (
+  const settings = (
     <Button
       variant="ghost"
       size="icon"
@@ -358,7 +360,7 @@ export function Ficha({
   const resolvedAppearance = normalizeAppearance(appearance);
   const paperStyle = { "--paper": resolvedAppearance.paper } as CSSProperties;
   const face =
-    "ficha relative flex h-full flex-col overflow-hidden bg-paper p-6 pb-7 text-paper-ink sm:p-8";
+    "ficha relative flex h-full flex-col overflow-hidden bg-paper p-6 pb-7 text-paper-ink sm:p-8 background-texture";
 
   if (!big) {
     return (
@@ -392,7 +394,7 @@ export function Ficha({
                   <span className="text-xs uppercase opacity-60">
                     {category}
                   </span>
-                  {gear}
+                  {settings}
                 </div>
                 <h2 className="break-words font-display text-2xl font-medium">
                   {title}
@@ -429,17 +431,34 @@ export function Ficha({
           inert={flipped ? true : undefined}
         >
           <Fillet corner="br" className={face}>
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs uppercase opacity-60">{category}</span>
-              {gear}
+            <div className="flex items-center justify-between gap-2 mb-5">
+              <div className="relative">
+                <CornerMarkers
+                  cornerSize={8}
+                  cornerThickness={2}
+                  cornerOpacity={0.5}
+                />{" "}
+                <span className="text-xs uppercase p-2">{category}</span>
+              </div>
+              {settings}
             </div>
-            <div className="flex flex-1 flex-col justify-center">
-              <h2 className="break-words font-display text-3xl font-medium sm:text-4xl">
-                {title}
-              </h2>
+            <div className="flex flex-1 flex-col my-10">
+              <CornerFrame
+                cornerSize={12}
+                cornerThickness={2}
+                cornerOpacity={0.7}
+                className="p-2.5"
+                withBackground={false}
+              >
+                <h2 className="break-words font-display text-3xl font-medium sm:text-4xl">
+                  {title}
+                </h2>
+                <p className="mt-3 text-xs opacity-60">{summary}</p>
+              </CornerFrame>
+
               <div className="mt-6 border-t border-current/25 pt-5">
                 {count !== undefined && (
-                  <p className="flex items-baseline gap-3 text-7xl font-medium leading-none sm:text-8xl">
+                  <p className="flex items-baseline gap-3 text-9xl font-medium leading-none sm:text-8xl">
                     <span className="count-display">
                       <CountUp value={count} />
                     </span>
@@ -448,11 +467,13 @@ export function Ficha({
                     </span>
                   </p>
                 )}
-                <p className="mt-3 text-xs opacity-60">{summary}</p>
               </div>
             </div>
-            <div className="pr-10">
-              <Button
+            <div className="grid mb-2">
+              <ChamferButton ref={frontBtnRef} onClick={flip} corner="br">
+                Ver itens ↻
+              </ChamferButton>
+              {/* <Button
                 ref={frontBtnRef}
                 variant="outline"
                 size="sm"
@@ -460,7 +481,7 @@ export function Ficha({
                 onClick={flip}
               >
                 Ver itens ↻
-              </Button>
+              </Button> */}
             </div>
             {editing && editContent && (
               <div className="ficha ficha-form scrollbar-none absolute inset-0 z-10 overflow-y-auto bg-paper p-6 pb-7 text-paper-ink sm:p-8">
