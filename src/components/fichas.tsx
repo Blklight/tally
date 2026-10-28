@@ -452,17 +452,15 @@ export function Ficha({
               </div>
             </div>
             <div className="pr-10">
-          <Fillet corner="br" className="inline-flex">
-            <Button
-              ref={frontBtnRef}
-              variant="outline"
-              size="sm"
-              className="rounded-none border-current/40 bg-transparent text-inherit hover:bg-current/10 hover:text-inherit"
-              onClick={flip}
-            >
-              Ver itens ↻
-            </Button>
-          </Fillet>
+              <Button
+                ref={frontBtnRef}
+                variant="outline"
+                size="sm"
+                className="border-current/40 bg-transparent text-inherit hover:bg-current/10 hover:text-inherit"
+                onClick={flip}
+              >
+                Ver itens ↻
+              </Button>
             </div>
             {editing && editContent && (
               <div className="ficha ficha-form scrollbar-none absolute inset-0 z-10 overflow-y-auto bg-paper p-6 pb-7 text-paper-ink sm:p-8">
