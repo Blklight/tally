@@ -47,7 +47,7 @@ export function TallyHeader({
         <h1 className="font-display text-2xl font-medium sm:text-3xl">
           Tally<span className="text-muted-foreground">.</span>
         </h1>
-        <div className="flex items-center gap-1">
+        <div className="flex flex-wrap items-center justify-end gap-1">
           <LanguageSwitcher />
           <Button
             aria-label={t("stackedCards")}
@@ -74,12 +74,14 @@ export function TallyHeader({
           <span className="mx-1 h-5 border-l border-border" />
           <Button
             aria-label={t("index")}
+            className="gap-1.5 px-2"
             onClick={onOpenIndex}
-            size="icon"
+            size="sm"
             title={t("index")}
             variant="ghost"
           >
             <BookOpen />
+            <span>{t("index")}</span>
           </Button>
           <Button
             aria-label={t("newCard")}
@@ -89,7 +91,7 @@ export function TallyHeader({
             variant="outline"
           >
             <Plus />
-            <span className="hidden sm:inline">{t("newCard")}</span>
+            <span>{t("newCard")}</span>
           </Button>
         </div>
       </div>

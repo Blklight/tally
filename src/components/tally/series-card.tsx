@@ -56,7 +56,7 @@ export function SeriesCard({
       category={`${categoryLabel(series.category, locale)} / ${unit}`}
       count={progressPercent}
       countSuffix="%"
-      countLabel={`${acquiredCount} de ${series.total} ${unit}`}
+      countLabel={`${acquiredCount} ${t("acquiredOf")} ${series.total} ${unit}`}
       editContent={
         <InlineEdit
           onAppearance={onAppearance}
