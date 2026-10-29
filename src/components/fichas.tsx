@@ -367,7 +367,7 @@ export function Ficha({
   const resolvedAppearance = normalizeAppearance(appearance);
   const paperStyle = { "--paper": resolvedAppearance.paper } as CSSProperties;
   const face =
-    "ficha relative flex h-full flex-col overflow-hidden bg-paper p-6 pb-7 text-paper-ink sm:p-8 background-texture";
+    "ficha relative flex h-full flex-col justify-between overflow-hidden bg-paper p-6 pb-7 text-paper-ink sm:p-8 background-texture";
 
   if (!big) {
     return (
@@ -461,18 +461,19 @@ export function Ficha({
                 className="p-2.5"
                 withBackground={false}
               >
-                <h2 className="break-words font-display text-3xl font-medium sm:text-4xl">
+                <h2 className="wrap-break-word font-mono text-3xl font-medium sm:text-4xl uppercase">
                   {title}
                 </h2>
                 {summary && (
-                  <p className="mt-3 text-sm opacity-80">{summary}</p>
+                  <p className="mt-2 text-sm opacity-80 font-mono">{summary}</p>
                 )}
+                {!summary && <span className="w-full h-5 mt-2 block"></span>}
               </CornerFrame>
 
               <div className="mt-6 border-current/25 pt-8">
                 {count !== undefined && (
                   <p className="flex flex-col items-center gap-1 leading-none">
-                    <span className="count-display flex items-baseline font-medium text-8xl sm:text-[150px]">
+                    <span className="count-display flex items-baseline font-medium text-8xl sm:text-[144px]">
                       <CountUp pad={!countSuffix} value={count} />
                       {countSuffix && (
                         <span className="ml-1 select-none text-5xl font-light opacity-75 sm:text-8xl">
@@ -533,8 +534,8 @@ export function Ficha({
           inert={!flipped ? true : undefined}
         >
           <Fillet corner="bl" className={face}>
-            <header className="relative mb-3 shrink-0 border-b border-current/25 pb-3">
-              <div className="mb-2 flex items-center justify-between gap-2">
+            <header className="relative mb-2 shrink-0">
+              <div className="flex items-center justify-between gap-2">
                 <Button
                   ref={backBtnRef}
                   variant="ghost"
@@ -546,13 +547,25 @@ export function Ficha({
                 </Button>
                 {actions}
               </div>
-              <h2 className="break-words font-display text-lg font-medium">
+              {/* <h2 className="break-words font-display text-lg font-medium">
                 {title}
-              </h2>
+              </h2> */}
             </header>
-            <div className="scrollbar-none relative min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6">
+            <CornerFrame
+              cornerSize={12}
+              cornerThickness={2}
+              cornerOpacity={0.7}
+              withBackground={false}
+              withTexture
+              className="relative flex min-h-0 flex-1 flex-col mb-5 p-2"
+            >
+              <div className="scrollbar-none relative min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6">
+                {children}
+              </div>
+            </CornerFrame>
+            {/* <div className="scrollbar-none relative min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6 mb-5">
               {children}
-            </div>
+            </div> */}
           </Fillet>
         </div>
       </div>
