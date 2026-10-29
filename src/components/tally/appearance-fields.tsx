@@ -88,6 +88,8 @@ export function NomenclatureField({
   value: Nomenclature;
   onChange: (value: Nomenclature) => void;
 }) {
+  const { t } = useLocale();
+
   return (
     <div className="space-y-2">
       <Label>{t("nomenclature")}</Label>

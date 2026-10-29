@@ -12,6 +12,7 @@ import {
   useState,
 } from "react";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/lib/i18n";
 import {
   type Appearance,
   DEFAULT_APPEARANCE,
@@ -19,8 +20,8 @@ import {
   normalizeAppearance,
 } from "@/lib/store";
 import { cn } from "@/lib/utils";
-import { ChamferButton } from "./ui/chamfer-button";
 import { CornerFrame, CornerMarkers } from "./corner-frame";
+import { ChamferButton } from "./ui/chamfer-button";
 
 export function HoldRow({
   label,
@@ -307,7 +308,7 @@ export function Ficha({
   actions,
   count,
   countSuffix,
-  countLabel = "faltantes",
+  countLabel,
 }: {
   title: string;
   category: string;
@@ -324,6 +325,7 @@ export function Ficha({
   startEditing?: boolean;
   onEditingChange?: (editing: boolean) => void;
 }) {
+  const { t } = useLocale();
   const [flipped, setFlipped] = useState(false);
   const [editing, setEditing] = useState(startEditing ?? false);
   useEffect(() => setEditing(startEditing ?? false), [startEditing]);
@@ -345,13 +347,14 @@ export function Ficha({
     });
   };
 
+  const resolvedCountLabel = countLabel ?? t("manyMissing");
   const settings = (
     <Button
       variant="ghost"
       size="icon"
       className="size-8 text-inherit hover:bg-current/10 hover:text-inherit"
-      aria-label={`Editar ${title}`}
-      title="Editar ficha"
+      aria-label={`${t("editCard")} ${title}`}
+      title={t("editCard")}
       onClick={() => {
         setEditing(true);
         onEditingChange?.(true);
@@ -477,9 +480,9 @@ export function Ficha({
                         </span>
                       )}
                     </span>
-                    {countLabel && (
+                    {resolvedCountLabel && (
                       <span className="whitespace-nowrap px-2 text-sm font-normal opacity-60">
-                        {countLabel}
+                        {resolvedCountLabel}
                       </span>
                     )}
                   </p>
@@ -487,8 +490,13 @@ export function Ficha({
               </div>
             </div>
             <div className="grid mb-2">
-              <ChamferButton ref={frontBtnRef} onClick={flip} corner="br">
-                Ver itens ↻
+              <ChamferButton
+                ref={frontBtnRef}
+                onClick={flip}
+                corner="br"
+                aria-label={t("viewItems")}
+              >
+                {t("viewItems")} ↻
               </ChamferButton>
               {/* <Button
                 ref={frontBtnRef}
@@ -534,7 +542,7 @@ export function Ficha({
                   className="-ml-2 text-inherit hover:bg-current/10 hover:text-inherit"
                   onClick={flip}
                 >
-                  <ChevronLeft /> Capa
+                  <ChevronLeft /> {t("cover")}
                 </Button>
                 {actions}
               </div>

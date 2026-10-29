@@ -1,6 +1,7 @@
 "use client";
 
 import { Ficha } from "@/components/fichas";
+import { useLocale } from "@/lib/i18n";
 import type { Appearance, Category, Nomenclature } from "@/lib/store";
 import { InlineCreate } from "./inline-create";
 
@@ -23,11 +24,13 @@ export function NewFichaCard({
     appearance: Appearance,
   ) => void;
 }) {
+  const { t } = useLocale();
+
   return (
     <Ficha
       appearance={appearance}
       big={big}
-      category="Criar"
+      category="other"
       editContent={
         <InlineCreate
           appearance={appearance}
@@ -41,8 +44,8 @@ export function NewFichaCard({
         if (!editing) onCancel();
       }}
       startEditing
-      summary="Preencha os dados da nova coleção"
-      title="Nova ficha"
+      summary={t("fillNewCollection")}
+      title={t("newCardTitle")}
     >
       {null}
     </Ficha>

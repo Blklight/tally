@@ -1,6 +1,6 @@
 import * as React from "react";
 import { cn } from "@/lib/utils";
-import { chamferClass, type Corner } from "./chamfer-utils";
+import { type Corner, chamferClass } from "./chamfer-utils";
 
 /* ---------------- FlipCard ---------------- */
 export function FlipCard({

@@ -81,7 +81,8 @@ export interface CornerMarkersProps {
 }
 
 export interface CornerFrameProps
-  extends React.HTMLAttributes<HTMLDivElement>, CornerMarkersProps {
+  extends React.HTMLAttributes<HTMLDivElement>,
+    CornerMarkersProps {
   /**
    * Conteúdo interno do frame.
    */
