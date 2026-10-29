@@ -33,6 +33,42 @@ const messages = {
     missingFirst: "Faltantes primeiro",
     opening: "Abrindo fichário…",
     noCardsFound: "Nenhuma ficha encontrada.",
+    newCardTitle: "Nova ficha",
+    fillNewCollection: "Preencha os dados da nova coleção",
+    create: "Criar ficha",
+    cancel: "Cancelar",
+    finish: "Concluir",
+    editCard: "Editar ficha",
+    deleteCard: "Excluir ficha",
+    title: "Título",
+    category: "Categoria",
+    nomenclature: "Nomenclatura",
+    total: "Total de",
+    volume: "volumes",
+    issue: "edições",
+    paperColor: "Cor do papel",
+    customColor: "Escolher cor personalizada",
+    contrastHint:
+      "A cor do texto é definida automaticamente para manter o contraste.",
+    newLooseItem: "Novo item avulso",
+    addLooseItem: "Adicionar item…",
+    looseItems: "Avulsos",
+    individualItems: "itens individuais",
+    noLooseItems: "Nenhum item avulso",
+    indexJump: "Pular para ficha",
+    jumpTo: "Pular para...",
+    complete: "Coleção completa!",
+    oneMissing: "faltante",
+    manyMissing: "faltantes",
+    acquiredOf: "de",
+    colors: {
+      white: "Branco",
+      craft: "Craft",
+      sepia: "Sépia",
+      pink: "Rosa",
+      green: "Verde",
+      blue: "Azul",
+    },
   },
   en: {
     language: "Language",
@@ -52,6 +88,41 @@ const messages = {
     missingFirst: "Missing first",
     opening: "Opening binder…",
     noCardsFound: "No cards found.",
+    newCardTitle: "New card",
+    fillNewCollection: "Fill in the new collection details",
+    create: "Create card",
+    cancel: "Cancel",
+    finish: "Done",
+    editCard: "Edit card",
+    deleteCard: "Delete card",
+    title: "Title",
+    category: "Category",
+    nomenclature: "Nomenclature",
+    total: "Total of",
+    volume: "volumes",
+    issue: "issues",
+    paperColor: "Paper color",
+    customColor: "Choose custom color",
+    contrastHint: "Text color is set automatically to preserve contrast.",
+    newLooseItem: "New loose item",
+    addLooseItem: "Add item…",
+    looseItems: "Loose items",
+    individualItems: "individual items",
+    noLooseItems: "No loose items",
+    indexJump: "Jump to card",
+    jumpTo: "Jump to...",
+    complete: "Collection complete!",
+    oneMissing: "missing",
+    manyMissing: "missing",
+    acquiredOf: "of",
+    colors: {
+      white: "White",
+      craft: "Craft",
+      sepia: "Sepia",
+      pink: "Pink",
+      green: "Green",
+      blue: "Blue",
+    },
   },
 } as const;
 
@@ -97,4 +168,36 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
 export function useLocale() {
   return useContext(LocaleContext);
+}
+
+export function categoryLabel(category: string, locale: Locale) {
+  const labels = {
+    "pt-BR": {
+      manga: "Mangá",
+      book: "Livro",
+      magazine: "Revista",
+      comic: "HQ",
+      other: "Outro",
+      "individual-items": "Itens individuais",
+    },
+    en: {
+      manga: "Manga",
+      book: "Book",
+      magazine: "Magazine",
+      comic: "Comic",
+      other: "Other",
+      "individual-items": "Individual items",
+    },
+  } as const;
+  return labels[locale][category as keyof (typeof labels)["en"]] ?? category;
+}
+
+export function nomenclatureLabel(nomenclature: string, locale: Locale) {
+  return locale === "pt-BR"
+    ? nomenclature === "issue"
+      ? "Edição"
+      : "Volume"
+    : nomenclature === "issue"
+      ? "Issue"
+      : "Volume";
 }

@@ -9,6 +9,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useLocale } from "@/lib/i18n";
 import type { Card } from "./types";
 
 export function IndexSheet({
@@ -26,6 +27,8 @@ export function IndexSheet({
   onQueryChange: (query: string) => void;
   onJump: (id: string) => void;
 }) {
+  const { t } = useLocale();
+
   return (
     <Sheet onOpenChange={onOpenChange} open={open}>
       <SheetContent
@@ -33,12 +36,12 @@ export function IndexSheet({
         side="left"
       >
         <SheetHeader className="px-0">
-          <SheetTitle>Índice</SheetTitle>
+          <SheetTitle>{t("index")}</SheetTitle>
         </SheetHeader>
         <Input
-          aria-label="Pular para ficha"
+          aria-label={t("indexJump")}
           onChange={(event) => onQueryChange(event.target.value)}
-          placeholder="Pular para..."
+          placeholder={t("jumpTo")}
           value={query}
         />
         <div className="flex-1 overflow-y-auto">
@@ -50,7 +53,8 @@ export function IndexSheet({
               variant="ghost"
             >
               <span className="min-w-0 break-words">
-                {card.series?.title ?? (card.draft ? "Nova ficha" : "Avulsos")}
+                {card.series?.title ??
+                  (card.draft ? t("newCard") : t("looseItems"))}
               </span>
               <ArrowUpRight className="shrink-0" />
             </Button>
