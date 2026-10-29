@@ -311,7 +311,7 @@ export function Ficha({
 }: {
   title: string;
   category: string;
-  summary: string;
+  summary?: string;
   children: ReactNode;
   actions?: ReactNode;
   appearance?: Appearance | undefined;
@@ -404,7 +404,11 @@ export function Ficha({
                   {title}
                 </h2>
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
-                  <p className="text-xs opacity-60">{summary}</p>
+                  {summary ? (
+                    <p className="text-xs opacity-60">{summary}</p>
+                  ) : (
+                    <span />
+                  )}
                   {actions}
                 </div>
               </header>
@@ -457,7 +461,9 @@ export function Ficha({
                 <h2 className="break-words font-display text-3xl font-medium sm:text-4xl">
                   {title}
                 </h2>
-                <p className="mt-3 text-sm opacity-80">{summary}</p>
+                {summary && (
+                  <p className="mt-3 text-sm opacity-80">{summary}</p>
+                )}
               </CornerFrame>
 
               <div className="mt-6 border-current/25 pt-8">

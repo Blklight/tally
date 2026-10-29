@@ -85,7 +85,6 @@ export function LooseItemsCard({
       : items;
 
   const missingCount = data.items.filter((item) => !item.found).length;
-  const foundCount = data.items.filter((item) => item.found).length;
 
   return (
     <Ficha
@@ -102,7 +101,6 @@ export function LooseItemsCard({
         />
       }
       onEdit={() => undefined}
-      summary={`${missingCount} faltantes · ${foundCount} na coleção`}
       title="Avulsos"
     >
       {ordered.map((item) => (
