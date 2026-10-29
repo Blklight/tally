@@ -4,6 +4,7 @@ import { BookOpen, Plus } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { Ficha, HoldRow } from "@/components/fichas";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/lib/i18n";
 import {
   type Appearance,
   type Data,
@@ -24,6 +25,7 @@ function LooseItemsEdit({
   onEditingChange?: (editing: boolean) => void;
   onClose?: () => void;
 }) {
+  const { t } = useLocale();
   const finish = () => {
     onEditingChange?.(false);
     onClose?.();
@@ -38,9 +40,9 @@ function LooseItemsEdit({
       onPointerDown={(event) => event.stopPropagation()}
     >
       <div className="flex items-center justify-between border-b border-current/20 pb-3">
-        <h3 className="font-display text-xl">Editar Avulsos</h3>
+        <h3 className="font-display text-xl">{t("editLoose")}</h3>
         <Button onClick={finish} size="sm" type="button" variant="ghost">
-          Concluir
+          {t("done")}
         </Button>
       </div>
       <AppearanceFields onChange={onChange} value={appearance} />
@@ -67,6 +69,7 @@ export function LooseItemsCard({
   onAddItem: (title: string) => void;
   onAppearanceChange: (appearance: Appearance) => void;
 }) {
+  const { t } = useLocale();
   const [newItem, setNewItem] = useState("");
 
   const normalizedQuery = query.trim().toLowerCase();
@@ -91,9 +94,9 @@ export function LooseItemsCard({
       actions={sortButton}
       appearance={data.looseAppearance}
       big={big}
-      category="Itens individuais"
+      category="individual-items"
       count={missingCount}
-      countLabel="faltantes"
+      countLabel={t("manyMissing")}
       editContent={
         <LooseItemsEdit
           appearance={data.looseAppearance ?? DEFAULT_APPEARANCE}
@@ -101,7 +104,7 @@ export function LooseItemsCard({
         />
       }
       onEdit={() => undefined}
-      title="Avulsos"
+      title={t("looseItems")}
     >
       {ordered.map((item) => (
         <HoldRow
@@ -115,7 +118,7 @@ export function LooseItemsCard({
       {items.length === 0 && (
         <div className="py-8 text-center">
           <BookOpen className="mx-auto mb-3 size-6 opacity-40" />
-          <p className="text-sm opacity-60">Nenhum item avulso</p>
+          <p className="text-sm opacity-60">{t("noLooseItems")}</p>
         </div>
       )}
       <form
@@ -130,10 +133,10 @@ export function LooseItemsCard({
       >
         <Plus className="size-4 shrink-0 opacity-60" />
         <input
-          aria-label="Novo item avulso"
+          aria-label={t("newLooseItem")}
           className="min-w-0 flex-1 border-b border-current/25 bg-transparent py-2 text-sm outline-none placeholder:text-current/40 focus:border-current"
           onChange={(event) => setNewItem(event.target.value)}
-          placeholder="Adicionar item…"
+          placeholder={t("addItem")}
           value={newItem}
         />
       </form>

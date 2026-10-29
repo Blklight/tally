@@ -2,6 +2,7 @@ import { GeistPixelCircle, GeistPixelSquare } from "geist/font/pixel";
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import type { ReactNode } from "react";
+import { PwaRegister } from "@/components/pwa-register";
 import { QueryProvider } from "@/components/query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -9,6 +10,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 import { LayoutBase } from "@/components/layout-base";
+import { LocaleProvider } from "@/lib/i18n";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -56,18 +58,21 @@ export default function RootLayout({
       )}
     >
       <body>
+        <PwaRegister />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
           enableSystem
           disableTransitionOnChange
         >
-          <QueryProvider>
-            <TooltipProvider>
-              <LayoutBase>{children}</LayoutBase>
-            </TooltipProvider>
-            <Toaster />
-          </QueryProvider>
+          <LocaleProvider>
+            <QueryProvider>
+              <TooltipProvider>
+                <LayoutBase>{children}</LayoutBase>
+              </TooltipProvider>
+              <Toaster />
+            </QueryProvider>
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

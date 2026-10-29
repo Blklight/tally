@@ -2,16 +2,16 @@
 
 import { useEffect, useState } from "react";
 
-export type Category = "Mangá" | "Livro" | "Revista" | "HQ" | "Outro";
+export type Category = "manga" | "book" | "magazine" | "comic" | "other";
 export const CATEGORIES: Category[] = [
-  "Mangá",
-  "Livro",
-  "Revista",
-  "HQ",
-  "Outro",
+  "manga",
+  "book",
+  "magazine",
+  "comic",
+  "other",
 ];
 
-export type Nomenclature = "Volume" | "Edição";
+export type Nomenclature = "volume" | "issue";
 export type PaperColor = string;
 export type InkColor = "graphite" | "light";
 export interface Appearance {
@@ -21,6 +21,18 @@ export interface Appearance {
 export const DEFAULT_APPEARANCE: Appearance = {
   paper: "#fffdf7",
   ink: "graphite",
+};
+
+const LEGACY_CATEGORIES: Record<string, Category> = {
+  Mangá: "manga",
+  Livro: "book",
+  Revista: "magazine",
+  HQ: "comic",
+  Outro: "other",
+};
+const LEGACY_NOMENCLATURES: Record<string, Nomenclature> = {
+  Volume: "volume",
+  Edição: "issue",
 };
 
 const LEGACY_PAPER_COLORS: Record<string, string> = {
@@ -102,14 +114,20 @@ function normalizeSeries(
   return {
     id: series.id ?? uid(),
     title: series.title ?? "Sem título",
-    category: series.category ?? "Outro",
+    category:
+      (series.category && LEGACY_CATEGORIES[series.category]) ??
+      series.category ??
+      "other",
     total,
     acquired: [...new Set(acquired)]
       .filter(
         (volume) => Number.isInteger(volume) && volume > 0 && volume <= total,
       )
       .sort((a, b) => a - b),
-    nomenclature: series.nomenclature ?? "Volume",
+    nomenclature:
+      (series.nomenclature && LEGACY_NOMENCLATURES[series.nomenclature]) ??
+      series.nomenclature ??
+      "volume",
     appearance: normalizeAppearance(series.appearance),
   };
 }
@@ -122,7 +140,7 @@ function normalizeData(
     items: (data.items ?? []).map((item) => ({
       id: item.id ?? uid(),
       title: item.title ?? "Sem título",
-      category: item.category ?? "Outro",
+      category: LEGACY_CATEGORIES[item.category] ?? item.category ?? "other",
       ...(item.note === undefined ? {} : { note: item.note }),
       found: item.found ?? false,
     })),
@@ -166,7 +184,7 @@ export function volumeLabel(
   s: Pick<Series, "title" | "nomenclature">,
   volume: number,
 ) {
-  return `${s.title} - ${s.nomenclature === "Edição" ? "Ed." : "Vol."} ${volume}`;
+  return `${s.title} - ${s.nomenclature === "issue" ? "Ed." : "Vol."} ${volume}`;
 }
 
 export function initializeData(existing: Data = empty): Data {
@@ -184,10 +202,10 @@ export function initializeData(existing: Data = empty): Data {
   const dragonBall: Series = {
     id: "dragon-ball",
     title: "Dragon Ball",
-    category: "Mangá",
+    category: "manga",
     total: 42,
     acquired: [29, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42],
-    nomenclature: "Volume",
+    nomenclature: "volume",
     appearance: { paper: "craft", ink: "graphite" },
   };
   return {

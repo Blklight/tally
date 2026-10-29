@@ -11,6 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLocale } from "@/lib/i18n";
 import {
   type Appearance,
   CATEGORIES,
@@ -35,6 +36,7 @@ export function InlineEdit({
   onDelete: () => void;
   onEditingChange?: (editing: boolean) => void;
 }) {
+  const { t } = useLocale();
   const appearance = series.appearance ?? DEFAULT_APPEARANCE;
 
   return (
@@ -49,7 +51,7 @@ export function InlineEdit({
       onPointerDown={(event) => event.stopPropagation()}
     >
       <div className="flex items-center justify-between border-b border-current/20 pb-3">
-        <h3 className="font-display text-xl">Editar ficha</h3>
+        <h3 className="font-display text-xl">{t("editCard")}</h3>
         <Button
           onClick={() => {
             onEditingChange?.(false);
@@ -59,12 +61,12 @@ export function InlineEdit({
           type="button"
           variant="ghost"
         >
-          Concluir
+          {t("finish")}
         </Button>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="inline-title">Título</Label>
+        <Label htmlFor="inline-title">{t("title")}</Label>
         <Input
           defaultValue={series.title}
           id="inline-title"
@@ -77,14 +79,14 @@ export function InlineEdit({
       </div>
 
       <div className="space-y-2">
-        <Label>Categoria</Label>
+        <Label>{t("category")}</Label>
         <Select
           onValueChange={(category) =>
             onUpdate({ category: category as Category })
           }
           value={series.category}
         >
-          <SelectTrigger aria-label="Categoria">
+          <SelectTrigger aria-label={t("category")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -99,12 +101,13 @@ export function InlineEdit({
 
       <NomenclatureField
         onChange={(nomenclature) => onUpdate({ nomenclature })}
-        value={series.nomenclature ?? "Volume"}
+        value={series.nomenclature ?? "volume"}
       />
 
       <div className="space-y-2">
         <Label htmlFor="inline-total">
-          Total de {series.nomenclature === "Edição" ? "edições" : "volumes"}
+          {t("total")}{" "}
+          {series.nomenclature === "issue" ? t("issue") : t("volume")}
         </Label>
         <Input
           defaultValue={series.total}

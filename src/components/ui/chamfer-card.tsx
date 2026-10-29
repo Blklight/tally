@@ -1,10 +1,10 @@
-import * as React from "react";
+import type * as React from "react";
 import { cn } from "@/lib/utils";
 import {
-  chamferClass,
-  chamferStyle,
   type ChamferBase,
   type Corner,
+  chamferClass,
+  chamferStyle,
   type Size,
 } from "./chamfer-utils";
 

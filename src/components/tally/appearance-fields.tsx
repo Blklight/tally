@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useLocale } from "@/lib/i18n";
 import {
   type Appearance,
   getContrastInk,
@@ -32,6 +33,7 @@ export function AppearanceFields({
   value: Appearance;
   onChange: (appearance: Appearance) => void;
 }) {
+  const { t } = useLocale();
   const appearance = normalizeAppearance(value);
   const setPaper = (paper: string) =>
     onChange({ paper, ink: getContrastInk(paper) });
@@ -39,7 +41,7 @@ export function AppearanceFields({
   return (
     <div className="space-y-4">
       <fieldset>
-        <legend className="mb-2 text-sm font-medium">Cor do papel</legend>
+        <legend className="mb-2 text-sm font-medium">{t("paperColor")}</legend>
         <div className="flex flex-wrap items-center gap-2">
           {papers.map((paper) => (
             <Button
@@ -61,11 +63,11 @@ export function AppearanceFields({
           ))}
           <label
             className="relative size-8 cursor-pointer overflow-hidden rounded-full border border-border"
-            title="Escolher cor personalizada"
+            title={t("customColor")}
           >
-            <span className="sr-only">Escolher cor personalizada</span>
+            <span className="sr-only">{t("customColor")}</span>
             <input
-              aria-label="Escolher cor personalizada"
+              aria-label={t("customColor")}
               className="absolute inset-[-8px] size-12 cursor-pointer"
               onChange={(event) => setPaper(event.target.value)}
               type="color"
@@ -74,9 +76,7 @@ export function AppearanceFields({
           </label>
         </div>
       </fieldset>
-      <p className="text-xs text-muted-foreground">
-        A cor do texto é definida automaticamente para manter o contraste.
-      </p>
+      <p className="text-xs text-muted-foreground">{t("contrastHint")}</p>
     </div>
   );
 }
@@ -88,19 +88,21 @@ export function NomenclatureField({
   value: Nomenclature;
   onChange: (value: Nomenclature) => void;
 }) {
+  const { t } = useLocale();
+
   return (
     <div className="space-y-2">
-      <Label>Nomenclatura</Label>
+      <Label>{t("nomenclature")}</Label>
       <Select
         onValueChange={(next) => onChange(next as Nomenclature)}
         value={value}
       >
-        <SelectTrigger aria-label="Nomenclatura">
+        <SelectTrigger aria-label={t("nomenclature")}>
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="Volume">Volume</SelectItem>
-          <SelectItem value="Edição">Edição</SelectItem>
+          <SelectItem value="volume">Volume</SelectItem>
+          <SelectItem value="issue">{t("issue")}</SelectItem>
         </SelectContent>
       </Select>
     </div>

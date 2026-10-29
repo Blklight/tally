@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Ficha, HoldRow } from "@/components/fichas";
+import { categoryLabel, useLocale } from "@/lib/i18n";
 import { type Appearance, type Series, volumeLabel } from "@/lib/store";
 import { InlineEdit } from "./inline-edit";
 import type { SortMode } from "./types";
@@ -25,6 +26,7 @@ export function SeriesCard({
   onDelete: () => void;
   onToggleVolume: (volume: number) => void;
 }) {
+  const { locale, t } = useLocale();
   const volumes = Array.from({ length: series.total }, (_, index) => index + 1);
   const ordered =
     sort === "missing"
@@ -39,22 +41,22 @@ export function SeriesCard({
   const progressPercent = Math.round(
     (acquiredCount / (series.total || 1)) * 100,
   );
-  const unit = series.nomenclature === "Edição" ? "edições" : "volumes";
+  const unit = series.nomenclature === "issue" ? t("issue") : t("volume");
 
   const summary =
     missingCount === 0
-      ? "Coleção completa!"
-      : `${missingCount} ${missingCount === 1 ? "faltante" : "faltantes"}`;
+      ? t("complete")
+      : `${missingCount} ${missingCount === 1 ? t("oneMissing") : t("manyMissing")}`;
 
   return (
     <Ficha
       actions={sortButton}
       appearance={series.appearance}
       big={big}
-      category={`${series.category} / ${unit}`}
+      category={`${categoryLabel(series.category, locale)} / ${unit}`}
       count={progressPercent}
       countSuffix="%"
-      countLabel={`${acquiredCount} de ${series.total} ${unit}`}
+      countLabel={`${acquiredCount} ${t("acquiredOf")} ${series.total} ${unit}`}
       editContent={
         <InlineEdit
           onAppearance={onAppearance}

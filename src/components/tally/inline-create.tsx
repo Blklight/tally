@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { categoryLabel, useLocale } from "@/lib/i18n";
 import {
   type Appearance,
   CATEGORIES,
@@ -38,10 +39,11 @@ export function InlineCreate({
   appearance?: Appearance;
   onAppearanceChange?: (appearance: Appearance) => void;
 }) {
+  const { locale, t } = useLocale();
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<Category>("Mangá");
+  const [category, setCategory] = useState<Category>("manga");
   const [total, setTotal] = useState("1");
-  const [nomenclature, setNomenclature] = useState<Nomenclature>("Volume");
+  const [nomenclature, setNomenclature] = useState<Nomenclature>("volume");
   const [localAppearance, setLocalAppearance] =
     useState<Appearance>(appearance);
 
@@ -72,20 +74,20 @@ export function InlineCreate({
       }}
     >
       <div className="flex items-center justify-between border-b border-current/20 pb-3">
-        <h3 className="font-display text-xl">Nova ficha</h3>
+        <h3 className="font-display text-xl">{t("newCardTitle")}</h3>
         <Button
-          aria-label="Cancelar criação"
+          aria-label={t("cancel")}
           onClick={onCancel}
           size="sm"
           type="button"
           variant="ghost"
         >
-          Cancelar
+          {t("cancel")}
         </Button>
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="create-title">Título</Label>
+        <Label htmlFor="create-title">{t("title")}</Label>
         <Input
           autoFocus
           id="create-title"
@@ -97,26 +99,26 @@ export function InlineCreate({
       </div>
 
       <div className="space-y-2">
-        <Label>Categoria</Label>
+        <Label>{t("category")}</Label>
         <Select
           onValueChange={(next) => {
             const nextCategory = next as Category;
             setCategory(nextCategory);
             setNomenclature(
-              nextCategory === "HQ" || nextCategory === "Revista"
-                ? "Edição"
-                : "Volume",
+              nextCategory === "comic" || nextCategory === "magazine"
+                ? "issue"
+                : "volume",
             );
           }}
           value={category}
         >
-          <SelectTrigger aria-label="Categoria">
+          <SelectTrigger aria-label={t("category")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
             {CATEGORIES.map((item) => (
               <SelectItem key={item} value={item}>
-                {item}
+                {categoryLabel(item, locale)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -127,7 +129,7 @@ export function InlineCreate({
 
       <div className="space-y-2">
         <Label htmlFor="create-total">
-          Total de {nomenclature === "Edição" ? "edições" : "volumes"}
+          {t("total")} {nomenclature === "issue" ? t("issue") : t("volume")}
         </Label>
         <Input
           id="create-total"
@@ -146,7 +148,7 @@ export function InlineCreate({
       />
 
       <Button className="mt-auto" type="submit">
-        <Plus /> Criar ficha
+        <Plus /> {t("create")}
       </Button>
     </form>
   );
