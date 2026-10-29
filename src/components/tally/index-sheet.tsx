@@ -32,8 +32,8 @@ export function IndexSheet({
   return (
     <Sheet onOpenChange={onOpenChange} open={open}>
       <SheetContent
-        className="sheet-surface flex w-80 flex-col px-5"
-        side="left"
+        className="sheet-surface flex w-[min(20rem,100vw)] flex-col px-5"
+        side="right"
       >
         <SheetHeader className="px-0">
           <SheetTitle>{t("index")}</SheetTitle>
