@@ -39,7 +39,7 @@ export function SeriesCard({
   const progressPercent = Math.round(
     (acquiredCount / (series.total || 1)) * 100,
   );
-  const unit = series.nomenclature === "Edição" ? "edições" : "volumes";
+  const unit = series.nomenclature === "issue" ? "edições" : "volumes";
 
   const summary =
     missingCount === 0

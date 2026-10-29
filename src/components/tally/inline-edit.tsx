@@ -99,12 +99,12 @@ export function InlineEdit({
 
       <NomenclatureField
         onChange={(nomenclature) => onUpdate({ nomenclature })}
-        value={series.nomenclature ?? "Volume"}
+        value={series.nomenclature ?? "volume"}
       />
 
       <div className="space-y-2">
         <Label htmlFor="inline-total">
-          Total de {series.nomenclature === "Edição" ? "edições" : "volumes"}
+          Total de {series.nomenclature === "issue" ? "edições" : "volumes"}
         </Label>
         <Input
           defaultValue={series.total}

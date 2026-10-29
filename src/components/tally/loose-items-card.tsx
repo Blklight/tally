@@ -91,7 +91,7 @@ export function LooseItemsCard({
       actions={sortButton}
       appearance={data.looseAppearance}
       big={big}
-      category="Itens individuais"
+      category="individual-items"
       count={missingCount}
       countLabel="faltantes"
       editContent={

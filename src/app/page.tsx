@@ -22,6 +22,7 @@ import {
   CarouselItem,
 } from "@/components/ui/carousel";
 import { TextureOverlay } from "@/components/ui/texture-overlay";
+import { useLocale } from "@/lib/i18n";
 import {
   type Appearance,
   type Category,
@@ -35,6 +36,7 @@ import {
 } from "@/lib/store";
 
 export default function HomePage() {
+  const { t } = useLocale();
   const [data, setData, loaded] = useData();
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("order");
@@ -150,7 +152,7 @@ export default function HomePage() {
         ...currentData,
         items: [
           ...currentData.items,
-          { id: uid(), title, category: "Livro" as Category, found: false },
+          { id: uid(), title, category: "book" as Category, found: false },
         ],
       }));
     },
@@ -215,7 +217,7 @@ export default function HomePage() {
   const sortButton = useMemo(
     () => (
       <Button
-        aria-label="Alterar ordenação"
+        aria-label={t("missingFirst")}
         className="h-7 px-2 text-xs text-inherit hover:bg-current/10 hover:text-inherit"
         onClick={() =>
           setSort((currentSort) =>
@@ -226,10 +228,10 @@ export default function HomePage() {
         variant="ghost"
       >
         <ArrowDownUp className="size-3.5" />
-        {sort === "order" ? "Em ordem" : "Faltantes primeiro"}
+        {sort === "order" ? t("inOrder") : t("missingFirst")}
       </Button>
     ),
-    [sort],
+    [sort, t],
   );
 
   const renderCard = useCallback(
@@ -344,11 +346,11 @@ export default function HomePage() {
 
       {!loaded ? (
         <p className="py-12 text-center text-sm text-muted-foreground">
-          Abrindo fichário…
+          {t("opening")}
         </p>
       ) : cards.length === 0 ? (
         <p className="py-12 text-center text-sm text-muted-foreground">
-          Nenhuma ficha encontrada.
+          {t("noCardsFound")}
         </p>
       ) : mode === "stack" ? (
         <StackView

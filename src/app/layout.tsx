@@ -9,6 +9,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import "./globals.css";
 import { LayoutBase } from "@/components/layout-base";
+import { LocaleProvider } from "@/lib/i18n";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -62,12 +63,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <QueryProvider>
-            <TooltipProvider>
-              <LayoutBase>{children}</LayoutBase>
-            </TooltipProvider>
-            <Toaster />
-          </QueryProvider>
+          <LocaleProvider>
+            <QueryProvider>
+              <TooltipProvider>
+                <LayoutBase>{children}</LayoutBase>
+              </TooltipProvider>
+              <Toaster />
+            </QueryProvider>
+          </LocaleProvider>
         </ThemeProvider>
       </body>
     </html>

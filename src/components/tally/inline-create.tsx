@@ -39,9 +39,9 @@ export function InlineCreate({
   onAppearanceChange?: (appearance: Appearance) => void;
 }) {
   const [title, setTitle] = useState("");
-  const [category, setCategory] = useState<Category>("Mangá");
+  const [category, setCategory] = useState<Category>("manga");
   const [total, setTotal] = useState("1");
-  const [nomenclature, setNomenclature] = useState<Nomenclature>("Volume");
+  const [nomenclature, setNomenclature] = useState<Nomenclature>("volume");
   const [localAppearance, setLocalAppearance] =
     useState<Appearance>(appearance);
 
@@ -103,9 +103,9 @@ export function InlineCreate({
             const nextCategory = next as Category;
             setCategory(nextCategory);
             setNomenclature(
-              nextCategory === "HQ" || nextCategory === "Revista"
-                ? "Edição"
-                : "Volume",
+              nextCategory === "comic" || nextCategory === "magazine"
+                ? "issue"
+                : "volume",
             );
           }}
           value={category}
@@ -127,7 +127,7 @@ export function InlineCreate({
 
       <div className="space-y-2">
         <Label htmlFor="create-total">
-          Total de {nomenclature === "Edição" ? "edições" : "volumes"}
+          Total de {nomenclature === "issue" ? "edições" : "volumes"}
         </Label>
         <Input
           id="create-total"

@@ -99,8 +99,8 @@ export function NomenclatureField({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="Volume">Volume</SelectItem>
-          <SelectItem value="Edição">Edição</SelectItem>
+          <SelectItem value="volume">Volume</SelectItem>
+          <SelectItem value="issue">Edição</SelectItem>
         </SelectContent>
       </Select>
     </div>
