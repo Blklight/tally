@@ -366,7 +366,7 @@ export default function HomePage() {
           opts={{ align: "start", loop: true }}
           setApi={setCarouselApi}
         >
-          <CarouselContent className="-ml-4 w-full">
+          <CarouselContent className="-ml-4 w-full px-3 py-3">
             {cards.map((card) => (
               <CarouselItem
                 className="basis-[min(28rem,calc(100vw-2rem))] pl-4"

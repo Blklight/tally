@@ -29,7 +29,7 @@ describe("Collection rules", () => {
     const item = {
       id: "owned-item",
       title: "Meu livro",
-      category: "Livro" as const,
+      category: "book" as const,
     };
     const initialized = initializeData({ series: [], items: [item] });
 
@@ -41,7 +41,7 @@ describe("Collection rules", () => {
     const series = {
       id: "existing",
       title: "Dragon Ball",
-      category: "Mangá" as const,
+      category: "manga" as const,
       total: 42,
       missing: [30],
     };
@@ -61,12 +61,12 @@ describe("Collection rules", () => {
 
   it("uses Volume nomenclature for numbered manga", () => {
     expect(
-      volumeLabel({ title: "Dragon Ball", nomenclature: "Volume" }, 25),
+      volumeLabel({ title: "Dragon Ball", nomenclature: "volume" }, 25),
     ).toBe("Dragon Ball - Vol. 25");
   });
 
-  it("uses Edição nomenclature for numbered editions", () => {
-    expect(volumeLabel({ title: "Minha HQ", nomenclature: "Edição" }, 7)).toBe(
+  it("uses Edition nomenclature for numbered editions", () => {
+    expect(volumeLabel({ title: "Minha HQ", nomenclature: "issue" }, 7)).toBe(
       "Minha HQ - Ed. 7",
     );
   });
@@ -115,7 +115,7 @@ describe("Appearance", () => {
         {
           id: "legacy",
           title: "Legacy",
-          category: "Livro",
+          category: "book",
           total: 1,
           missing: [1],
           appearance: { paper: "craft", ink: "light" },

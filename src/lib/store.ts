@@ -114,7 +114,10 @@ function normalizeSeries(
   return {
     id: series.id ?? uid(),
     title: series.title ?? "Sem título",
-    category: LEGACY_CATEGORIES[series.category] ?? series.category ?? "other",
+    category:
+      (series.category && LEGACY_CATEGORIES[series.category]) ??
+      series.category ??
+      "other",
     total,
     acquired: [...new Set(acquired)]
       .filter(
@@ -122,7 +125,7 @@ function normalizeSeries(
       )
       .sort((a, b) => a - b),
     nomenclature:
-      LEGACY_NOMENCLATURES[series.nomenclature] ??
+      (series.nomenclature && LEGACY_NOMENCLATURES[series.nomenclature]) ??
       series.nomenclature ??
       "volume",
     appearance: normalizeAppearance(series.appearance),
@@ -181,7 +184,7 @@ export function volumeLabel(
   s: Pick<Series, "title" | "nomenclature">,
   volume: number,
 ) {
-  return `${s.title} - ${s.nomenclature === "Edição" ? "Ed." : "Vol."} ${volume}`;
+  return `${s.title} - ${s.nomenclature === "issue" ? "Ed." : "Vol."} ${volume}`;
 }
 
 export function initializeData(existing: Data = empty): Data {

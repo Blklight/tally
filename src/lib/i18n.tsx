@@ -63,9 +63,6 @@ const messages = {
     viewItems: "Ver itens",
     cover: "Capa",
     editLoose: "Editar avulsos",
-    looseItems: "Avulsos",
-    noLooseItems: "Nenhum item avulso",
-    newLooseItem: "Novo item avulso",
     addItem: "Adicionar item…",
     done: "Concluir",
     acquiredOf: "de",
@@ -125,9 +122,6 @@ const messages = {
     viewItems: "View items",
     cover: "Cover",
     editLoose: "Edit loose items",
-    looseItems: "Loose items",
-    noLooseItems: "No loose items",
-    newLooseItem: "New loose item",
     addItem: "Add item…",
     done: "Done",
     acquiredOf: "of",
@@ -142,7 +136,7 @@ const messages = {
   },
 } as const;
 
-type MessageKey = keyof typeof messages.en;
+type MessageKey = Exclude<keyof typeof messages.en, "colors">;
 
 const LocaleContext = createContext<{
   locale: Locale;

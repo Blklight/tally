@@ -2,6 +2,7 @@ import { GeistPixelCircle, GeistPixelSquare } from "geist/font/pixel";
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import type { ReactNode } from "react";
+import { PwaRegister } from "@/components/pwa-register";
 import { QueryProvider } from "@/components/query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/ui/sonner";
@@ -57,6 +58,7 @@ export default function RootLayout({
       )}
     >
       <body>
+        <PwaRegister />
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
