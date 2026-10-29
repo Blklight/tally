@@ -133,7 +133,7 @@ export function HoldRow({
   );
 }
 
-function CountUp({ value }: { value: number }) {
+function CountUp({ value, pad = true }: { value: number; pad?: boolean }) {
   const [display, setDisplay] = useState(0);
 
   useEffect(() => {
@@ -150,7 +150,7 @@ function CountUp({ value }: { value: number }) {
     return () => cancelAnimationFrame(frame);
   }, [value]);
 
-  return <>{String(display).padStart(2, "0")}</>;
+  return <>{pad ? String(display).padStart(2, "0") : String(display)}</>;
 }
 
 const CHAMFER = 44,
@@ -306,6 +306,8 @@ export function Ficha({
   big,
   actions,
   count,
+  countSuffix,
+  countLabel = "faltantes",
 }: {
   title: string;
   category: string;
@@ -316,6 +318,8 @@ export function Ficha({
   onEdit: () => void;
   big?: boolean;
   count?: number;
+  countSuffix?: string;
+  countLabel?: string;
   editContent?: ReactNode;
   startEditing?: boolean;
   onEditingChange?: (editing: boolean) => void;
@@ -453,18 +457,25 @@ export function Ficha({
                 <h2 className="break-words font-display text-3xl font-medium sm:text-4xl">
                   {title}
                 </h2>
-                <p className="mt-3 text-xs opacity-60">{summary}</p>
+                <p className="mt-3 text-sm opacity-80">{summary}</p>
               </CornerFrame>
 
-              <div className="mt-6 border-t border-current/25 pt-5">
+              <div className="mt-6 border-current/25 pt-8">
                 {count !== undefined && (
-                  <p className="flex items-baseline gap-3 text-9xl font-medium leading-none sm:text-8xl">
-                    <span className="count-display">
-                      <CountUp value={count} />
+                  <p className="flex flex-col items-center gap-1 leading-none">
+                    <span className="count-display flex items-baseline font-medium text-8xl sm:text-[150px]">
+                      <CountUp pad={!countSuffix} value={count} />
+                      {countSuffix && (
+                        <span className="ml-1 select-none text-5xl font-light opacity-75 sm:text-8xl">
+                          {countSuffix}
+                        </span>
+                      )}
                     </span>
-                    <span className="whitespace-nowrap text-sm font-normal opacity-60">
-                      faltantes
-                    </span>
+                    {countLabel && (
+                      <span className="whitespace-nowrap px-2 text-sm font-normal opacity-60">
+                        {countLabel}
+                      </span>
+                    )}
                   </p>
                 )}
               </div>

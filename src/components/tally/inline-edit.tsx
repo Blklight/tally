@@ -117,7 +117,9 @@ export function InlineEdit({
             );
             onUpdate({
               total,
-              acquired: series.acquired.filter((volume) => volume <= total),
+              acquired: (series.acquired ?? []).filter(
+                (volume) => volume <= total,
+              ),
             });
           }}
           step={1}

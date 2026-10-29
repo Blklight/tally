@@ -34,15 +34,27 @@ export function SeriesCard({
         ]
       : volumes;
 
+  const acquiredCount = series.acquired?.length ?? 0;
+  const missingCount = series.total - acquiredCount;
+  const progressPercent = Math.round(
+    (acquiredCount / (series.total || 1)) * 100,
+  );
+  const unit = series.nomenclature === "Edição" ? "edições" : "volumes";
+
+  const summary =
+    missingCount === 0
+      ? "Coleção completa!"
+      : `${missingCount} ${missingCount === 1 ? "faltante" : "faltantes"}`;
+
   return (
     <Ficha
       actions={sortButton}
       appearance={series.appearance}
       big={big}
-      category={`${series.category} / ${
-        series.nomenclature === "Edição" ? "edições" : "volumes"
-      }`}
-      count={series.total - (series.acquired?.length ?? 0)}
+      category={`${series.category} / ${unit}`}
+      count={progressPercent}
+      countSuffix="%"
+      countLabel={`${acquiredCount} de ${series.total} ${unit}`}
       editContent={
         <InlineEdit
           onAppearance={onAppearance}
@@ -53,9 +65,7 @@ export function SeriesCard({
         />
       }
       onEdit={() => undefined}
-      summary={`${series.total - (series.acquired?.length ?? 0)} faltantes · ${
-        series.acquired?.length ?? 0
-      } na coleção · ${series.total} no total`}
+      summary={summary}
       title={series.title}
     >
       {ordered.map((volume) => (

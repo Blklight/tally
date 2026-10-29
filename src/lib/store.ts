@@ -196,10 +196,7 @@ export function initializeData(existing: Data = empty): Data {
     series: (hasDragonBall
       ? existing.series
       : [dragonBall, ...existing.series]
-    ).map((series) => ({
-      ...series,
-      appearance: normalizeAppearance(series.appearance),
-    })),
+    ).map(normalizeSeries),
     looseAppearance: normalizeAppearance(existing.looseAppearance),
   };
 }

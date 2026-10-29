@@ -84,13 +84,17 @@ export function LooseItemsCard({
         ]
       : items;
 
+  const missingCount = data.items.filter((item) => !item.found).length;
+  const foundCount = data.items.filter((item) => item.found).length;
+
   return (
     <Ficha
       actions={sortButton}
       appearance={data.looseAppearance}
       big={big}
       category="Itens individuais"
-      count={data.items.filter((item) => !item.found).length}
+      count={missingCount}
+      countLabel="faltantes"
       editContent={
         <LooseItemsEdit
           appearance={data.looseAppearance ?? DEFAULT_APPEARANCE}
@@ -98,9 +102,7 @@ export function LooseItemsCard({
         />
       }
       onEdit={() => undefined}
-      summary={`${data.items.filter((item) => !item.found).length} faltantes · ${
-        data.items.filter((item) => item.found).length
-      } na coleção`}
+      summary={`${missingCount} faltantes · ${foundCount} na coleção`}
       title="Avulsos"
     >
       {ordered.map((item) => (
