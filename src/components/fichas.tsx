@@ -547,14 +547,11 @@ export function Ficha({
                 </Button>
                 {actions}
               </div>
-              {/* <h2 className="break-words font-display text-lg font-medium">
-                {title}
-              </h2> */}
             </header>
             <CornerFrame
-              cornerSize={12}
+              cornerSize={16}
               cornerThickness={2}
-              cornerOpacity={0.7}
+              cornerOpacity={0.9}
               withBackground={false}
               withTexture
               className="relative flex min-h-0 flex-1 flex-col mb-5 p-2"
@@ -563,9 +560,6 @@ export function Ficha({
                 {children}
               </div>
             </CornerFrame>
-            {/* <div className="scrollbar-none relative min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6 mb-5">
-              {children}
-            </div> */}
           </Fillet>
         </div>
       </div>

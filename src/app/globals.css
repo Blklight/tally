@@ -501,7 +501,7 @@
    LAYOUT COMPONENTS
    ============================================================ */
 .background-header {
-  @apply sticky lg:top-2.25 top-0 w-full z-99 h-12 grid lg:grid-cols-[125px_3fr_1fr] md:grid-cols-[125px_3fr_1fr] grid-cols-[125px_3fr_1fr] justify-between items-center border-b border-foreground bg-background;
+  @apply sticky top-0 w-full z-99 h-12 grid lg:grid-cols-[125px_3fr_1fr] md:grid-cols-[125px_3fr_1fr] grid-cols-[125px_3fr_1fr] justify-between items-center border-b border-foreground bg-blue-500;
 }
 
 .background-header::before {
@@ -1123,8 +1123,8 @@
 }
 
 .strike {
-  background:
-    linear-gradient(currentColor, currentColor) no-repeat 0 55% / 0% 1.5px;
+  background: linear-gradient(currentColor, currentColor) no-repeat 0 55% / 0%
+    1.5px;
   transition: background-size 380ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 

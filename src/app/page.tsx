@@ -3,11 +3,12 @@
 import { ArrowDownUp } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { StackView } from "@/components/fichas";
+import { Navbar } from "@/components/navbar";
 import { IndexSheet } from "@/components/tally/index-sheet";
 import { LooseItemsCard } from "@/components/tally/loose-items-card";
 import { NewFichaCard } from "@/components/tally/new-ficha-card";
 import { SeriesCard } from "@/components/tally/series-card";
-import { TallyHeader } from "@/components/tally/tally-header";
+import { TallyToolbar } from "@/components/tally/tally-toolbar";
 import {
   type Card,
   LOOSE_ID,
@@ -328,19 +329,21 @@ export default function HomePage() {
   };
 
   return (
-    <main className="flex min-h-0 w-full flex-1 flex-col overflow-x-clip overflow-y-hidden p-2 bg-light book:bg-sepia dark:bg-dark relative background-texture rounded-xs">
+    <main className="flex min-h-0 w-full flex-1 flex-col overflow-x-clip overflow-y-hidden bg-light book:bg-sepia dark:bg-dark relative background-texture rounded-xs">
       <TextureOverlay texture={"grid"} className="mix-blend-overlay z-0" />
-      <TallyHeader
+      <Navbar
+        mode={mode}
+        onModeChange={setMode}
+        onOpenIndex={() => setIndexOpen(true)}
+        onStartAdding={startAdding}
+      />
+      <TallyToolbar
         canNavigate={cards.length > 1}
         cardCount={allCards.length}
         missingCount={missingCount}
-        mode={mode}
-        onModeChange={setMode}
         onNext={goToNext}
-        onOpenIndex={() => setIndexOpen(true)}
         onPrevious={goToPrevious}
         onQueryChange={setQuery}
-        onStartAdding={startAdding}
         query={query}
       />
 
@@ -366,7 +369,7 @@ export default function HomePage() {
           opts={{ align: "start", loop: true }}
           setApi={setCarouselApi}
         >
-          <CarouselContent className="-ml-4 w-full px-3 py-3">
+          <CarouselContent className="-ml-4 w-full px-3 py-4">
             {cards.map((card) => (
               <CarouselItem
                 className="basis-[min(28rem,calc(100vw-2rem))] pl-4"
