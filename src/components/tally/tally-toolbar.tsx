@@ -31,7 +31,7 @@ export function TallyToolbar({
         {t("missing")}
       </span>
       <div className="flex items-center gap-3">
-        <div className="relative w-full sm:w-56">
+        <div className="relative hidden w-full sm:block sm:w-56">
           <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 opacity-50" />
           <Input
             aria-label={t("searchCards")}

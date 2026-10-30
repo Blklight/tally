@@ -4,7 +4,6 @@ import { ArrowDownUp } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
 import { StackView } from "@/components/fichas";
 import { Navbar } from "@/components/navbar";
-import { IndexSheet } from "@/components/tally/index-sheet";
 import { LooseItemsCard } from "@/components/tally/loose-items-card";
 import { NewFichaCard } from "@/components/tally/new-ficha-card";
 import { SeriesCard } from "@/components/tally/series-card";
@@ -44,8 +43,6 @@ export default function HomePage() {
   const [mode, setMode] = useState<"stack" | "list">("stack");
   const [index, setIndex] = useState(0);
   const [navigation, setNavigation] = useState({ direction: 1, token: 0 });
-  const [indexOpen, setIndexOpen] = useState(false);
-  const [indexQuery, setIndexQuery] = useState("");
   const [adding, setAdding] = useState(false);
   const [draftAppearance, setDraftAppearance] =
     useState<Appearance>(DEFAULT_APPEARANCE);
@@ -205,16 +202,6 @@ export default function HomePage() {
     [setData],
   );
 
-  const jump = useCallback(
-    (id: string) => {
-      setMode("stack");
-      setQuery("");
-      setIndexOpen(false);
-      setIndex(allCards.findIndex((card) => card.id === id));
-    },
-    [allCards],
-  );
-
   const sortButton = useMemo(
     () => (
       <Button
@@ -301,11 +288,6 @@ export default function HomePage() {
     [renderCard],
   );
 
-  const indexCards = useMemo(
-    () => allCards.filter((card) => matches(card, indexQuery)),
-    [allCards, indexQuery, matches],
-  );
-
   const goToPrevious = () => {
     if (mode === "list") {
       carouselApi?.scrollPrev();
@@ -334,8 +316,9 @@ export default function HomePage() {
       <Navbar
         mode={mode}
         onModeChange={setMode}
-        onOpenIndex={() => setIndexOpen(true)}
+        onQueryChange={setQuery}
         onStartAdding={startAdding}
+        query={query}
       />
       <TallyToolbar
         canNavigate={cards.length > 1}
@@ -381,15 +364,6 @@ export default function HomePage() {
           </CarouselContent>
         </Carousel>
       )}
-
-      <IndexSheet
-        cards={indexCards}
-        onJump={jump}
-        onOpenChange={setIndexOpen}
-        onQueryChange={setIndexQuery}
-        open={indexOpen}
-        query={indexQuery}
-      />
     </main>
   );
 }

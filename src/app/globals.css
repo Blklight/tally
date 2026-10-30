@@ -501,7 +501,7 @@
    LAYOUT COMPONENTS
    ============================================================ */
 .background-header {
-  @apply sticky top-0 w-full z-99 h-12 grid lg:grid-cols-[125px_3fr_1fr] md:grid-cols-[125px_3fr_1fr] grid-cols-[125px_3fr_1fr] justify-between items-center border-b border-foreground bg-blue-500;
+  @apply sticky top-0 w-full z-99 h-12 grid lg:grid-cols-[125px_3fr_1fr] md:grid-cols-[125px_3fr_1fr] grid-cols-[125px_3fr_1fr] justify-between items-center border-b border-foreground bg-background;
 }
 
 .background-header::before {
