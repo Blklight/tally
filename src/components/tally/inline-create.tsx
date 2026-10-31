@@ -134,7 +134,7 @@ export function InlineCreate({
 
       {cardType === "collection" && (
         <>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 [&>*]:min-w-0 [&_button]:w-full">
             <div className="min-w-0 space-y-2">
               <Label>{t("category")}</Label>
               <Select

@@ -4,11 +4,20 @@ import { BookOpen, Plus } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { Ficha, HoldRow } from "@/components/fichas";
 import { Button } from "@/components/ui/button";
-import { useLocale } from "@/lib/i18n";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { categoryLabel, useLocale } from "@/lib/i18n";
 import {
   type Appearance,
   type Data,
+  CATEGORIES,
   DEFAULT_APPEARANCE,
+  type Category,
   type LooseItem,
 } from "@/lib/store";
 import { AppearanceFields } from "./appearance-fields";
@@ -69,14 +78,15 @@ export function LooseItemsCard({
   sortButton: ReactNode;
   query: string;
   onToggleItem: (item: LooseItem) => void;
-  onAddItem: (title: string) => void;
+  onAddItem: (title: string, category: Category) => void;
   onAppearanceChange: (appearance: Appearance) => void;
   appearance?: Appearance;
   items?: LooseItem[];
   title?: string;
 }) {
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
   const [newItem, setNewItem] = useState("");
+  const [newItemCategory, setNewItemCategory] = useState<Category>("book");
 
   const cardAppearance = appearance ?? data.looseAppearance;
   const sourceItems = itemsOverride ?? data.items;
@@ -119,7 +129,11 @@ export function LooseItemsCard({
           checked={!!item.found}
           key={item.id}
           label={item.title}
-          note={item.note || item.category}
+          note={
+            item.category === "other"
+              ? undefined
+              : item.note || categoryLabel(item.category, locale)
+          }
           onToggle={() => onToggleItem(item)}
         />
       ))}
@@ -135,11 +149,29 @@ export function LooseItemsCard({
           event.preventDefault();
           const title = newItem.trim();
           if (!title) return;
-          onAddItem(title);
+          onAddItem(title, newItemCategory);
           setNewItem("");
         }}
       >
         <Plus className="size-4 shrink-0 opacity-60" />
+        <Select
+          onValueChange={(value) => setNewItemCategory(value as Category)}
+          value={newItemCategory}
+        >
+          <SelectTrigger
+            aria-label={t("category")}
+            className="h-9 w-32 shrink-0"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CATEGORIES.map((category) => (
+              <SelectItem key={category} value={category}>
+                {categoryLabel(category, locale)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <input
           aria-label={t("newLooseItem")}
           className="min-w-0 flex-1 border-b border-current/25 bg-transparent py-2 text-sm outline-none placeholder:text-current/40 focus:border-current"

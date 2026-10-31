@@ -75,7 +75,7 @@ export function HoldRow({
       aria-label={label}
       aria-description="Mantenha pressionado para alternar"
       className={cn(
-        "hold-row relative h-auto min-h-12 w-full justify-start gap-3 overflow-hidden rounded-sm border-b border-current/10 px-3 py-3 text-left font-normal whitespace-normal hover:bg-current/5",
+        "hold-row relative h-auto min-h-16 w-full justify-start gap-3 overflow-hidden rounded-sm border-b border-current/10 px-3 py-3 text-left font-normal whitespace-normal hover:bg-current/5",
         holding && "is-holding",
       )}
       onPointerDown={(e) => {

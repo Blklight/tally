@@ -36,7 +36,7 @@ const messages = {
     helpViews:
       "Alterne entre fichas empilhadas e lista contínua no menu de visualização.",
     helpNavigation:
-      "Use as setas para navegar entre fichas ou abra o Índice para pular diretamente para uma ficha.",
+      "Use as setas para navegar entre fichas e voltar para a ficha anterior.",
     helpGestures:
       "No mobile, deslize para a esquerda ou direita para trocar de ficha. No desktop, você também pode arrastar a ficha horizontalmente com o mouse ou trackpad.",
     view: "Visualização",
@@ -124,7 +124,7 @@ const messages = {
     helpViews:
       "Switch between stacked cards and the continuous list from the view menu.",
     helpNavigation:
-      "Use the arrows to move between cards or open Index to jump directly to a card.",
+      "Use the arrows to move between cards and return to the previous card.",
     helpGestures:
       "On mobile, swipe left or right to change cards. On desktop, drag the card horizontally with your mouse or trackpad.",
     view: "View",

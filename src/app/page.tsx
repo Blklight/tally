@@ -145,12 +145,12 @@ export default function HomePage() {
   );
 
   const addItem = useCallback(
-    (title: string) => {
+    (title: string, category: Category) => {
       setData((currentData) => ({
         ...currentData,
         items: [
           ...currentData.items,
-          { id: uid(), title, category: "book" as Category, found: false },
+          { id: uid(), title, category, found: false },
         ],
       }));
     },
@@ -265,11 +265,11 @@ export default function HomePage() {
               big={big}
               data={{ ...data, items: series.looseItems ?? [] }}
               items={series.looseItems ?? []}
-              onAddItem={(title) =>
+              onAddItem={(title, category) =>
                 updateSeries(series.id, {
                   looseItems: [
                     ...(series.looseItems ?? []),
-                    { id: uid(), title, category: "other", found: false },
+                    { id: uid(), title, category, found: false },
                   ],
                 })
               }
