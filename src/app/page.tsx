@@ -231,9 +231,10 @@ export default function HomePage() {
             big={big}
             onAppearanceChange={setDraftAppearance}
             onCancel={() => setAdding(false)}
-            onCreateLoose={(title) => {
-              addItem(title);
+            onCreateLoose={() => {
               setAdding(false);
+              setQuery("");
+              setIndex(data.series.length);
             }}
             onCreate={handleCreate}
           />

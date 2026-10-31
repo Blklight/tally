@@ -2,11 +2,9 @@
 
 import { Ficha } from "@/components/fichas";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { useLocale } from "@/lib/i18n";
 import type { Appearance, Category, Nomenclature } from "@/lib/store";
 import { InlineCreate } from "./inline-create";
-import { useState } from "react";
 
 export function NewFichaCard({
   appearance,
@@ -20,7 +18,7 @@ export function NewFichaCard({
   big?: boolean;
   onAppearanceChange: (appearance: Appearance) => void;
   onCancel: () => void;
-  onCreateLoose: (title: string) => void;
+  onCreateLoose: () => void;
   onCreate: (
     title: string,
     category: Category,
@@ -30,14 +28,6 @@ export function NewFichaCard({
   ) => void;
 }) {
   const { t } = useLocale();
-  const [looseTitle, setLooseTitle] = useState("");
-
-  const createLoose = () => {
-    const title = looseTitle.trim();
-    if (!title) return;
-    onCreateLoose(title);
-    setLooseTitle("");
-  };
 
   return (
     <Ficha
@@ -52,27 +42,10 @@ export function NewFichaCard({
             onCancel={onCancel}
             onCreate={onCreate}
           />
-          <div className="flex flex-col gap-2 border-t border-current/15 pt-4">
-            <span className="text-xs uppercase tracking-widest opacity-60">
-              {t("looseItems")}
-            </span>
-            <div className="flex items-center gap-2">
-              <Input
-                aria-label={t("newLooseItem")}
-                onChange={(event) => setLooseTitle(event.target.value)}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") {
-                    event.preventDefault();
-                    createLoose();
-                  }
-                }}
-                placeholder={t("addItem")}
-                value={looseTitle}
-              />
-              <Button onClick={createLoose} type="button">
-                {t("addItem")}
-              </Button>
-            </div>
+          <div className="border-t border-current/15 pt-4">
+            <Button onClick={onCreateLoose} type="button" variant="outline">
+              {t("createLooseCard")}
+            </Button>
           </div>
         </div>
       }
