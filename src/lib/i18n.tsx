@@ -29,12 +29,17 @@ const messages = {
     help: "Ajuda",
     helpTitle: "Como usar o Tally",
     helpIntro: "Organize suas coleções e acompanhe o que já foi adquirido.",
-    helpCreate: "Use Nova ficha para criar uma coleção ou abrir uma ficha de avulsos.",
-    helpCheck: "Marque os itens conforme você os adquire. O progresso é atualizado automaticamente.",
-    helpViews: "Alterne entre fichas empilhadas e lista contínua no menu de visualização.",
-    helpNavigation: "Use as setas para navegar entre fichas ou abra o Índice para pular diretamente para uma ficha.",
-    helpGestures: "No mobile, deslize para a esquerda ou direita para trocar de ficha. No desktop, você também pode arrastar a ficha horizontalmente com o mouse ou trackpad.",
-    view: "Visualização", 
+    helpCreate:
+      "Use Nova ficha para criar uma coleção ou abrir uma ficha de avulsos.",
+    helpCheck:
+      "Marque os itens conforme você os adquire. O progresso é atualizado automaticamente.",
+    helpViews:
+      "Alterne entre fichas empilhadas e lista contínua no menu de visualização.",
+    helpNavigation:
+      "Use as setas para navegar entre fichas ou abra o Índice para pular diretamente para uma ficha.",
+    helpGestures:
+      "No mobile, deslize para a esquerda ou direita para trocar de ficha. No desktop, você também pode arrastar a ficha horizontalmente com o mouse ou trackpad.",
+    view: "Visualização",
     stackedCards: "Fichas empilhadas",
     continuousList: "Lista contínua",
     index: "Índice",
@@ -60,6 +65,8 @@ const messages = {
     category: "Categoria",
     nomenclature: "Nomenclatura",
     total: "Total de",
+    decreaseTotal: "Diminuir total",
+    increaseTotal: "Aumentar total",
     volume: "volumes",
     issue: "edições",
     paperColor: "Cor do papel",
@@ -110,11 +117,16 @@ const messages = {
     help: "Help",
     helpTitle: "How to use Tally",
     helpIntro: "Organize your collections and track what you have acquired.",
-    helpCreate: "Use New card to create a collection or open the loose-items card.",
-    helpCheck: "Mark items as you acquire them. Progress updates automatically.",
-    helpViews: "Switch between stacked cards and the continuous list from the view menu.",
-    helpNavigation: "Use the arrows to move between cards or open Index to jump directly to a card.",
-    helpGestures: "On mobile, swipe left or right to change cards. On desktop, drag the card horizontally with your mouse or trackpad.",
+    helpCreate:
+      "Use New card to create a collection or open the loose-items card.",
+    helpCheck:
+      "Mark items as you acquire them. Progress updates automatically.",
+    helpViews:
+      "Switch between stacked cards and the continuous list from the view menu.",
+    helpNavigation:
+      "Use the arrows to move between cards or open Index to jump directly to a card.",
+    helpGestures:
+      "On mobile, swipe left or right to change cards. On desktop, drag the card horizontally with your mouse or trackpad.",
     view: "View",
     stackedCards: "Stacked cards",
     continuousList: "Continuous list",
@@ -141,6 +153,8 @@ const messages = {
     category: "Category",
     nomenclature: "Nomenclature",
     total: "Total of",
+    decreaseTotal: "Decrease total",
+    increaseTotal: "Increase total",
     volume: "volumes",
     issue: "issues",
     paperColor: "Paper color",

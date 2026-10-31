@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -96,18 +96,6 @@ export function InlineCreate({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="create-title">{t("title")}</Label>
-        <Input
-          autoFocus
-          id="create-title"
-          onChange={(event) => setTitle(event.target.value)}
-          placeholder="Ex: Dragon Ball"
-          required
-          value={title}
-        />
-      </div>
-
-      <div className="space-y-2">
         <Label>{t("cardType")}</Label>
         <div className="grid grid-cols-2 gap-2">
           <Button
@@ -132,57 +120,100 @@ export function InlineCreate({
         )}
       </div>
 
+      <div className="space-y-2">
+        <Label htmlFor="create-title">{t("title")}</Label>
+        <Input
+          autoFocus
+          id="create-title"
+          onChange={(event) => setTitle(event.target.value)}
+          placeholder="Ex: Dragon Ball"
+          required
+          value={title}
+        />
+      </div>
+
       {cardType === "collection" && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-          <div className="min-w-0 space-y-2">
-            <Label>{t("category")}</Label>
-            <Select
-              onValueChange={(next) => {
-                const nextCategory = next as Category;
-                setCategory(nextCategory);
-                setNomenclature(
-                  nextCategory === "comic" || nextCategory === "magazine"
-                    ? "issue"
-                    : "volume",
-                );
-              }}
-              value={category}
-            >
-              <SelectTrigger aria-label={t("category")}>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((item) => (
-                  <SelectItem key={item} value={item}>
-                    {categoryLabel(item, locale)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="min-w-0 space-y-2">
+              <Label>{t("category")}</Label>
+              <Select
+                onValueChange={(next) => {
+                  const nextCategory = next as Category;
+                  setCategory(nextCategory);
+                  setNomenclature(
+                    nextCategory === "comic" || nextCategory === "magazine"
+                      ? "issue"
+                      : "volume",
+                  );
+                }}
+                value={category}
+              >
+                <SelectTrigger aria-label={t("category")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((item) => (
+                    <SelectItem key={item} value={item}>
+                      {categoryLabel(item, locale)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="min-w-0">
+              <NomenclatureField
+                onChange={setNomenclature}
+                value={nomenclature}
+              />
+            </div>
           </div>
 
-          <div className="min-w-0">
-            <NomenclatureField
-              onChange={setNomenclature}
-              value={nomenclature}
-            />
-          </div>
-
-          <div className="min-w-0 space-y-2">
+          <div className="space-y-2">
             <Label htmlFor="create-total">
               {t("total")} {nomenclature === "issue" ? t("issue") : t("volume")}
             </Label>
-            <Input
-              id="create-total"
-              min={1}
-              onChange={(event) => setTotal(event.target.value)}
-              required
-              step={1}
-              type="number"
-              value={total}
-            />
+            <div className="flex items-center gap-2">
+              <Button
+                aria-label={t("decreaseTotal")}
+                onClick={() =>
+                  setTotal((currentTotal) =>
+                    String(Math.max(1, Number(currentTotal) - 1)),
+                  )
+                }
+                size="icon"
+                type="button"
+                variant="outline"
+              >
+                <Minus />
+              </Button>
+              <Input
+                className="text-center"
+                id="create-total"
+                min={1}
+                onChange={(event) => setTotal(event.target.value)}
+                required
+                step={1}
+                type="number"
+                value={total}
+              />
+              <Button
+                aria-label={t("increaseTotal")}
+                onClick={() =>
+                  setTotal((currentTotal) =>
+                    String(Math.max(1, Number(currentTotal) + 1)),
+                  )
+                }
+                size="icon"
+                type="button"
+                variant="outline"
+              >
+                <Plus />
+              </Button>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       <AppearanceFields
