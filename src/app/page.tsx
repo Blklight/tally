@@ -231,6 +231,10 @@ export default function HomePage() {
             big={big}
             onAppearanceChange={setDraftAppearance}
             onCancel={() => setAdding(false)}
+            onCreateLoose={(title) => {
+              addItem(title);
+              setAdding(false);
+            }}
             onCreate={handleCreate}
           />
         );
@@ -352,10 +356,10 @@ export default function HomePage() {
           opts={{ align: "start", loop: true }}
           setApi={setCarouselApi}
         >
-          <CarouselContent className="-ml-4 w-full px-3 py-4">
+          <CarouselContent className="-ml-4 w-full px-3 py-6">
             {cards.map((card) => (
               <CarouselItem
-                className="basis-[min(28rem,calc(100vw-2rem))] pl-4"
+                className="basis-[min(28rem,calc(100vw-2rem))] pl-4 drop-shadow-[0_10px_18px_rgba(0,0,0,0.16)] dark:drop-shadow-[0_12px_20px_rgba(0,0,0,0.42)]"
                 key={card.id}
               >
                 {renderCard(card, true)}

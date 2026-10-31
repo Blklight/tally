@@ -1,11 +1,26 @@
 "use client";
 
-import { Languages, Layers, List, Menu, Plus, Search } from "lucide-react";
+import {
+  CircleHelp,
+  Languages,
+  Layers,
+  List,
+  Menu,
+  Plus,
+  Search,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { LanguageSwitcher } from "@/components/tally/language-switcher";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
@@ -39,6 +54,7 @@ export function Navbar({
   onQueryChange,
 }: NavbarProps) {
   const { t } = useLocale();
+  const [helpOpen, setHelpOpen] = useState(false);
 
   return (
     <header className="background-header background-texture rounded-b-xs px-0">
@@ -49,6 +65,29 @@ export function Navbar({
         >
           Tally<span className="text-muted-foreground">.</span>
         </Link>
+
+        <Dialog onOpenChange={setHelpOpen} open={helpOpen}>
+          <Button
+            aria-label={t("help")}
+            className={navButtonClassName}
+            onClick={() => setHelpOpen(true)}
+            title={t("help")}
+            variant="ghost"
+          >
+            <CircleHelp />
+          </Button>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>{t("helpTitle")}</DialogTitle>
+              <DialogDescription>{t("helpIntro")}</DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-col gap-3 text-sm text-muted-foreground">
+              <p>{t("helpCreate")}</p>
+              <p>{t("helpCheck")}</p>
+              <p>{t("helpViews")}</p>
+            </div>
+          </DialogContent>
+        </Dialog>
 
         <div className="ml-auto flex h-full items-center">
           <Button
