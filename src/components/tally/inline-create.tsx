@@ -43,7 +43,9 @@ export function InlineCreate({
 }) {
   const { locale, t } = useLocale();
   const [title, setTitle] = useState("");
-  const [cardType, setCardType] = useState<"collection" | "loose">("collection");
+  const [cardType, setCardType] = useState<"collection" | "loose">(
+    "collection",
+  );
   const [category, setCategory] = useState<Category>("manga");
   const [total, setTotal] = useState("1");
   const [nomenclature, setNomenclature] = useState<Nomenclature>("volume");
@@ -131,52 +133,56 @@ export function InlineCreate({
       </div>
 
       {cardType === "collection" && (
-        <>
-          <div className="space-y-2">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="min-w-0 space-y-2">
             <Label>{t("category")}</Label>
-        <Select
-          onValueChange={(next) => {
-            const nextCategory = next as Category;
-            setCategory(nextCategory);
-            setNomenclature(
-              nextCategory === "comic" || nextCategory === "magazine"
-                ? "issue"
-                : "volume",
-            );
-          }}
-          value={category}
-        >
-          <SelectTrigger aria-label={t("category")}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {CATEGORIES.map((item) => (
-              <SelectItem key={item} value={item}>
-                {categoryLabel(item, locale)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+            <Select
+              onValueChange={(next) => {
+                const nextCategory = next as Category;
+                setCategory(nextCategory);
+                setNomenclature(
+                  nextCategory === "comic" || nextCategory === "magazine"
+                    ? "issue"
+                    : "volume",
+                );
+              }}
+              value={category}
+            >
+              <SelectTrigger aria-label={t("category")}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CATEGORIES.map((item) => (
+                  <SelectItem key={item} value={item}>
+                    {categoryLabel(item, locale)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-      <NomenclatureField onChange={setNomenclature} value={nomenclature} />
+          <div className="min-w-0">
+            <NomenclatureField
+              onChange={setNomenclature}
+              value={nomenclature}
+            />
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="create-total">
-          {t("total")} {nomenclature === "issue" ? t("issue") : t("volume")}
-        </Label>
-        <Input
-          id="create-total"
-          min={1}
-          onChange={(event) => setTotal(event.target.value)}
-          required
-          step={1}
-          type="number"
-          value={total}
-        />
-      </div>
-
-        </>
+          <div className="min-w-0 space-y-2">
+            <Label htmlFor="create-total">
+              {t("total")} {nomenclature === "issue" ? t("issue") : t("volume")}
+            </Label>
+            <Input
+              id="create-total"
+              min={1}
+              onChange={(event) => setTotal(event.target.value)}
+              required
+              step={1}
+              type="number"
+              value={total}
+            />
+          </div>
+        </div>
       )}
 
       <AppearanceFields
