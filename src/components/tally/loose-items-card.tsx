@@ -59,6 +59,9 @@ export function LooseItemsCard({
   onToggleItem,
   onAddItem,
   onAppearanceChange,
+  appearance,
+  items: itemsOverride,
+  title,
 }: {
   data: Data;
   big?: boolean;
@@ -68,12 +71,17 @@ export function LooseItemsCard({
   onToggleItem: (item: LooseItem) => void;
   onAddItem: (title: string) => void;
   onAppearanceChange: (appearance: Appearance) => void;
+  appearance?: Appearance;
+  items?: LooseItem[];
+  title?: string;
 }) {
   const { t } = useLocale();
   const [newItem, setNewItem] = useState("");
 
+  const cardAppearance = appearance ?? data.looseAppearance;
+  const sourceItems = itemsOverride ?? data.items;
   const normalizedQuery = query.trim().toLowerCase();
-  const items = data.items.filter(
+  const items = sourceItems.filter(
     (item) =>
       !normalizedQuery ||
       "avulsos".includes(normalizedQuery) ||
@@ -87,24 +95,24 @@ export function LooseItemsCard({
         ]
       : items;
 
-  const missingCount = data.items.filter((item) => !item.found).length;
+  const missingCount = sourceItems.filter((item) => !item.found).length;
 
   return (
     <Ficha
       actions={sortButton}
-      appearance={data.looseAppearance}
+      appearance={cardAppearance}
       big={big}
       category="individual-items"
       count={missingCount}
       countLabel={t("manyMissing")}
       editContent={
         <LooseItemsEdit
-          appearance={data.looseAppearance ?? DEFAULT_APPEARANCE}
+          appearance={cardAppearance ?? DEFAULT_APPEARANCE}
           onChange={onAppearanceChange}
         />
       }
       onEdit={() => undefined}
-      title={t("looseItems")}
+      title={title ?? t("looseItems")}
     >
       {ordered.map((item) => (
         <HoldRow

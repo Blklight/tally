@@ -25,6 +25,7 @@ import { AppearanceFields, NomenclatureField } from "./appearance-fields";
 export function InlineCreate({
   onCancel,
   onCreate,
+  onCreateLoose,
   appearance = DEFAULT_APPEARANCE,
   onAppearanceChange,
 }: {
@@ -36,11 +37,13 @@ export function InlineCreate({
     nomenclature: Nomenclature,
     appearance: Appearance,
   ) => void;
+  onCreateLoose: (title: string, appearance: Appearance) => void;
   appearance?: Appearance;
   onAppearanceChange?: (appearance: Appearance) => void;
 }) {
   const { locale, t } = useLocale();
   const [title, setTitle] = useState("");
+  const [cardType, setCardType] = useState<"collection" | "loose">("collection");
   const [category, setCategory] = useState<Category>("manga");
   const [total, setTotal] = useState("1");
   const [nomenclature, setNomenclature] = useState<Nomenclature>("volume");
@@ -63,13 +66,17 @@ export function InlineCreate({
       onSubmit={(event) => {
         event.preventDefault();
         if (title.trim()) {
-          onCreate(
-            title.trim(),
-            category,
-            Math.max(1, Number(total) || 1),
-            nomenclature,
-            activeAppearance,
-          );
+          if (cardType === "loose") {
+            onCreateLoose(title.trim(), activeAppearance);
+          } else {
+            onCreate(
+              title.trim(),
+              category,
+              Math.max(1, Number(total) || 1),
+              nomenclature,
+              activeAppearance,
+            );
+          }
         }
       }}
     >
@@ -99,7 +106,34 @@ export function InlineCreate({
       </div>
 
       <div className="space-y-2">
-        <Label>{t("category")}</Label>
+        <Label>{t("cardType")}</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            onClick={() => setCardType("collection")}
+            type="button"
+            variant={cardType === "collection" ? "default" : "outline"}
+          >
+            {t("collectionCard")}
+          </Button>
+          <Button
+            onClick={() => setCardType("loose")}
+            type="button"
+            variant={cardType === "loose" ? "default" : "outline"}
+          >
+            {t("looseCard")}
+          </Button>
+        </div>
+        {cardType === "loose" && (
+          <p className="text-xs text-muted-foreground">
+            {t("looseCardDescription")}
+          </p>
+        )}
+      </div>
+
+      {cardType === "collection" && (
+        <>
+          <div className="space-y-2">
+            <Label>{t("category")}</Label>
         <Select
           onValueChange={(next) => {
             const nextCategory = next as Category;
@@ -141,6 +175,9 @@ export function InlineCreate({
           value={total}
         />
       </div>
+
+        </>
+      )}
 
       <AppearanceFields
         onChange={handleAppearanceChange}

@@ -1,7 +1,6 @@
 "use client";
 
 import { Ficha } from "@/components/fichas";
-import { Button } from "@/components/ui/button";
 import { useLocale } from "@/lib/i18n";
 import type { Appearance, Category, Nomenclature } from "@/lib/store";
 import { InlineCreate } from "./inline-create";
@@ -18,7 +17,7 @@ export function NewFichaCard({
   big?: boolean;
   onAppearanceChange: (appearance: Appearance) => void;
   onCancel: () => void;
-  onCreateLoose: () => void;
+  onCreateLoose: (title: string, appearance: Appearance) => void;
   onCreate: (
     title: string,
     category: Category,
@@ -41,12 +40,8 @@ export function NewFichaCard({
             onAppearanceChange={onAppearanceChange}
             onCancel={onCancel}
             onCreate={onCreate}
+            onCreateLoose={onCreateLoose}
           />
-          <div className="border-t border-current/15 pt-4">
-            <Button onClick={onCreateLoose} type="button" variant="outline">
-              {t("createLooseCard")}
-            </Button>
-          </div>
         </div>
       }
       onEdit={() => undefined}

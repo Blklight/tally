@@ -86,6 +86,7 @@ export function Navbar({
               <p>{t("helpCheck")}</p>
               <p>{t("helpViews")}</p>
               <p>{t("helpNavigation")}</p>
+              <p>{t("helpGestures")}</p>
             </div>
           </DialogContent>
         </Dialog>

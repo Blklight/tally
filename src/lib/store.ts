@@ -78,6 +78,8 @@ export interface Series {
   missing?: number[];
   nomenclature?: Nomenclature;
   appearance?: Appearance;
+  isLoose?: boolean;
+  looseItems?: LooseItem[];
 }
 
 export interface LooseItem {
@@ -129,6 +131,14 @@ function normalizeSeries(
       series.nomenclature ??
       "volume",
     appearance: normalizeAppearance(series.appearance),
+    isLoose: series.isLoose ?? false,
+    looseItems: (series.looseItems ?? []).map((item) => ({
+      id: item.id ?? uid(),
+      title: item.title ?? "Sem título",
+      category: LEGACY_CATEGORIES[item.category] ?? item.category ?? "other",
+      ...(item.note === undefined ? {} : { note: item.note }),
+      found: item.found ?? false,
+    })),
   };
 }
 

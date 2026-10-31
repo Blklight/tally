@@ -231,10 +231,25 @@ export default function HomePage() {
             big={big}
             onAppearanceChange={setDraftAppearance}
             onCancel={() => setAdding(false)}
-            onCreateLoose={() => {
+            onCreateLoose={(title, appearance) => {
+              setData((currentData) => ({
+                ...currentData,
+                series: [
+                  {
+                    id: uid(),
+                    title,
+                    category: "other",
+                    total: 0,
+                    acquired: [],
+                    appearance: normalizeAppearance(appearance),
+                    isLoose: true,
+                    looseItems: [],
+                  },
+                  ...currentData.series,
+                ],
+              }));
               setAdding(false);
-              setQuery("");
-              setIndex(data.series.length);
+              setIndex(0);
             }}
             onCreate={handleCreate}
           />
@@ -243,6 +258,40 @@ export default function HomePage() {
 
       if (card.series) {
         const { series } = card;
+        if (series.isLoose) {
+          return (
+            <LooseItemsCard
+              appearance={series.appearance}
+              big={big}
+              data={{ ...data, items: series.looseItems ?? [] }}
+              items={series.looseItems ?? []}
+              onAddItem={(title) =>
+                updateSeries(series.id, {
+                  looseItems: [
+                    ...(series.looseItems ?? []),
+                    { id: uid(), title, category: "other", found: false },
+                  ],
+                })
+              }
+              onAppearanceChange={(appearance) =>
+                updateSeries(series.id, { appearance })
+              }
+              onToggleItem={(item) =>
+                updateSeries(series.id, {
+                  looseItems: (series.looseItems ?? []).map((currentItem) =>
+                    currentItem.id === item.id
+                      ? { ...currentItem, found: !currentItem.found }
+                      : currentItem,
+                  ),
+                })
+              }
+              query={query}
+              sort={sort}
+              sortButton={sortButton}
+              title={series.title}
+            />
+          );
+        }
         return (
           <SeriesCard
             big={big}
