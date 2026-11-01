@@ -14,10 +14,10 @@ import {
 import { categoryLabel, useLocale } from "@/lib/i18n";
 import {
   type Appearance,
-  type Data,
   CATEGORIES,
-  DEFAULT_APPEARANCE,
   type Category,
+  type Data,
+  DEFAULT_APPEARANCE,
   type LooseItem,
 } from "@/lib/store";
 import { AppearanceFields } from "./appearance-fields";
@@ -137,12 +137,6 @@ export function LooseItemsCard({
           onToggle={() => onToggleItem(item)}
         />
       ))}
-      {items.length === 0 && (
-        <div className="py-8 text-center">
-          <BookOpen className="mx-auto mb-3 size-6 opacity-40" />
-          <p className="text-sm opacity-60">{t("noLooseItems")}</p>
-        </div>
-      )}
       <form
         className="mt-3 flex items-center gap-2 px-3"
         onSubmit={(event) => {
@@ -162,7 +156,7 @@ export function LooseItemsCard({
             aria-label={t("category")}
             className="h-9 w-32 shrink-0"
           >
-            <SelectValue />
+            <SelectValue>{categoryLabel(newItemCategory, locale)}</SelectValue>
           </SelectTrigger>
           <SelectContent>
             {CATEGORIES.map((category) => (
@@ -179,7 +173,16 @@ export function LooseItemsCard({
           placeholder={t("addItem")}
           value={newItem}
         />
+        <Button className="shrink-0" size="sm" type="submit">
+          {t("addItem")}
+        </Button>
       </form>
+      {items.length === 0 && (
+        <div className="py-8 text-center">
+          <BookOpen className="mx-auto mb-3 size-6 opacity-40" />
+          <p className="text-sm opacity-60">{t("noLooseItems")}</p>
+        </div>
+      )}
     </Ficha>
   );
 }
