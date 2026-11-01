@@ -110,18 +110,11 @@ export function Navbar({
             <LanguageSwitcher className={navButtonClassName} />
           </div>
 
-          <NavbarMobileMenu
-            mode={mode}
-            onModeChange={onModeChange}
-            onQueryChange={onQueryChange}
-            query={query}
-          />
-
           <AnimatedThemeToggler className={navButtonClassName} />
           <Dialog onOpenChange={setHelpOpen} open={helpOpen}>
             <Button
               aria-label={t("help")}
-              className={navButtonClassName}
+              className={`${navButtonClassName} hidden sm:flex`}
               onClick={() => setHelpOpen(true)}
               title={t("help")}
               variant="ghost"
@@ -142,6 +135,12 @@ export function Navbar({
               </div>
             </DialogContent>
           </Dialog>
+          <NavbarMobileMenu
+            mode={mode}
+            onModeChange={onModeChange}
+            onQueryChange={onQueryChange}
+            query={query}
+          />
         </div>
       </div>
     </header>
@@ -156,6 +155,7 @@ function NavbarMobileMenu({
 }: Pick<NavbarProps, "mode" | "onModeChange" | "query" | "onQueryChange">) {
   const { locale, setLocale, t } = useLocale();
   const [open, setOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const nextLocale = locale === "pt-BR" ? "en" : "pt-BR";
 
   return (
@@ -165,7 +165,7 @@ function NavbarMobileMenu({
         className={cn(navButtonClassName, "sm:hidden")}
         title={t("menu")}
       >
-        <Menu />
+        <Menu className="size-5" strokeWidth={1.75} />
       </SheetTrigger>
       <SheetContent
         className="sheet-surface flex w-[min(20rem,100vw)] flex-col px-5"
@@ -240,6 +240,30 @@ function NavbarMobileMenu({
               </Button>
             </div>
           </div>
+
+          <Dialog onOpenChange={setHelpOpen} open={helpOpen}>
+            <Button
+              className="w-full justify-start"
+              onClick={() => setHelpOpen(true)}
+              variant="outline"
+            >
+              <CircleHelp />
+              {t("help")}
+            </Button>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t("helpTitle")}</DialogTitle>
+                <DialogDescription>{t("helpIntro")}</DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-3 text-sm text-muted-foreground">
+                <p>{t("helpCreate")}</p>
+                <p>{t("helpCheck")}</p>
+                <p>{t("helpViews")}</p>
+                <p>{t("helpNavigation")}</p>
+                <p>{t("helpGestures")}</p>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </SheetContent>
     </Sheet>
