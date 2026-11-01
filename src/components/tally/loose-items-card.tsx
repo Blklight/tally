@@ -134,15 +134,17 @@ export function LooseItemsCard({
           setNewItem("");
         }}
       >
-        <input
-          aria-label={t("newLooseItem")}
-          className="w-full border-b border-current/25 bg-transparent py-2 text-sm outline-none placeholder:text-current/40 focus:border-current"
-          onChange={(event) => setNewItem(event.target.value)}
-          placeholder={t("addItem")}
-          value={newItem}
-        />
         <div className="flex items-center gap-2">
           <Plus className="size-4 shrink-0 opacity-60" />
+          <input
+            aria-label={t("newLooseItem")}
+            className="min-w-0 flex-1 border-b border-current/25 bg-transparent py-2 text-sm outline-none placeholder:text-current/40 focus:border-current"
+            onChange={(event) => setNewItem(event.target.value)}
+            placeholder={t("addItem")}
+            value={newItem}
+          />
+        </div>
+        <div className="flex items-center gap-2">
           <Select
             onValueChange={(value) => setNewItemCategory(value as Category)}
             value={newItemCategory}

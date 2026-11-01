@@ -33,7 +33,7 @@ import { useLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const navButtonClassName =
-  "size-12 shrink-0 cursor-pointer rounded-xs border-0 bg-clip-border p-0 text-[#252525] outline-none hover:bg-[#252525] hover:text-[#eaeaea] focus-visible:ring-2 focus-visible:ring-ring active:not-aria-[haspopup]:translate-y-0 dark:text-[#eaeaea] dark:hover:bg-[#eaeaea] dark:hover:text-[#252525] [&_svg]:size-4.5";
+  "size-12 shrink-0 cursor-pointer rounded-none border-0 bg-clip-border p-0 text-[#252525] outline-none hover:bg-[#252525] hover:text-[#eaeaea] focus-visible:ring-2 focus-visible:ring-ring active:not-aria-[haspopup]:translate-y-0 dark:text-[#eaeaea] dark:hover:bg-[#eaeaea] dark:hover:text-[#252525] [&_svg]:size-4.5";
 
 const activeButtonClassName =
   "bg-[#252525] text-[#eaeaea] hover:bg-[#252525] hover:text-[#eaeaea] dark:bg-[#eaeaea] dark:text-[#252525] dark:hover:bg-[#eaeaea] dark:hover:text-[#252525]";
@@ -65,31 +65,6 @@ export function Navbar({
         >
           Tally<span className="text-muted-foreground">.</span>
         </Link>
-
-        <Dialog onOpenChange={setHelpOpen} open={helpOpen}>
-          <Button
-            aria-label={t("help")}
-            className={navButtonClassName}
-            onClick={() => setHelpOpen(true)}
-            title={t("help")}
-            variant="ghost"
-          >
-            <CircleHelp />
-          </Button>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{t("helpTitle")}</DialogTitle>
-              <DialogDescription>{t("helpIntro")}</DialogDescription>
-            </DialogHeader>
-            <div className="flex flex-col gap-3 text-sm text-muted-foreground">
-              <p>{t("helpCreate")}</p>
-              <p>{t("helpCheck")}</p>
-              <p>{t("helpViews")}</p>
-              <p>{t("helpNavigation")}</p>
-              <p>{t("helpGestures")}</p>
-            </div>
-          </DialogContent>
-        </Dialog>
 
         <div className="ml-auto flex h-full items-center">
           <Button
@@ -143,6 +118,30 @@ export function Navbar({
           />
 
           <AnimatedThemeToggler className={navButtonClassName} />
+          <Dialog onOpenChange={setHelpOpen} open={helpOpen}>
+            <Button
+              aria-label={t("help")}
+              className={navButtonClassName}
+              onClick={() => setHelpOpen(true)}
+              title={t("help")}
+              variant="ghost"
+            >
+              <CircleHelp />
+            </Button>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>{t("helpTitle")}</DialogTitle>
+                <DialogDescription>{t("helpIntro")}</DialogDescription>
+              </DialogHeader>
+              <div className="flex flex-col gap-3 text-sm text-muted-foreground">
+                <p>{t("helpCreate")}</p>
+                <p>{t("helpCheck")}</p>
+                <p>{t("helpViews")}</p>
+                <p>{t("helpNavigation")}</p>
+                <p>{t("helpGestures")}</p>
+              </div>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
     </header>

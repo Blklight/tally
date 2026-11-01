@@ -112,7 +112,7 @@ export function HoldRow({
       }}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <span className="hold-fill absolute inset-0 origin-left bg-current/10" />
+      <span className="hold-fill absolute inset-0 origin-left bg-current/20" />
       <span
         className={cn(
           "relative flex size-6 shrink-0 items-center justify-center rounded-[3px] border-[1.5px] border-current",
@@ -286,7 +286,7 @@ export function HoldAction({
       onPointerCancel={cancel}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <span className="hold-fill absolute inset-0 origin-left bg-current/10" />
+      <span className="hold-fill absolute inset-0 origin-left bg-current/20" />
       <span className="relative flex items-center gap-2">
         <Trash2 /> {label}
       </span>
@@ -367,7 +367,7 @@ export function Ficha({
   const resolvedAppearance = normalizeAppearance(appearance);
   const paperStyle = { "--paper": resolvedAppearance.paper } as CSSProperties;
   const face =
-    "ficha relative flex h-full flex-col justify-between overflow-hidden bg-paper p-6 pb-7 text-paper-ink sm:p-8 background-texture";
+    "ficha relative flex h-full flex-col justify-between overflow-hidden bg-paper p-6 pb-7 text-paper-ink sm:p-8 background-texture [&_[data-slot=button]]:bg-paper-ink [&_[data-slot=button]]:text-paper [&_[data-slot=button]]:hover:bg-paper-ink/85";
 
   if (!big) {
     return (
