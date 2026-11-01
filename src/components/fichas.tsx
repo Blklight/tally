@@ -367,7 +367,7 @@ export function Ficha({
   const resolvedAppearance = normalizeAppearance(appearance);
   const paperStyle = { "--paper": resolvedAppearance.paper } as CSSProperties;
   const face =
-    "ficha relative flex h-full flex-col justify-between overflow-hidden bg-paper p-6 pb-7 text-paper-ink sm:p-8 background-texture [&_[data-slot=button]]:bg-paper-ink [&_[data-slot=button]]:text-paper [&_[data-slot=button]]:hover:bg-paper-ink/85";
+    "ficha relative flex h-full flex-col justify-between overflow-hidden bg-paper p-6 pb-7 text-paper-ink sm:p-8 background-texture";
 
   if (!big) {
     return (
@@ -494,6 +494,7 @@ export function Ficha({
               <ChamferButton
                 ref={frontBtnRef}
                 onClick={flip}
+                className="bg-paper-ink text-paper hover:bg-paper-ink/85"
                 corner="br"
                 aria-label={t("viewItems")}
               >
