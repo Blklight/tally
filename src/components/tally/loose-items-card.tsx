@@ -124,6 +124,47 @@ export function LooseItemsCard({
       onEdit={() => undefined}
       title={title ?? t("looseItems")}
     >
+      <form
+        className="sticky top-0 z-10 mb-2 space-y-2 border-b border-current/10 bg-inherit px-3 pb-3 pt-1"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const title = newItem.trim();
+          if (!title) return;
+          onAddItem(title, newItemCategory);
+          setNewItem("");
+        }}
+      >
+        <input
+          aria-label={t("newLooseItem")}
+          className="w-full border-b border-current/25 bg-transparent py-2 text-sm outline-none placeholder:text-current/40 focus:border-current"
+          onChange={(event) => setNewItem(event.target.value)}
+          placeholder={t("addItem")}
+          value={newItem}
+        />
+        <div className="flex items-center gap-2">
+          <Plus className="size-4 shrink-0 opacity-60" />
+          <Select
+            onValueChange={(value) => setNewItemCategory(value as Category)}
+            value={newItemCategory}
+          >
+            <SelectTrigger aria-label={t("category")} className="h-9 flex-1">
+              <SelectValue>
+                {categoryLabel(newItemCategory, locale)}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORIES.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {categoryLabel(category, locale)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button className="shrink-0" size="sm" type="submit">
+            {t("addItem")}
+          </Button>
+        </div>
+      </form>
       {ordered.map((item) => (
         <HoldRow
           checked={!!item.found}
@@ -137,46 +178,6 @@ export function LooseItemsCard({
           onToggle={() => onToggleItem(item)}
         />
       ))}
-      <form
-        className="mt-3 flex items-center gap-2 px-3"
-        onSubmit={(event) => {
-          event.preventDefault();
-          const title = newItem.trim();
-          if (!title) return;
-          onAddItem(title, newItemCategory);
-          setNewItem("");
-        }}
-      >
-        <Plus className="size-4 shrink-0 opacity-60" />
-        <Select
-          onValueChange={(value) => setNewItemCategory(value as Category)}
-          value={newItemCategory}
-        >
-          <SelectTrigger
-            aria-label={t("category")}
-            className="h-9 w-32 shrink-0"
-          >
-            <SelectValue>{categoryLabel(newItemCategory, locale)}</SelectValue>
-          </SelectTrigger>
-          <SelectContent>
-            {CATEGORIES.map((category) => (
-              <SelectItem key={category} value={category}>
-                {categoryLabel(category, locale)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <input
-          aria-label={t("newLooseItem")}
-          className="min-w-0 flex-1 border-b border-current/25 bg-transparent py-2 text-sm outline-none placeholder:text-current/40 focus:border-current"
-          onChange={(event) => setNewItem(event.target.value)}
-          placeholder={t("addItem")}
-          value={newItem}
-        />
-        <Button className="shrink-0" size="sm" type="submit">
-          {t("addItem")}
-        </Button>
-      </form>
       {items.length === 0 && (
         <div className="py-8 text-center">
           <BookOpen className="mx-auto mb-3 size-6 opacity-40" />
