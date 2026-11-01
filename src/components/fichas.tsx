@@ -732,7 +732,7 @@ export function StackView<T extends { id: string }>({
               aria-hidden={!isTop}
               inert={!isTop ? true : undefined}
               className={cn(
-                "absolute inset-0",
+                "absolute inset-y-0 left-3 right-3 sm:inset-x-0",
                 !isTop && "pointer-events-none",
               )}
               style={{
