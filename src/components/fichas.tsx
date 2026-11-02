@@ -176,11 +176,9 @@ export function HoldRow({
           <DropdownMenuContent align="end">
             {onEdit && (
               <DropdownMenuItem
-                onSelect={() => {
-                  window.setTimeout(() => {
-                    setDraft(label);
-                    setEditing(true);
-                  }, 0);
+                onClick={() => {
+                  setDraft(label);
+                  setEditing(true);
                 }}
               >
                 <Save /> Editar
