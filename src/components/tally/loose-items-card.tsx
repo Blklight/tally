@@ -67,6 +67,8 @@ export function LooseItemsCard({
   query,
   onToggleItem,
   onAddItem,
+  onEditItem,
+  onDeleteItem,
   onAppearanceChange,
   appearance,
   items: itemsOverride,
@@ -79,6 +81,8 @@ export function LooseItemsCard({
   query: string;
   onToggleItem: (item: LooseItem) => void;
   onAddItem: (title: string, category: Category) => void;
+  onEditItem?: (item: LooseItem, title: string) => void;
+  onDeleteItem?: (item: LooseItem) => void;
   onAppearanceChange: (appearance: Appearance) => void;
   appearance?: Appearance;
   items?: LooseItem[];
@@ -177,6 +181,8 @@ export function LooseItemsCard({
               ? undefined
               : item.note || categoryLabel(item.category, locale)
           }
+          onDelete={() => onDeleteItem?.(item)}
+          onEdit={(title) => onEditItem?.(item, title)}
           onToggle={() => onToggleItem(item)}
         />
       ))}

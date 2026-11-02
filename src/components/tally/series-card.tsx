@@ -16,6 +16,7 @@ export function SeriesCard({
   onAppearance,
   onDelete,
   onToggleVolume,
+  onEditVolume,
 }: {
   series: Series;
   big?: boolean;
@@ -25,6 +26,7 @@ export function SeriesCard({
   onAppearance: (appearance: Appearance) => void;
   onDelete: () => void;
   onToggleVolume: (volume: number) => void;
+  onEditVolume: (volume: number, text: string) => void;
 }) {
   const { locale, t } = useLocale();
   const volumes = Array.from({ length: series.total }, (_, index) => index + 1);
@@ -74,7 +76,9 @@ export function SeriesCard({
         <HoldRow
           checked={series.acquired?.includes(volume) ?? false}
           key={volume}
-          label={volumeLabel(series, volume)}
+          label={`${volumeLabel(series, volume)}${series.volumeNotes?.[volume] ? ` — ${series.volumeNotes[volume]}` : ""}`}
+          editPrefix={volumeLabel(series, volume)}
+          onEdit={(text) => onEditVolume(volume, text)}
           onToggle={() => onToggleVolume(volume)}
         />
       ))}

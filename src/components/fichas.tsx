@@ -1,6 +1,13 @@
 "use client";
 
-import { Check, ChevronLeft, Settings2, Trash2 } from "lucide-react";
+import {
+  Check,
+  ChevronLeft,
+  MoreVertical,
+  Pencil,
+  Settings2,
+  Trash2,
+} from "lucide-react";
 import {
   type CSSProperties,
   cloneElement,
@@ -12,6 +19,20 @@ import {
   useState,
 } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useLocale } from "@/lib/i18n";
 import {
   type Appearance,
@@ -28,13 +49,21 @@ export function HoldRow({
   note,
   checked,
   onToggle,
+  onEdit,
+  onDelete,
+  editPrefix,
 }: {
   label: string;
   note?: string;
   checked: boolean;
   onToggle: () => void;
+  onEdit?: (label: string) => void;
+  onDelete?: () => void;
+  editPrefix?: string;
 }) {
   const [holding, setHolding] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [draft, setDraft] = useState(label);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const origin = useRef<{ x: number; y: number } | null>(null);
 
@@ -68,18 +97,16 @@ export function HoldRow({
   }, []);
 
   return (
-    <Button
-      variant="ghost"
+    <div
       role="checkbox"
       aria-checked={checked}
       aria-label={label}
-      aria-description="Mantenha pressionado para alternar"
       className={cn(
-        "hold-row relative h-auto min-h-16 w-full justify-start gap-3 overflow-hidden rounded-sm border-b border-current/10 px-3 py-3 text-left font-normal whitespace-normal hover:bg-current/5",
+        "hold-row relative flex h-auto min-h-16 w-full items-center gap-3 overflow-hidden rounded-sm border-b border-current/10 px-3 py-3 text-left font-normal whitespace-normal hover:bg-current/5",
         holding && "is-holding",
       )}
       onPointerDown={(e) => {
-        if (e.button !== 0) return;
+        if (e.button !== 0 || editOpen) return;
         origin.current = { x: e.clientX, y: e.clientY };
         begin();
       }}
@@ -90,26 +117,12 @@ export function HoldRow({
             e.clientX - origin.current.x,
             e.clientY - origin.current.y,
           ) > 10
-        ) {
+        )
           cancel();
-        }
       }}
       onPointerUp={cancel}
       onPointerLeave={cancel}
       onPointerCancel={cancel}
-      onBlur={cancel}
-      onKeyDown={(e) => {
-        if ((e.key === " " || e.key === "Enter") && !e.repeat) {
-          e.preventDefault();
-          begin();
-        }
-      }}
-      onKeyUp={(e) => {
-        if (e.key === " " || e.key === "Enter") {
-          e.preventDefault();
-          cancel();
-        }
-      }}
       onContextMenu={(e) => e.preventDefault()}
     >
       <span className="hold-fill absolute inset-0 origin-left bg-current/20" />
@@ -130,7 +143,79 @@ export function HoldRow({
         <span className={cn("strike", checked && "is-struck")}>{label}</span>
         {note && <span className="mt-1 block text-xs opacity-60">{note}</span>}
       </span>
-    </Button>
+      {(onEdit || onDelete) && (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            aria-label="Ações do item"
+            className="relative flex size-8 shrink-0 items-center justify-center rounded-sm"
+            onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => {
+              e.stopPropagation();
+              cancel();
+            }}
+            type="button"
+          >
+            <MoreVertical />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            onPointerDown={(event) => event.stopPropagation()}
+          >
+            {onEdit && (
+              <DropdownMenuItem
+                onClick={(event) => {
+                  event.stopPropagation();
+                  setDraft(label);
+                  setEditOpen(true);
+                }}
+              >
+                <Pencil /> Editar
+              </DropdownMenuItem>
+            )}
+            {onDelete && (
+              <DropdownMenuItem onSelect={onDelete}>Excluir</DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+      <Dialog onOpenChange={setEditOpen} open={editOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Editar item</DialogTitle>
+          </DialogHeader>
+          <Input
+            autoFocus
+            onChange={(event) => setDraft(event.target.value)}
+            value={draft}
+          />
+          <DialogFooter>
+            <Button
+              onClick={() => setEditOpen(false)}
+              type="button"
+              variant="ghost"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                onEdit?.(
+                  editPrefix && draft.startsWith(editPrefix)
+                    ? draft
+                        .slice(editPrefix.length)
+                        .replace(/^\s*—\s*/, "")
+                        .trim()
+                    : draft.trim(),
+                );
+                setEditOpen(false);
+              }}
+              type="button"
+            >
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
   );
 }
 

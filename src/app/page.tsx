@@ -276,6 +276,22 @@ export default function HomePage() {
               onAppearanceChange={(appearance) =>
                 updateSeries(series.id, { appearance })
               }
+              onDeleteItem={(item) =>
+                updateSeries(series.id, {
+                  looseItems: (series.looseItems ?? []).filter(
+                    (currentItem) => currentItem.id !== item.id,
+                  ),
+                })
+              }
+              onEditItem={(item, title) =>
+                updateSeries(series.id, {
+                  looseItems: (series.looseItems ?? []).map((currentItem) =>
+                    currentItem.id === item.id
+                      ? { ...currentItem, title }
+                      : currentItem,
+                  ),
+                })
+              }
               onToggleItem={(item) =>
                 updateSeries(series.id, {
                   looseItems: (series.looseItems ?? []).map((currentItem) =>
@@ -299,6 +315,11 @@ export default function HomePage() {
               updateSeries(series.id, { appearance })
             }
             onDelete={() => removeSeries(series.id)}
+            onEditVolume={(volume, text) =>
+              updateSeries(series.id, {
+                volumeNotes: { ...(series.volumeNotes ?? {}), [volume]: text },
+              })
+            }
             onToggleVolume={(volume) => toggleVolume(series.id, volume)}
             onUpdate={(patch) => updateSeries(series.id, patch)}
             series={series}
@@ -313,6 +334,24 @@ export default function HomePage() {
           big={big}
           data={data}
           onAddItem={addItem}
+          onDeleteItem={(item) =>
+            setData((currentData) => ({
+              ...currentData,
+              items: currentData.items.filter(
+                (currentItem) => currentItem.id !== item.id,
+              ),
+            }))
+          }
+          onEditItem={(item, title) =>
+            setData((currentData) => ({
+              ...currentData,
+              items: currentData.items.map((currentItem) =>
+                currentItem.id === item.id
+                  ? { ...currentItem, title }
+                  : currentItem,
+              ),
+            }))
+          }
           onAppearanceChange={setLooseAppearance}
           onToggleItem={(item) => toggleItem(item.id)}
           query={query}

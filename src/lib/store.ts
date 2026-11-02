@@ -80,6 +80,7 @@ export interface Series {
   appearance?: Appearance;
   isLoose?: boolean;
   looseItems?: LooseItem[];
+  volumeNotes?: Record<number, string>;
 }
 
 export interface LooseItem {
@@ -132,6 +133,7 @@ function normalizeSeries(
       "volume",
     appearance: normalizeAppearance(series.appearance),
     isLoose: series.isLoose ?? false,
+    volumeNotes: series.volumeNotes ?? {},
     looseItems: (series.looseItems ?? []).map((item) => ({
       id: item.id ?? uid(),
       title: item.title ?? "Sem título",
