@@ -166,7 +166,6 @@ export function HoldRow({
             className="relative flex size-8 shrink-0 items-center justify-center rounded-sm"
             onClick={(e) => e.stopPropagation()}
             onPointerDown={(e) => {
-              e.preventDefault();
               e.stopPropagation();
               cancel();
             }}
