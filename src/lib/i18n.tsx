@@ -26,6 +26,19 @@ const messages = {
     book: "Livro",
     system: "Sistema",
     menu: "Menu",
+    help: "Ajuda",
+    helpTitle: "Como usar o Tally",
+    helpIntro: "Organize suas coleções e acompanhe o que já foi adquirido.",
+    helpCreate:
+      "Use Nova ficha para criar uma coleção ou abrir uma ficha de avulsos.",
+    helpCheck:
+      "Marque os itens conforme você os adquire. O progresso é atualizado automaticamente.",
+    helpViews:
+      "Alterne entre fichas empilhadas e lista contínua no menu de visualização.",
+    helpNavigation:
+      "Use as setas para navegar entre fichas e voltar para a ficha anterior.",
+    helpGestures:
+      "No mobile, deslize para a esquerda ou direita para trocar de ficha. No desktop, você também pode arrastar a ficha horizontalmente com o mouse ou trackpad.",
     view: "Visualização",
     stackedCards: "Fichas empilhadas",
     continuousList: "Lista contínua",
@@ -52,6 +65,8 @@ const messages = {
     category: "Categoria",
     nomenclature: "Nomenclatura",
     total: "Total de",
+    decreaseTotal: "Diminuir total",
+    increaseTotal: "Aumentar total",
     volume: "volumes",
     issue: "edições",
     paperColor: "Cor do papel",
@@ -59,6 +74,11 @@ const messages = {
     contrastHint:
       "A cor do texto é definida automaticamente para manter o contraste.",
     newLooseItem: "Novo item avulso",
+    createLooseCard: "Abrir ficha de avulsos",
+    cardType: "Tipo de ficha",
+    collectionCard: "Coleção numerada",
+    looseCard: "Itens avulsos",
+    looseCardDescription: "Sem categoria, nomenclatura ou total obrigatório.",
     addLooseItem: "Adicionar item…",
     looseItems: "Avulsos",
     individualItems: "itens individuais",
@@ -94,6 +114,19 @@ const messages = {
     book: "Book",
     system: "System",
     menu: "Menu",
+    help: "Help",
+    helpTitle: "How to use Tally",
+    helpIntro: "Organize your collections and track what you have acquired.",
+    helpCreate:
+      "Use New card to create a collection or open the loose-items card.",
+    helpCheck:
+      "Mark items as you acquire them. Progress updates automatically.",
+    helpViews:
+      "Switch between stacked cards and the continuous list from the view menu.",
+    helpNavigation:
+      "Use the arrows to move between cards and return to the previous card.",
+    helpGestures:
+      "On mobile, swipe left or right to change cards. On desktop, drag the card horizontally with your mouse or trackpad.",
     view: "View",
     stackedCards: "Stacked cards",
     continuousList: "Continuous list",
@@ -120,12 +153,19 @@ const messages = {
     category: "Category",
     nomenclature: "Nomenclature",
     total: "Total of",
+    decreaseTotal: "Decrease total",
+    increaseTotal: "Increase total",
     volume: "volumes",
     issue: "issues",
     paperColor: "Paper color",
     customColor: "Choose custom color",
     contrastHint: "Text color is set automatically to preserve contrast.",
     newLooseItem: "New loose item",
+    createLooseCard: "Open loose-items card",
+    cardType: "Card type",
+    collectionCard: "Numbered collection",
+    looseCard: "Loose items",
+    looseCardDescription: "No category, nomenclature, or required total.",
     addLooseItem: "Add item…",
     looseItems: "Loose items",
     individualItems: "individual items",

@@ -25,12 +25,12 @@ export function TallyToolbar({
   const { t } = useLocale();
 
   return (
-    <div className="flex shrink-0 flex-col gap-3 border-b border-border py-1 px-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between">
-      <span>
+    <div className="flex shrink-0 flex-col gap-3 border-b-0 border-border py-1 px-1 text-xs text-muted-foreground sm:flex-row sm:items-center sm:justify-between sm:border-b">
+      <span className="hidden sm:block">
         {String(cardCount).padStart(2, "0")} {t("cards")} · {missingCount}{" "}
         {t("missing")}
       </span>
-      <div className="flex items-center gap-3">
+      <div className="ml-auto flex items-center gap-3">
         <div className="relative hidden w-full sm:block sm:w-56">
           <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 opacity-50" />
           <Input

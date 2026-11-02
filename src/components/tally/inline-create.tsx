@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Minus, Plus } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ import { AppearanceFields, NomenclatureField } from "./appearance-fields";
 export function InlineCreate({
   onCancel,
   onCreate,
+  onCreateLoose,
   appearance = DEFAULT_APPEARANCE,
   onAppearanceChange,
 }: {
@@ -36,11 +37,15 @@ export function InlineCreate({
     nomenclature: Nomenclature,
     appearance: Appearance,
   ) => void;
+  onCreateLoose: (title: string, appearance: Appearance) => void;
   appearance?: Appearance;
   onAppearanceChange?: (appearance: Appearance) => void;
 }) {
   const { locale, t } = useLocale();
   const [title, setTitle] = useState("");
+  const [cardType, setCardType] = useState<"collection" | "loose">(
+    "collection",
+  );
   const [category, setCategory] = useState<Category>("manga");
   const [total, setTotal] = useState("1");
   const [nomenclature, setNomenclature] = useState<Nomenclature>("volume");
@@ -63,13 +68,17 @@ export function InlineCreate({
       onSubmit={(event) => {
         event.preventDefault();
         if (title.trim()) {
-          onCreate(
-            title.trim(),
-            category,
-            Math.max(1, Number(total) || 1),
-            nomenclature,
-            activeAppearance,
-          );
+          if (cardType === "loose") {
+            onCreateLoose(title.trim(), activeAppearance);
+          } else {
+            onCreate(
+              title.trim(),
+              category,
+              Math.max(1, Number(total) || 1),
+              nomenclature,
+              activeAppearance,
+            );
+          }
         }
       }}
     >
@@ -87,6 +96,31 @@ export function InlineCreate({
       </div>
 
       <div className="space-y-2">
+        <Label>{t("cardType")}</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <Button
+            onClick={() => setCardType("collection")}
+            type="button"
+            variant={cardType === "collection" ? "default" : "outline"}
+          >
+            {t("collectionCard")}
+          </Button>
+          <Button
+            onClick={() => setCardType("loose")}
+            type="button"
+            variant={cardType === "loose" ? "default" : "outline"}
+          >
+            {t("looseCard")}
+          </Button>
+        </div>
+        {cardType === "loose" && (
+          <p className="text-xs text-muted-foreground">
+            {t("looseCardDescription")}
+          </p>
+        )}
+      </div>
+
+      <div className="space-y-2">
         <Label htmlFor="create-title">{t("title")}</Label>
         <Input
           autoFocus
@@ -98,49 +132,89 @@ export function InlineCreate({
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>{t("category")}</Label>
-        <Select
-          onValueChange={(next) => {
-            const nextCategory = next as Category;
-            setCategory(nextCategory);
-            setNomenclature(
-              nextCategory === "comic" || nextCategory === "magazine"
-                ? "issue"
-                : "volume",
-            );
-          }}
-          value={category}
-        >
-          <SelectTrigger aria-label={t("category")}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {CATEGORIES.map((item) => (
-              <SelectItem key={item} value={item}>
-                {categoryLabel(item, locale)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {cardType === "collection" && (
+        <>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 [&>*]:min-w-0 [&_button]:w-full">
+            <div className="min-w-0 space-y-2">
+              <Label>{t("category")}</Label>
+              <Select
+                onValueChange={(next) => {
+                  const nextCategory = next as Category;
+                  setCategory(nextCategory);
+                  setNomenclature(
+                    nextCategory === "comic" || nextCategory === "magazine"
+                      ? "issue"
+                      : "volume",
+                  );
+                }}
+                value={category}
+              >
+                <SelectTrigger aria-label={t("category")}>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((item) => (
+                    <SelectItem key={item} value={item}>
+                      {categoryLabel(item, locale)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-      <NomenclatureField onChange={setNomenclature} value={nomenclature} />
+            <div className="min-w-0">
+              <NomenclatureField
+                onChange={setNomenclature}
+                value={nomenclature}
+              />
+            </div>
+          </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="create-total">
-          {t("total")} {nomenclature === "issue" ? t("issue") : t("volume")}
-        </Label>
-        <Input
-          id="create-total"
-          min={1}
-          onChange={(event) => setTotal(event.target.value)}
-          required
-          step={1}
-          type="number"
-          value={total}
-        />
-      </div>
+          <div className="space-y-2">
+            <Label htmlFor="create-total">
+              {t("total")} {nomenclature === "issue" ? t("issue") : t("volume")}
+            </Label>
+            <div className="flex items-center gap-2">
+              <Button
+                aria-label={t("decreaseTotal")}
+                onClick={() =>
+                  setTotal((currentTotal) =>
+                    String(Math.max(1, Number(currentTotal) - 1)),
+                  )
+                }
+                size="icon"
+                type="button"
+                variant="outline"
+              >
+                <Minus />
+              </Button>
+              <Input
+                className="text-center"
+                id="create-total"
+                min={1}
+                onChange={(event) => setTotal(event.target.value)}
+                required
+                step={1}
+                type="number"
+                value={total}
+              />
+              <Button
+                aria-label={t("increaseTotal")}
+                onClick={() =>
+                  setTotal((currentTotal) =>
+                    String(Math.max(1, Number(currentTotal) + 1)),
+                  )
+                }
+                size="icon"
+                type="button"
+                variant="outline"
+              >
+                <Plus />
+              </Button>
+            </div>
+          </div>
+        </>
+      )}
 
       <AppearanceFields
         onChange={handleAppearanceChange}

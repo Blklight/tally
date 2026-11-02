@@ -11,11 +11,13 @@ export function NewFichaCard({
   onAppearanceChange,
   onCancel,
   onCreate,
+  onCreateLoose,
 }: {
   appearance: Appearance;
   big?: boolean;
   onAppearanceChange: (appearance: Appearance) => void;
   onCancel: () => void;
+  onCreateLoose: (title: string, appearance: Appearance) => void;
   onCreate: (
     title: string,
     category: Category,
@@ -32,12 +34,15 @@ export function NewFichaCard({
       big={big}
       category="other"
       editContent={
-        <InlineCreate
-          appearance={appearance}
-          onAppearanceChange={onAppearanceChange}
-          onCancel={onCancel}
-          onCreate={onCreate}
-        />
+        <div className="flex flex-col gap-4">
+          <InlineCreate
+            appearance={appearance}
+            onAppearanceChange={onAppearanceChange}
+            onCancel={onCancel}
+            onCreate={onCreate}
+            onCreateLoose={onCreateLoose}
+          />
+        </div>
       }
       onEdit={() => undefined}
       onEditingChange={(editing) => {

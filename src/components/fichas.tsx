@@ -75,7 +75,7 @@ export function HoldRow({
       aria-label={label}
       aria-description="Mantenha pressionado para alternar"
       className={cn(
-        "hold-row relative h-auto min-h-12 w-full justify-start gap-3 overflow-hidden rounded-sm border-b border-current/10 px-3 py-3 text-left font-normal whitespace-normal hover:bg-current/5",
+        "hold-row relative h-auto min-h-16 w-full justify-start gap-3 overflow-hidden rounded-sm border-b border-current/10 px-3 py-3 text-left font-normal whitespace-normal hover:bg-current/5",
         holding && "is-holding",
       )}
       onPointerDown={(e) => {
@@ -112,7 +112,7 @@ export function HoldRow({
       }}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <span className="hold-fill absolute inset-0 origin-left bg-current/10" />
+      <span className="hold-fill absolute inset-0 origin-left bg-current/20" />
       <span
         className={cn(
           "relative flex size-6 shrink-0 items-center justify-center rounded-[3px] border-[1.5px] border-current",
@@ -286,7 +286,7 @@ export function HoldAction({
       onPointerCancel={cancel}
       onContextMenu={(e) => e.preventDefault()}
     >
-      <span className="hold-fill absolute inset-0 origin-left bg-current/10" />
+      <span className="hold-fill absolute inset-0 origin-left bg-current/20" />
       <span className="relative flex items-center gap-2">
         <Trash2 /> {label}
       </span>
@@ -494,6 +494,7 @@ export function Ficha({
               <ChamferButton
                 ref={frontBtnRef}
                 onClick={flip}
+                className="bg-paper-ink text-paper hover:bg-paper-ink/85"
                 corner="br"
                 aria-label={t("viewItems")}
               >
@@ -672,7 +673,7 @@ export function StackView<T extends { id: string }>({
   return (
     <div className="flex min-h-0 flex-1 flex-col pt-2">
       <div
-        className="relative mx-auto mb-11 min-h-0 w-full max-w-md flex-1 touch-pan-y select-none overflow-visible"
+        className="relative mx-auto mb-11 min-h-0 w-full max-w-md flex-1 touch-pan-y select-none overflow-visible px-3 sm:px-0"
         onPointerDown={(e) => {
           if (disabled || busy.current) return;
           if (
@@ -731,7 +732,7 @@ export function StackView<T extends { id: string }>({
               aria-hidden={!isTop}
               inert={!isTop ? true : undefined}
               className={cn(
-                "absolute inset-0",
+                "absolute inset-y-0 left-3 right-3 sm:inset-x-0",
                 !isTop && "pointer-events-none",
               )}
               style={{

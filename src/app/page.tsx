@@ -145,12 +145,12 @@ export default function HomePage() {
   );
 
   const addItem = useCallback(
-    (title: string) => {
+    (title: string, category: Category) => {
       setData((currentData) => ({
         ...currentData,
         items: [
           ...currentData.items,
-          { id: uid(), title, category: "book" as Category, found: false },
+          { id: uid(), title, category, found: false },
         ],
       }));
     },
@@ -231,6 +231,26 @@ export default function HomePage() {
             big={big}
             onAppearanceChange={setDraftAppearance}
             onCancel={() => setAdding(false)}
+            onCreateLoose={(title, appearance) => {
+              setData((currentData) => ({
+                ...currentData,
+                series: [
+                  {
+                    id: uid(),
+                    title,
+                    category: "other",
+                    total: 0,
+                    acquired: [],
+                    appearance: normalizeAppearance(appearance),
+                    isLoose: true,
+                    looseItems: [],
+                  },
+                  ...currentData.series,
+                ],
+              }));
+              setAdding(false);
+              setIndex(0);
+            }}
             onCreate={handleCreate}
           />
         );
@@ -238,6 +258,40 @@ export default function HomePage() {
 
       if (card.series) {
         const { series } = card;
+        if (series.isLoose) {
+          return (
+            <LooseItemsCard
+              appearance={series.appearance}
+              big={big}
+              data={{ ...data, items: series.looseItems ?? [] }}
+              items={series.looseItems ?? []}
+              onAddItem={(title, category) =>
+                updateSeries(series.id, {
+                  looseItems: [
+                    ...(series.looseItems ?? []),
+                    { id: uid(), title, category, found: false },
+                  ],
+                })
+              }
+              onAppearanceChange={(appearance) =>
+                updateSeries(series.id, { appearance })
+              }
+              onToggleItem={(item) =>
+                updateSeries(series.id, {
+                  looseItems: (series.looseItems ?? []).map((currentItem) =>
+                    currentItem.id === item.id
+                      ? { ...currentItem, found: !currentItem.found }
+                      : currentItem,
+                  ),
+                })
+              }
+              query={query}
+              sort={sort}
+              sortButton={sortButton}
+              title={series.title}
+            />
+          );
+        }
         return (
           <SeriesCard
             big={big}
@@ -352,10 +406,10 @@ export default function HomePage() {
           opts={{ align: "start", loop: true }}
           setApi={setCarouselApi}
         >
-          <CarouselContent className="-ml-4 w-full px-3 py-4">
+          <CarouselContent className="-ml-4 w-full px-3 py-6">
             {cards.map((card) => (
               <CarouselItem
-                className="basis-[min(28rem,calc(100vw-2rem))] pl-4"
+                className="basis-[min(28rem,calc(100vw-2rem))] pl-4 drop-shadow-[0_10px_18px_rgba(0,0,0,0.16)] dark:drop-shadow-[0_12px_20px_rgba(0,0,0,0.42)]"
                 key={card.id}
               >
                 {renderCard(card, true)}

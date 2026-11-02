@@ -4,9 +4,18 @@ import { BookOpen, Plus } from "lucide-react";
 import { type ReactNode, useState } from "react";
 import { Ficha, HoldRow } from "@/components/fichas";
 import { Button } from "@/components/ui/button";
-import { useLocale } from "@/lib/i18n";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { categoryLabel, useLocale } from "@/lib/i18n";
 import {
   type Appearance,
+  CATEGORIES,
+  type Category,
   type Data,
   DEFAULT_APPEARANCE,
   type LooseItem,
@@ -59,6 +68,9 @@ export function LooseItemsCard({
   onToggleItem,
   onAddItem,
   onAppearanceChange,
+  appearance,
+  items: itemsOverride,
+  title,
 }: {
   data: Data;
   big?: boolean;
@@ -66,14 +78,20 @@ export function LooseItemsCard({
   sortButton: ReactNode;
   query: string;
   onToggleItem: (item: LooseItem) => void;
-  onAddItem: (title: string) => void;
+  onAddItem: (title: string, category: Category) => void;
   onAppearanceChange: (appearance: Appearance) => void;
+  appearance?: Appearance;
+  items?: LooseItem[];
+  title?: string;
 }) {
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
   const [newItem, setNewItem] = useState("");
+  const [newItemCategory, setNewItemCategory] = useState<Category>("book");
 
+  const cardAppearance = appearance ?? data.looseAppearance;
+  const sourceItems = itemsOverride ?? data.items;
   const normalizedQuery = query.trim().toLowerCase();
-  const items = data.items.filter(
+  const items = sourceItems.filter(
     (item) =>
       !normalizedQuery ||
       "avulsos".includes(normalizedQuery) ||
@@ -87,31 +105,78 @@ export function LooseItemsCard({
         ]
       : items;
 
-  const missingCount = data.items.filter((item) => !item.found).length;
+  const missingCount = sourceItems.filter((item) => !item.found).length;
 
   return (
     <Ficha
       actions={sortButton}
-      appearance={data.looseAppearance}
+      appearance={cardAppearance}
       big={big}
       category="individual-items"
       count={missingCount}
       countLabel={t("manyMissing")}
       editContent={
         <LooseItemsEdit
-          appearance={data.looseAppearance ?? DEFAULT_APPEARANCE}
+          appearance={cardAppearance ?? DEFAULT_APPEARANCE}
           onChange={onAppearanceChange}
         />
       }
       onEdit={() => undefined}
-      title={t("looseItems")}
+      title={title ?? t("looseItems")}
     >
+      <form
+        className="sticky top-0 z-10 mb-2 space-y-2 border-b border-current/10 bg-inherit px-3 pb-3 pt-1"
+        onSubmit={(event) => {
+          event.preventDefault();
+          const title = newItem.trim();
+          if (!title) return;
+          onAddItem(title, newItemCategory);
+          setNewItem("");
+        }}
+      >
+        <div className="flex items-center gap-2">
+          <Plus className="size-4 shrink-0 opacity-60" />
+          <input
+            aria-label={t("newLooseItem")}
+            className="min-w-0 flex-1 border-b border-current/25 bg-transparent py-2 text-sm outline-none placeholder:text-current/40 focus:border-current"
+            onChange={(event) => setNewItem(event.target.value)}
+            placeholder={t("addItem")}
+            value={newItem}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Select
+            onValueChange={(value) => setNewItemCategory(value as Category)}
+            value={newItemCategory}
+          >
+            <SelectTrigger aria-label={t("category")} className="h-9 flex-1">
+              <SelectValue>
+                {categoryLabel(newItemCategory, locale)}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {CATEGORIES.map((category) => (
+                <SelectItem key={category} value={category}>
+                  {categoryLabel(category, locale)}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Button className="shrink-0" size="sm" type="submit">
+            {t("addItem")}
+          </Button>
+        </div>
+      </form>
       {ordered.map((item) => (
         <HoldRow
           checked={!!item.found}
           key={item.id}
           label={item.title}
-          note={item.note || item.category}
+          note={
+            item.category === "other"
+              ? undefined
+              : item.note || categoryLabel(item.category, locale)
+          }
           onToggle={() => onToggleItem(item)}
         />
       ))}
@@ -121,25 +186,6 @@ export function LooseItemsCard({
           <p className="text-sm opacity-60">{t("noLooseItems")}</p>
         </div>
       )}
-      <form
-        className="mt-3 flex items-center gap-2 px-3"
-        onSubmit={(event) => {
-          event.preventDefault();
-          const title = newItem.trim();
-          if (!title) return;
-          onAddItem(title);
-          setNewItem("");
-        }}
-      >
-        <Plus className="size-4 shrink-0 opacity-60" />
-        <input
-          aria-label={t("newLooseItem")}
-          className="min-w-0 flex-1 border-b border-current/25 bg-transparent py-2 text-sm outline-none placeholder:text-current/40 focus:border-current"
-          onChange={(event) => setNewItem(event.target.value)}
-          placeholder={t("addItem")}
-          value={newItem}
-        />
-      </form>
     </Ficha>
   );
 }
