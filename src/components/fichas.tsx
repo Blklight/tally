@@ -4,7 +4,7 @@ import {
   Check,
   ChevronLeft,
   MoreVertical,
-  Save,
+  Pencil,
   Settings2,
   Trash2,
 } from "lucide-react";
@@ -19,6 +19,14 @@ import {
   useState,
 } from "react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -54,7 +62,7 @@ export function HoldRow({
   editPrefix?: string;
 }) {
   const [holding, setHolding] = useState(false);
-  const [editing, setEditing] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
   const [draft, setDraft] = useState(label);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const origin = useRef<{ x: number; y: number } | null>(null);
@@ -98,7 +106,7 @@ export function HoldRow({
         holding && "is-holding",
       )}
       onPointerDown={(e) => {
-        if (e.button !== 0 || editing) return;
+        if (e.button !== 0 || editOpen) return;
         origin.current = { x: e.clientX, y: e.clientY };
         begin();
       }}
@@ -126,39 +134,15 @@ export function HoldRow({
       >
         {checked && <Check className="check-pop size-4 text-paper" />}
       </span>
-      {editing ? (
-        <input
-          autoFocus
-          className="relative min-w-0 flex-1 border-b border-current/40 bg-transparent py-1 text-sm outline-none"
-          onChange={(e) => setDraft(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              onEdit?.(
-                editPrefix && draft.startsWith(editPrefix)
-                  ? draft
-                      .slice(editPrefix.length)
-                      .replace(/^\s*—\s*/, "")
-                      .trim()
-                  : draft.trim(),
-              );
-              setEditing(false);
-            }
-          }}
-          value={draft}
-        />
-      ) : (
-        <span
-          className={cn(
-            "relative min-w-0 flex-1 break-words text-sm",
-            checked && "opacity-50",
-          )}
-        >
-          <span className={cn("strike", checked && "is-struck")}>{label}</span>
-          {note && (
-            <span className="mt-1 block text-xs opacity-60">{note}</span>
-          )}
-        </span>
-      )}
+      <span
+        className={cn(
+          "relative min-w-0 flex-1 break-words text-sm",
+          checked && "opacity-50",
+        )}
+      >
+        <span className={cn("strike", checked && "is-struck")}>{label}</span>
+        {note && <span className="mt-1 block text-xs opacity-60">{note}</span>}
+      </span>
       {(onEdit || onDelete) && (
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -176,12 +160,13 @@ export function HoldRow({
           <DropdownMenuContent align="end">
             {onEdit && (
               <DropdownMenuItem
-                onClick={() => {
+                onClick={(event) => {
+                  event.stopPropagation();
                   setDraft(label);
-                  setEditing(true);
+                  setEditOpen(true);
                 }}
               >
-                <Save /> Editar
+                <Pencil /> Editar
               </DropdownMenuItem>
             )}
             {onDelete && (
@@ -190,6 +175,43 @@ export function HoldRow({
           </DropdownMenuContent>
         </DropdownMenu>
       )}
+      <Dialog onOpenChange={setEditOpen} open={editOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Editar item</DialogTitle>
+          </DialogHeader>
+          <Input
+            autoFocus
+            onChange={(event) => setDraft(event.target.value)}
+            value={draft}
+          />
+          <DialogFooter>
+            <Button
+              onClick={() => setEditOpen(false)}
+              type="button"
+              variant="ghost"
+            >
+              Cancelar
+            </Button>
+            <Button
+              onClick={() => {
+                onEdit?.(
+                  editPrefix && draft.startsWith(editPrefix)
+                    ? draft
+                        .slice(editPrefix.length)
+                        .replace(/^\s*—\s*/, "")
+                        .trim()
+                    : draft.trim(),
+                );
+                setEditOpen(false);
+              }}
+              type="button"
+            >
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
