@@ -157,7 +157,10 @@ export function HoldRow({
           >
             <MoreVertical />
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent
+            align="end"
+            onPointerDown={(event) => event.stopPropagation()}
+          >
             {onEdit && (
               <DropdownMenuItem
                 onClick={(event) => {
