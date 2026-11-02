@@ -3,7 +3,7 @@
 import {
   Check,
   ChevronLeft,
-  MoreHorizontal,
+  MoreVertical,
   Save,
   Settings2,
   Trash2,
@@ -165,9 +165,14 @@ export function HoldRow({
             aria-label="Ações do item"
             className="relative flex size-8 shrink-0 items-center justify-center rounded-sm"
             onClick={(e) => e.stopPropagation()}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              cancel();
+            }}
             type="button"
           >
-            <MoreHorizontal />
+            <MoreVertical />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             {onEdit && (
