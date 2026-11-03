@@ -457,7 +457,7 @@ export default function HomePage() {
   };
 
   return (
-    <main className="flex min-h-0 w-full flex-1 flex-col overflow-x-clip overflow-y-hidden bg-light book:bg-sepia dark:bg-dark relative background-texture rounded-xs">
+    <main className="relative flex min-h-0 w-full flex-1 flex-col overflow-x-clip overflow-y-auto bg-light book:bg-sepia dark:bg-dark background-texture rounded-xs sm:overflow-y-hidden">
       <TextureOverlay texture={"grid"} className="mix-blend-overlay z-0" />
       <Navbar
         cardCount={cards.length}
@@ -470,12 +470,6 @@ export default function HomePage() {
         onStartAdding={startAdding}
         query={query}
       />
-      <TallyToolbar
-        canNavigate={cards.length > 1}
-        onNext={goToNext}
-        onPrevious={goToPrevious}
-      />
-
       {!loaded ? (
         <p className="py-12 text-center text-sm text-muted-foreground">
           {t("opening")}
@@ -510,6 +504,11 @@ export default function HomePage() {
           </CarouselContent>
         </Carousel>
       )}
+      <TallyToolbar
+        canNavigate={cards.length > 1}
+        onNext={goToNext}
+        onPrevious={goToPrevious}
+      />
     </main>
   );
 }
