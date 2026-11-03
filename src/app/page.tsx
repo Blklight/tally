@@ -457,7 +457,7 @@ export default function HomePage() {
   };
 
   return (
-    <main className="relative flex min-h-0 w-full flex-1 flex-col overflow-x-clip overflow-y-auto bg-light book:bg-sepia dark:bg-dark background-texture rounded-xs sm:overflow-y-hidden">
+    <main className="relative flex min-h-0 w-full flex-1 flex-col overflow-x-clip overflow-y-auto bg-light book:bg-sepia dark:bg-dark background-texture rounded-xs">
       <TextureOverlay texture={"grid"} className="mix-blend-overlay z-0" />
       <Navbar
         cardCount={cards.length}

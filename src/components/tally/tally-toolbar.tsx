@@ -18,10 +18,10 @@ export function TallyToolbar({
   if (!canNavigate) return null;
 
   return (
-    <div className="relative z-30 flex shrink-0 justify-center gap-2 px-0 py-1 sm:pointer-events-none sm:absolute sm:inset-x-0 sm:top-0 sm:h-0 sm:justify-between sm:px-0 sm:py-0">
+    <div className="relative z-30 flex shrink-0 justify-center gap-2 px-0 py-1">
       <Button
         aria-label={t("previousCard")}
-        className="pointer-events-auto size-8 rounded-none border-0 bg-transparent p-0 shadow-none sm:absolute sm:top-3 sm:left-1"
+        className="size-8 rounded-none border-0 bg-transparent p-0 shadow-none"
         onClick={onPrevious}
         size="icon"
         variant="ghost"
@@ -30,7 +30,7 @@ export function TallyToolbar({
       </Button>
       <Button
         aria-label={t("nextCard")}
-        className="pointer-events-auto size-8 rounded-none border-0 bg-transparent p-0 shadow-none sm:absolute sm:top-3 sm:right-1"
+        className="size-8 rounded-none border-0 bg-transparent p-0 shadow-none"
         onClick={onNext}
         size="icon"
         variant="ghost"
