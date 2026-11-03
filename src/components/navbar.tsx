@@ -5,15 +5,28 @@ import {
   Languages,
   Layers,
   List,
-  Menu,
+  Moon,
   Plus,
-  Search,
+  Sparkles,
+  Sun,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useTheme } from "next-themes";
 import { LanguageSwitcher } from "@/components/tally/language-switcher";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
+import {
+  Command,
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+  CommandSeparator,
+  CommandShortcut,
+} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -21,14 +34,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetTrigger,
-} from "@/components/ui/sheet";
 import { useLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
@@ -54,6 +59,7 @@ export function Navbar({
   onQueryChange,
 }: NavbarProps) {
   const { t } = useLocale();
+  const [commandOpen, setCommandOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
 
   return (
@@ -111,161 +117,139 @@ export function Navbar({
           </div>
 
           <AnimatedThemeToggler className={navButtonClassName} />
-          <Dialog onOpenChange={setHelpOpen} open={helpOpen}>
-            <Button
-              aria-label={t("help")}
-              className={`${navButtonClassName} hidden sm:flex`}
-              onClick={() => setHelpOpen(true)}
-              title={t("help")}
-              variant="ghost"
-            >
-              <CircleHelp />
-            </Button>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t("helpTitle")}</DialogTitle>
-                <DialogDescription>{t("helpIntro")}</DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-3 text-sm text-muted-foreground">
-                <p>{t("helpCreate")}</p>
-                <p>{t("helpCheck")}</p>
-                <p>{t("helpViews")}</p>
-                <p>{t("helpNavigation")}</p>
-                <p>{t("helpGestures")}</p>
-              </div>
-            </DialogContent>
-          </Dialog>
-          <NavbarMobileMenu
-            mode={mode}
-            onModeChange={onModeChange}
-            onQueryChange={onQueryChange}
-            query={query}
-          />
+          <Button
+            aria-label={t("commandMenu")}
+            className={navButtonClassName}
+            onClick={() => setCommandOpen(true)}
+            title={t("commandMenu")}
+            variant="ghost"
+          >
+            <Sparkles />
+          </Button>
         </div>
       </div>
+
+      <CommandMenu
+        commandOpen={commandOpen}
+        mode={mode}
+        onCommandOpenChange={setCommandOpen}
+        onHelp={() => {
+          setCommandOpen(false);
+          setHelpOpen(true);
+        }}
+        onModeChange={onModeChange}
+        onQueryChange={onQueryChange}
+        onStartAdding={onStartAdding}
+        query={query}
+      />
+
+      <Dialog onOpenChange={setHelpOpen} open={helpOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("helpTitle")}</DialogTitle>
+            <DialogDescription>{t("helpIntro")}</DialogDescription>
+          </DialogHeader>
+          <div className="flex flex-col gap-3 text-sm text-muted-foreground">
+            <p>{t("helpCreate")}</p>
+            <p>{t("helpCheck")}</p>
+            <p>{t("helpViews")}</p>
+            <p>{t("helpNavigation")}</p>
+            <p>{t("helpGestures")}</p>
+          </div>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }
 
-function NavbarMobileMenu({
+function CommandMenu({
+  commandOpen,
   mode,
+  onCommandOpenChange,
+  onHelp,
   onModeChange,
-  query,
   onQueryChange,
-}: Pick<NavbarProps, "mode" | "onModeChange" | "query" | "onQueryChange">) {
+  onStartAdding,
+  query,
+}: {
+  commandOpen: boolean;
+  mode: "stack" | "list";
+  onCommandOpenChange: (open: boolean) => void;
+  onHelp: () => void;
+  onModeChange: (mode: "stack" | "list") => void;
+  onQueryChange: (query: string) => void;
+  onStartAdding: () => void;
+  query: string;
+}) {
   const { locale, setLocale, t } = useLocale();
-  const [open, setOpen] = useState(false);
-  const [helpOpen, setHelpOpen] = useState(false);
-  const nextLocale = locale === "pt-BR" ? "en" : "pt-BR";
+  const { setTheme } = useTheme();
+
+  const run = (action: () => void) => {
+    action();
+    onCommandOpenChange(false);
+  };
 
   return (
-    <Sheet onOpenChange={setOpen} open={open}>
-      <SheetTrigger
-        aria-label={t("menu")}
-        className={cn(navButtonClassName, "sm:hidden")}
-        title={t("menu")}
-      >
-        <Menu className="size-5" strokeWidth={1.75} />
-      </SheetTrigger>
-      <SheetContent
-        className="sheet-surface flex w-[min(20rem,100vw)] flex-col px-5"
-        side="right"
-      >
-        <SheetHeader className="px-0">
-          <SheetTitle>{t("menu")}</SheetTitle>
-        </SheetHeader>
-
-        <div className="flex flex-col gap-6">
-          <div className="space-y-2">
-            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              {t("searchCards")}
-            </p>
-            <div className="relative">
-              <Search className="pointer-events-none absolute top-1/2 left-2 size-3.5 -translate-y-1/2 opacity-50" />
-              <Input
-                aria-label={t("searchCards")}
-                className="h-9 pl-7"
-                onChange={(event) => onQueryChange(event.target.value)}
-                placeholder={t("searchPlaceholder")}
-                value={query}
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              {t("language")}
-            </p>
-            <Button
-              className="w-full justify-between"
-              onClick={() => {
-                setLocale(nextLocale);
-                setOpen(false);
-              }}
-              variant="outline"
+    <CommandDialog
+      description={t("commandDescription")}
+      onOpenChange={onCommandOpenChange}
+      open={commandOpen}
+      title={t("commandMenu")}
+    >
+      <Command>
+        <CommandInput
+          onValueChange={onQueryChange}
+          placeholder={t("commandPlaceholder")}
+          value={query}
+        />
+        <CommandList>
+          <CommandEmpty>{t("noCommands")}</CommandEmpty>
+          <CommandGroup heading={t("commandActions")}>
+            <CommandItem onSelect={() => run(onStartAdding)}>
+              <Plus />
+              {t("newCard")}
+              <CommandShortcut>N</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={() => run(() => onModeChange("stack"))}>
+              <Layers />
+              {t("stackedCards")}
+              {mode === "stack" && <CommandShortcut>Ativo</CommandShortcut>}
+            </CommandItem>
+            <CommandItem onSelect={() => run(() => onModeChange("list"))}>
+              <List />
+              {t("continuousList")}
+              {mode === "list" && <CommandShortcut>Ativo</CommandShortcut>}
+            </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading={t("commandPreferences")}>
+            <CommandItem
+              onSelect={() =>
+                run(() => setLocale(locale === "pt-BR" ? "en" : "pt-BR"))
+              }
             >
-              <span>{locale === "pt-BR" ? t("portuguese") : t("english")}</span>
               <Languages />
-            </Button>
-          </div>
-
-          <div className="space-y-2">
-            <p className="text-xs font-medium tracking-wide text-muted-foreground uppercase">
-              {t("view")}
-            </p>
-            <div className="grid grid-cols-2 gap-2">
-              <Button
-                aria-pressed={mode === "stack"}
-                className="justify-start"
-                onClick={() => {
-                  onModeChange("stack");
-                  setOpen(false);
-                }}
-                variant={mode === "stack" ? "secondary" : "outline"}
-              >
-                <Layers />
-                <span className="truncate">{t("stackedCards")}</span>
-              </Button>
-              <Button
-                aria-pressed={mode === "list"}
-                className="justify-start"
-                onClick={() => {
-                  onModeChange("list");
-                  setOpen(false);
-                }}
-                variant={mode === "list" ? "secondary" : "outline"}
-              >
-                <List />
-                <span className="truncate">{t("continuousList")}</span>
-              </Button>
-            </div>
-          </div>
-
-          <Dialog onOpenChange={setHelpOpen} open={helpOpen}>
-            <Button
-              className="w-full justify-start"
-              onClick={() => setHelpOpen(true)}
-              variant="outline"
-            >
+              {t("language")}:{" "}
+              {locale === "pt-BR" ? t("portuguese") : t("english")}
+            </CommandItem>
+            <CommandItem onSelect={() => run(() => setTheme("light"))}>
+              <Sun />
+              {t("light")}
+            </CommandItem>
+            <CommandItem onSelect={() => run(() => setTheme("dark"))}>
+              <Moon />
+              {t("dark")}
+            </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
+          <CommandGroup heading={t("commandHelp")}>
+            <CommandItem onSelect={onHelp}>
               <CircleHelp />
               {t("help")}
-            </Button>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>{t("helpTitle")}</DialogTitle>
-                <DialogDescription>{t("helpIntro")}</DialogDescription>
-              </DialogHeader>
-              <div className="flex flex-col gap-3 text-sm text-muted-foreground">
-                <p>{t("helpCreate")}</p>
-                <p>{t("helpCheck")}</p>
-                <p>{t("helpViews")}</p>
-                <p>{t("helpNavigation")}</p>
-                <p>{t("helpGestures")}</p>
-              </div>
-            </DialogContent>
-          </Dialog>
-        </div>
-      </SheetContent>
-    </Sheet>
+            </CommandItem>
+          </CommandGroup>
+        </CommandList>
+      </Command>
+    </CommandDialog>
   );
 }
