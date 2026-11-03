@@ -2,6 +2,7 @@
 
 import {
   CircleHelp,
+  Download,
   Languages,
   Layers,
   List,
@@ -9,13 +10,14 @@ import {
   Plus,
   Sparkles,
   Sun,
+  Upload,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 import { useTheme } from "next-themes";
-import { LanguageSwitcher } from "@/components/tally/language-switcher";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Command,
   CommandDialog,
@@ -35,16 +37,14 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useLocale } from "@/lib/i18n";
-import { cn } from "@/lib/utils";
 
 const navButtonClassName =
   "size-12 shrink-0 cursor-pointer rounded-none border-0 bg-clip-border p-0 text-[#252525] outline-none hover:bg-[#252525] hover:text-[#eaeaea] focus-visible:ring-2 focus-visible:ring-ring active:not-aria-[haspopup]:translate-y-0 dark:text-[#eaeaea] dark:hover:bg-[#eaeaea] dark:hover:text-[#252525] [&_svg]:size-4.5";
 
-const activeButtonClassName =
-  "bg-[#252525] text-[#eaeaea] hover:bg-[#252525] hover:text-[#eaeaea] dark:bg-[#eaeaea] dark:text-[#252525] dark:hover:bg-[#eaeaea] dark:hover:text-[#252525]";
-
 type NavbarProps = {
   mode: "stack" | "list";
+  onExport: () => void;
+  onImport: (json: string) => { imported: number; error?: string };
   onModeChange: (mode: "stack" | "list") => void;
   onStartAdding: () => void;
   query: string;
@@ -53,6 +53,8 @@ type NavbarProps = {
 
 export function Navbar({
   mode,
+  onExport,
+  onImport,
   onModeChange,
   onStartAdding,
   query,
@@ -61,6 +63,9 @@ export function Navbar({
   const { t } = useLocale();
   const [commandOpen, setCommandOpen] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [importText, setImportText] = useState("");
+  const [importError, setImportError] = useState("");
 
   return (
     <header className="background-header background-texture rounded-b-xs px-0">
@@ -84,38 +89,6 @@ export function Navbar({
             <Plus />
           </Button>
 
-          <div className="hidden h-full items-center sm:flex">
-            <Button
-              aria-label={t("stackedCards")}
-              aria-pressed={mode === "stack"}
-              className={cn(
-                navButtonClassName,
-                mode === "stack" && activeButtonClassName,
-              )}
-              onClick={() => onModeChange("stack")}
-              size="icon"
-              title={t("stackedCards")}
-              variant="ghost"
-            >
-              <Layers />
-            </Button>
-            <Button
-              aria-label={t("continuousList")}
-              aria-pressed={mode === "list"}
-              className={cn(
-                navButtonClassName,
-                mode === "list" && activeButtonClassName,
-              )}
-              onClick={() => onModeChange("list")}
-              size="icon"
-              title={t("continuousList")}
-              variant="ghost"
-            >
-              <List />
-            </Button>
-            <LanguageSwitcher className={navButtonClassName} />
-          </div>
-
           <AnimatedThemeToggler className={navButtonClassName} />
           <Button
             aria-label={t("commandMenu")}
@@ -133,9 +106,15 @@ export function Navbar({
         commandOpen={commandOpen}
         mode={mode}
         onCommandOpenChange={setCommandOpen}
+        onExport={onExport}
         onHelp={() => {
           setCommandOpen(false);
           setHelpOpen(true);
+        }}
+        onImportOpen={() => {
+          setCommandOpen(false);
+          setImportError("");
+          setImportOpen(true);
         }}
         onModeChange={onModeChange}
         onQueryChange={onQueryChange}
@@ -158,6 +137,43 @@ export function Navbar({
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog onOpenChange={setImportOpen} open={importOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{t("importData")}</DialogTitle>
+            <DialogDescription>{t("importDataDescription")}</DialogDescription>
+          </DialogHeader>
+          <Textarea
+            aria-label={t("importData")}
+            onChange={(event) => setImportText(event.target.value)}
+            placeholder='{"series": [], "items": []}'
+            rows={10}
+            value={importText}
+          />
+          {importError && (
+            <p className="text-sm text-destructive">{importError}</p>
+          )}
+          <div className="flex justify-end gap-2">
+            <Button onClick={() => setImportOpen(false)} variant="ghost">
+              {t("cancel")}
+            </Button>
+            <Button
+              onClick={() => {
+                const result = onImport(importText);
+                if (result.error) {
+                  setImportError(result.error);
+                  return;
+                }
+                setImportText("");
+                setImportOpen(false);
+              }}
+            >
+              {t("import")}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </header>
   );
 }
@@ -166,7 +182,9 @@ function CommandMenu({
   commandOpen,
   mode,
   onCommandOpenChange,
+  onExport,
   onHelp,
+  onImportOpen,
   onModeChange,
   onQueryChange,
   onStartAdding,
@@ -175,7 +193,9 @@ function CommandMenu({
   commandOpen: boolean;
   mode: "stack" | "list";
   onCommandOpenChange: (open: boolean) => void;
+  onExport: () => void;
   onHelp: () => void;
+  onImportOpen: () => void;
   onModeChange: (mode: "stack" | "list") => void;
   onQueryChange: (query: string) => void;
   onStartAdding: () => void;
@@ -209,6 +229,14 @@ function CommandMenu({
               <Plus />
               {t("newCard")}
               <CommandShortcut>N</CommandShortcut>
+            </CommandItem>
+            <CommandItem onSelect={() => run(onExport)}>
+              <Download />
+              {t("exportData")}
+            </CommandItem>
+            <CommandItem onSelect={onImportOpen}>
+              <Upload />
+              {t("importData")}
             </CommandItem>
             <CommandItem onSelect={() => run(() => onModeChange("stack"))}>
               <Layers />

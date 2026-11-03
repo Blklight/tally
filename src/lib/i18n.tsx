@@ -33,6 +33,11 @@ const messages = {
     commandPreferences: "Preferências",
     commandHelp: "Ajuda",
     noCommands: "Nenhum comando encontrado.",
+    exportData: "Exportar dados",
+    importData: "Importar dados",
+    importDataDescription:
+      "Cole um JSON exportado pelo Tally. Itens repetidos serão ignorados.",
+    import: "Importar",
     help: "Ajuda",
     helpTitle: "Como usar o Tally",
     helpIntro: "Organize suas coleções e acompanhe o que já foi adquirido.",
@@ -128,6 +133,11 @@ const messages = {
     commandPreferences: "Preferences",
     commandHelp: "Help",
     noCommands: "No commands found.",
+    exportData: "Export data",
+    importData: "Import data",
+    importDataDescription:
+      "Paste JSON exported by Tally. Duplicate items will be ignored.",
+    import: "Import",
     help: "Help",
     helpTitle: "How to use Tally",
     helpIntro: "Organize your collections and track what you have acquired.",

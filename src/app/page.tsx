@@ -29,6 +29,7 @@ import {
   DEFAULT_APPEARANCE,
   type Nomenclature,
   normalizeAppearance,
+  normalizeImportedData,
   type Series,
   toggleMissing,
   uid,
@@ -163,6 +164,58 @@ export default function HomePage() {
         ...currentData,
         looseAppearance: normalizeAppearance(looseAppearance),
       }));
+    },
+    [setData],
+  );
+
+  const exportData = useCallback(() => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], {
+      type: "application/json",
+    });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement("a");
+    anchor.href = url;
+    anchor.download = `tally-export-${new Date().toISOString().slice(0, 10)}.json`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  }, [data]);
+
+  const importData = useCallback(
+    (json: string) => {
+      try {
+        const imported = normalizeImportedData(JSON.parse(json));
+        if (!imported)
+          return { imported: 0, error: "JSON inválido ou sem itens." };
+        let importedCount = 0;
+        setData((currentData) => {
+          const existingSeries = new Set(
+            currentData.series.map((series) => series.id),
+          );
+          const existingItems = new Set(
+            currentData.items.map((item) => item.id),
+          );
+          const series = imported.series.filter((series) => {
+            if (existingSeries.has(series.id)) return false;
+            existingSeries.add(series.id);
+            importedCount += 1;
+            return true;
+          });
+          const items = imported.items.filter((item) => {
+            if (existingItems.has(item.id)) return false;
+            existingItems.add(item.id);
+            importedCount += 1;
+            return true;
+          });
+          return {
+            ...currentData,
+            series: [...currentData.series, ...series],
+            items: [...currentData.items, ...items],
+          };
+        });
+        return { imported: importedCount };
+      } catch {
+        return { imported: 0, error: "Não foi possível ler esse JSON." };
+      }
     },
     [setData],
   );
@@ -408,6 +461,8 @@ export default function HomePage() {
       <TextureOverlay texture={"grid"} className="mix-blend-overlay z-0" />
       <Navbar
         mode={mode}
+        onExport={exportData}
+        onImport={importData}
         onModeChange={setMode}
         onQueryChange={setQuery}
         onStartAdding={startAdding}

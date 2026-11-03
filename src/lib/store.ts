@@ -144,21 +144,63 @@ function normalizeSeries(
   };
 }
 
-function normalizeData(
-  data: Data & { series?: Array<Partial<Series> & { missing?: number[] }> },
-): Data {
+function normalizeData(data: {
+  series?: Array<Partial<Series> & { missing?: number[] }>;
+  items?: Array<Partial<LooseItem>>;
+  looseAppearance?: Partial<Appearance>;
+  initialized?: boolean;
+}): Data {
   return {
     series: (data.series ?? []).map(normalizeSeries),
     items: (data.items ?? []).map((item) => ({
       id: item.id ?? uid(),
       title: item.title ?? "Sem título",
-      category: LEGACY_CATEGORIES[item.category] ?? item.category ?? "other",
+      category:
+        (item.category && LEGACY_CATEGORIES[item.category]) ??
+        item.category ??
+        "other",
       ...(item.note === undefined ? {} : { note: item.note }),
       found: item.found ?? false,
     })),
     looseAppearance: normalizeAppearance(data.looseAppearance),
     initialized: data.initialized ?? false,
   };
+}
+
+export function normalizeImportedData(value: unknown): Data | null {
+  if (!value || typeof value !== "object") return null;
+  const input = value as Record<string, unknown>;
+  if (Array.isArray(value)) {
+    const series: Array<Partial<Series>> = [];
+    const items: Array<Partial<LooseItem>> = [];
+    for (const entry of value) {
+      if (!entry || typeof entry !== "object") continue;
+      const candidate = entry as Record<string, unknown>;
+      if (typeof candidate.total === "number" || candidate.isLoose === false) {
+        series.push(candidate as Partial<Series>);
+      } else if (typeof candidate.title === "string") {
+        items.push(candidate as unknown as Partial<LooseItem>);
+      }
+    }
+    return normalizeData({ series, items });
+  }
+  if (Array.isArray(input.series) || Array.isArray(input.items)) {
+    return normalizeData(
+      input as unknown as {
+        series?: Array<Partial<Series> & { missing?: number[] }>;
+        items?: Array<Partial<LooseItem>>;
+      },
+    );
+  }
+  if (typeof input.title === "string") {
+    return typeof input.total === "number" || input.isLoose === false
+      ? normalizeData({ series: [input as Partial<Series>], items: [] })
+      : normalizeData({
+          series: [],
+          items: [input as unknown as Partial<LooseItem>],
+        });
+  }
+  return null;
 }
 
 function readData(): Promise<Data | null> {
