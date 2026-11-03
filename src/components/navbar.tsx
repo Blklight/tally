@@ -42,6 +42,8 @@ const navButtonClassName =
   "size-12 shrink-0 cursor-pointer rounded-none border-0 bg-clip-border p-0 text-[#252525] outline-none hover:bg-[#252525] hover:text-[#eaeaea] focus-visible:ring-2 focus-visible:ring-ring active:not-aria-[haspopup]:translate-y-0 dark:text-[#eaeaea] dark:hover:bg-[#eaeaea] dark:hover:text-[#252525] [&_svg]:size-4.5";
 
 type NavbarProps = {
+  cardCount: number;
+  missingCount: number;
   mode: "stack" | "list";
   onExport: () => void;
   onImport: (json: string) => { imported: number; error?: string };
@@ -52,6 +54,8 @@ type NavbarProps = {
 };
 
 export function Navbar({
+  cardCount,
+  missingCount,
   mode,
   onExport,
   onImport,
@@ -103,7 +107,9 @@ export function Navbar({
       </div>
 
       <CommandMenu
+        cardCount={cardCount}
         commandOpen={commandOpen}
+        missingCount={missingCount}
         mode={mode}
         onCommandOpenChange={setCommandOpen}
         onExport={onExport}
@@ -179,7 +185,9 @@ export function Navbar({
 }
 
 function CommandMenu({
+  cardCount,
   commandOpen,
+  missingCount,
   mode,
   onCommandOpenChange,
   onExport,
@@ -190,7 +198,9 @@ function CommandMenu({
   onStartAdding,
   query,
 }: {
+  cardCount: number;
   commandOpen: boolean;
+  missingCount: number;
   mode: "stack" | "list";
   onCommandOpenChange: (open: boolean) => void;
   onExport: () => void;
@@ -216,7 +226,7 @@ function CommandMenu({
       open={commandOpen}
       title={t("commandMenu")}
     >
-      <Command>
+      <Command shouldFilter={false}>
         <CommandInput
           onValueChange={onQueryChange}
           placeholder={t("commandPlaceholder")}
@@ -224,6 +234,22 @@ function CommandMenu({
         />
         <CommandList>
           <CommandEmpty>{t("noCommands")}</CommandEmpty>
+          {query && (
+            <CommandGroup heading={t("commandSearch")}>
+              <CommandItem disabled>
+                <span className="text-xs text-muted-foreground">{query}</span>
+              </CommandItem>
+            </CommandGroup>
+          )}
+          <CommandGroup heading={t("commandOverview")}>
+            <CommandItem disabled>
+              <span className="font-mono text-xs">
+                {String(cardCount).padStart(2, "0")} {t("cards")} ·{" "}
+                {missingCount} {t("missing")}
+              </span>
+            </CommandItem>
+          </CommandGroup>
+          <CommandSeparator />
           <CommandGroup heading={t("commandActions")}>
             <CommandItem onSelect={() => run(onStartAdding)}>
               <Plus />

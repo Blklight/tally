@@ -460,6 +460,8 @@ export default function HomePage() {
     <main className="flex min-h-0 w-full flex-1 flex-col overflow-x-clip overflow-y-hidden bg-light book:bg-sepia dark:bg-dark relative background-texture rounded-xs">
       <TextureOverlay texture={"grid"} className="mix-blend-overlay z-0" />
       <Navbar
+        cardCount={cards.length}
+        missingCount={missingCount}
         mode={mode}
         onExport={exportData}
         onImport={importData}
@@ -470,12 +472,8 @@ export default function HomePage() {
       />
       <TallyToolbar
         canNavigate={cards.length > 1}
-        cardCount={allCards.length}
-        missingCount={missingCount}
         onNext={goToNext}
         onPrevious={goToPrevious}
-        onQueryChange={setQuery}
-        query={query}
       />
 
       {!loaded ? (
