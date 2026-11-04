@@ -102,7 +102,7 @@ export function HoldRow({
       aria-checked={checked}
       aria-label={label}
       className={cn(
-        "hold-row relative flex h-auto min-h-16 w-full items-center gap-3 overflow-hidden rounded-sm border-b border-current/10 px-3 py-3 text-left font-normal whitespace-normal hover:bg-current/5",
+        "hold-row relative flex h-auto min-h-16 w-full cursor-default items-center gap-3 overflow-hidden rounded-sm border-b border-current/10 px-3 py-3 text-left font-normal whitespace-normal hover:bg-current/5",
         holding && "is-holding",
       )}
       onPointerDown={(e) => {
@@ -758,7 +758,7 @@ export function StackView<T extends { id: string }>({
   return (
     <div className="flex min-h-0 flex-1 flex-col pt-2">
       <div
-        className="relative mx-auto mb-11 min-h-0 w-full max-w-md flex-1 touch-pan-y select-none overflow-visible px-3 sm:px-0"
+        className="relative mx-auto mb-6 min-h-0 w-full max-w-md flex-1 touch-pan-y select-none overflow-visible px-3 sm:px-0"
         onPointerDown={(e) => {
           if (disabled || busy.current) return;
           if (
