@@ -145,6 +145,18 @@ export default function HomePage() {
     [setData],
   );
 
+  const togglePriority = useCallback(
+    (id: string) => {
+      setData((currentData) => ({
+        ...currentData,
+        items: currentData.items.map((item) =>
+          item.id === id ? { ...item, priority: !item.priority } : item,
+        ),
+      }));
+    },
+    [setData],
+  );
+
   const addItem = useCallback(
     (title: string, category: Category) => {
       setData((currentData) => ({
@@ -345,6 +357,15 @@ export default function HomePage() {
                   ),
                 })
               }
+              onTogglePriority={(item) =>
+                updateSeries(series.id, {
+                  looseItems: (series.looseItems ?? []).map((currentItem) =>
+                    currentItem.id === item.id
+                      ? { ...currentItem, priority: !currentItem.priority }
+                      : currentItem,
+                  ),
+                })
+              }
               onToggleItem={(item) =>
                 updateSeries(series.id, {
                   looseItems: (series.looseItems ?? []).map((currentItem) =>
@@ -368,11 +389,20 @@ export default function HomePage() {
               updateSeries(series.id, { appearance })
             }
             onDelete={() => removeSeries(series.id)}
-            onEditVolume={(volume, text) =>
+            onEditNote={(volume, note) => {
+              const { [volume]: _removed, ...rest } = series.volumeNotes ?? {};
               updateSeries(series.id, {
-                volumeNotes: { ...(series.volumeNotes ?? {}), [volume]: text },
-              })
-            }
+                volumeNotes: note ? { ...rest, [volume]: note } : rest,
+              });
+            }}
+            onTogglePriority={(volume) => {
+              const current = series.priorityVolumes ?? [];
+              updateSeries(series.id, {
+                priorityVolumes: current.includes(volume)
+                  ? current.filter((entry) => entry !== volume)
+                  : [...current, volume].sort((a, b) => a - b),
+              });
+            }}
             onToggleVolume={(volume) => toggleVolume(series.id, volume)}
             onUpdate={(patch) => updateSeries(series.id, patch)}
             series={series}
@@ -406,6 +436,7 @@ export default function HomePage() {
             }))
           }
           onAppearanceChange={setLooseAppearance}
+          onTogglePriority={(item) => togglePriority(item.id)}
           onToggleItem={(item) => toggleItem(item.id)}
           query={query}
           sort={sort}
@@ -415,6 +446,8 @@ export default function HomePage() {
     },
     [
       addItem,
+      togglePriority,
+      setData,
       data,
       draftAppearance,
       handleCreate,

@@ -41,3 +41,34 @@ describe("HoldRow", () => {
     expect(toggle).toHaveBeenCalledTimes(1);
   });
 });
+
+describe("HoldRow actions", () => {
+  it("toggles priority and opens the note editor from the drawer", () => {
+    const priority = vi.fn();
+    const editNote = vi.fn();
+
+    render(
+      <HoldRow
+        checked={false}
+        label="Berserk - Vol. 3"
+        note="capa dura"
+        onEditNote={editNote}
+        onToggle={vi.fn()}
+        onTogglePriority={priority}
+        priority
+      />,
+    );
+
+    expect(screen.getByRole("img", { name: "Item prioritário" })).toBeVisible();
+
+    fireEvent.click(screen.getByText("Tirar prioridade"));
+    expect(priority).toHaveBeenCalledTimes(1);
+
+    fireEvent.click(screen.getByText("Editar nota"));
+    const input = screen.getByRole("textbox", { name: "Editar nota" });
+    expect(input).toHaveValue("capa dura");
+    fireEvent.change(input, { target: { value: "  1ª edição " } });
+    fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
+    expect(editNote).toHaveBeenCalledWith("1ª edição");
+  });
+});

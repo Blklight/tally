@@ -81,6 +81,7 @@ export interface Series {
   isLoose?: boolean;
   looseItems?: LooseItem[];
   volumeNotes?: Record<number, string>;
+  priorityVolumes?: number[];
 }
 
 export interface LooseItem {
@@ -89,6 +90,31 @@ export interface LooseItem {
   category: Category;
   note?: string;
   found?: boolean;
+  priority?: boolean;
+}
+
+export function normalizeLooseItem(item: Partial<LooseItem>): LooseItem {
+  return {
+    id: item.id ?? uid(),
+    title: item.title ?? "Sem título",
+    category:
+      (item.category && LEGACY_CATEGORIES[item.category]) ??
+      item.category ??
+      "other",
+    ...(item.note === undefined ? {} : { note: item.note }),
+    found: item.found ?? false,
+    priority: item.priority ?? false,
+  };
+}
+
+export function orderByPriority<T>(
+  entries: T[],
+  isPriority: (entry: T) => boolean,
+): T[] {
+  return [
+    ...entries.filter((entry) => isPriority(entry)),
+    ...entries.filter((entry) => !isPriority(entry)),
+  ];
 }
 
 export interface Data {
@@ -134,13 +160,12 @@ function normalizeSeries(
     appearance: normalizeAppearance(series.appearance),
     isLoose: series.isLoose ?? false,
     volumeNotes: series.volumeNotes ?? {},
-    looseItems: (series.looseItems ?? []).map((item) => ({
-      id: item.id ?? uid(),
-      title: item.title ?? "Sem título",
-      category: LEGACY_CATEGORIES[item.category] ?? item.category ?? "other",
-      ...(item.note === undefined ? {} : { note: item.note }),
-      found: item.found ?? false,
-    })),
+    priorityVolumes: [...new Set(series.priorityVolumes ?? [])]
+      .filter(
+        (volume) => Number.isInteger(volume) && volume > 0 && volume <= total,
+      )
+      .sort((a, b) => a - b),
+    looseItems: (series.looseItems ?? []).map(normalizeLooseItem),
   };
 }
 
@@ -152,16 +177,7 @@ function normalizeData(data: {
 }): Data {
   return {
     series: (data.series ?? []).map(normalizeSeries),
-    items: (data.items ?? []).map((item) => ({
-      id: item.id ?? uid(),
-      title: item.title ?? "Sem título",
-      category:
-        (item.category && LEGACY_CATEGORIES[item.category]) ??
-        item.category ??
-        "other",
-      ...(item.note === undefined ? {} : { note: item.note }),
-      found: item.found ?? false,
-    })),
+    items: (data.items ?? []).map(normalizeLooseItem),
     looseAppearance: normalizeAppearance(data.looseAppearance),
     initialized: data.initialized ?? false,
   };

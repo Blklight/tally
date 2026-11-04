@@ -4,6 +4,8 @@ import {
   getContrastInk,
   initializeData,
   normalizeAppearance,
+  normalizeImportedData,
+  orderByPriority,
   toggleMissing,
   uid,
   volumeLabel,
@@ -130,5 +132,27 @@ describe("Appearance", () => {
       ink: "graphite",
     });
     expect(initialized.looseAppearance).toEqual(DEFAULT_APPEARANCE);
+  });
+});
+
+describe("priority", () => {
+  it("moves priority entries to the top, keeping relative order", () => {
+    expect(orderByPriority([1, 2, 3, 4], (n) => n === 3 || n === 4)).toEqual([
+      3, 4, 1, 2,
+    ]);
+  });
+
+  it("normalizes priority on loose items and priority volumes on series", () => {
+    const data = normalizeImportedData({
+      series: [
+        { id: "s", title: "S", total: 5, priorityVolumes: [4, 2, 2, 9] },
+      ],
+      items: [
+        { id: "i", title: "I", priority: true },
+        { id: "j", title: "J" },
+      ],
+    });
+    expect(data?.series[0]?.priorityVolumes).toEqual([2, 4]);
+    expect(data?.items.map((item) => item.priority)).toEqual([true, false]);
   });
 });

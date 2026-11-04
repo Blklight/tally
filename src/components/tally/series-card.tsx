@@ -3,7 +3,12 @@
 import type { ReactNode } from "react";
 import { Ficha, HoldRow } from "@/components/fichas";
 import { categoryLabel, useLocale } from "@/lib/i18n";
-import { type Appearance, type Series, volumeLabel } from "@/lib/store";
+import {
+  type Appearance,
+  orderByPriority,
+  type Series,
+  volumeLabel,
+} from "@/lib/store";
 import { InlineEdit } from "./inline-edit";
 import type { SortMode } from "./types";
 
@@ -16,7 +21,8 @@ export function SeriesCard({
   onAppearance,
   onDelete,
   onToggleVolume,
-  onEditVolume,
+  onTogglePriority,
+  onEditNote,
 }: {
   series: Series;
   big?: boolean;
@@ -26,17 +32,24 @@ export function SeriesCard({
   onAppearance: (appearance: Appearance) => void;
   onDelete: () => void;
   onToggleVolume: (volume: number) => void;
-  onEditVolume: (volume: number, text: string) => void;
+  onTogglePriority: (volume: number) => void;
+  onEditNote: (volume: number, note: string) => void;
 }) {
   const { locale, t } = useLocale();
   const volumes = Array.from({ length: series.total }, (_, index) => index + 1);
-  const ordered =
+  const sorted =
     sort === "missing"
       ? [
           ...volumes.filter((volume) => !series.acquired?.includes(volume)),
           ...volumes.filter((volume) => series.acquired?.includes(volume)),
         ]
       : volumes;
+  const ordered = orderByPriority(
+    sorted,
+    (volume) =>
+      !!series.priorityVolumes?.includes(volume) &&
+      !series.acquired?.includes(volume),
+  );
 
   const acquiredCount = series.acquired?.length ?? 0;
   const missingCount = series.total - acquiredCount;
@@ -76,9 +89,11 @@ export function SeriesCard({
         <HoldRow
           checked={series.acquired?.includes(volume) ?? false}
           key={volume}
-          label={`${volumeLabel(series, volume)}${series.volumeNotes?.[volume] ? ` — ${series.volumeNotes[volume]}` : ""}`}
-          editPrefix={volumeLabel(series, volume)}
-          onEdit={(text) => onEditVolume(volume, text)}
+          label={volumeLabel(series, volume)}
+          note={series.volumeNotes?.[volume]}
+          onEditNote={(note) => onEditNote(volume, note)}
+          onTogglePriority={() => onTogglePriority(volume)}
+          priority={series.priorityVolumes?.includes(volume) ?? false}
           onToggle={() => onToggleVolume(volume)}
         />
       ))}

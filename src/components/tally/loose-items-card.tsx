@@ -19,6 +19,7 @@ import {
   type Data,
   DEFAULT_APPEARANCE,
   type LooseItem,
+  orderByPriority,
 } from "@/lib/store";
 import { AppearanceFields } from "./appearance-fields";
 import type { SortMode } from "./types";
@@ -69,6 +70,7 @@ export function LooseItemsCard({
   onAddItem,
   onEditItem,
   onDeleteItem,
+  onTogglePriority,
   onAppearanceChange,
   appearance,
   items: itemsOverride,
@@ -83,6 +85,7 @@ export function LooseItemsCard({
   onAddItem: (title: string, category: Category) => void;
   onEditItem?: (item: LooseItem, title: string) => void;
   onDeleteItem?: (item: LooseItem) => void;
+  onTogglePriority?: (item: LooseItem) => void;
   onAppearanceChange: (appearance: Appearance) => void;
   appearance?: Appearance;
   items?: LooseItem[];
@@ -101,13 +104,17 @@ export function LooseItemsCard({
       "avulsos".includes(normalizedQuery) ||
       item.title.toLowerCase().includes(normalizedQuery),
   );
-  const ordered =
+  const sorted =
     sort === "missing"
       ? [
           ...items.filter((item) => !item.found),
           ...items.filter((item) => item.found),
         ]
       : items;
+  const ordered = orderByPriority(
+    sorted,
+    (item) => !!item.priority && !item.found,
+  );
 
   const missingCount = sourceItems.filter((item) => !item.found).length;
 
@@ -184,6 +191,8 @@ export function LooseItemsCard({
           onDelete={() => onDeleteItem?.(item)}
           onEdit={(title) => onEditItem?.(item, title)}
           onToggle={() => onToggleItem(item)}
+          onTogglePriority={onTogglePriority && (() => onTogglePriority(item))}
+          priority={!!item.priority}
         />
       ))}
       {items.length === 0 && (
