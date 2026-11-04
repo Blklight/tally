@@ -758,7 +758,7 @@ export function StackView<T extends { id: string }>({
   return (
     <div className="flex min-h-0 flex-1 flex-col pt-2">
       <div
-        className="relative mx-auto mb-11 min-h-0 w-full max-w-md flex-1 touch-pan-y select-none overflow-visible px-3 sm:px-0"
+        className="relative mx-auto mb-8 min-h-0 w-full max-w-md flex-1 touch-pan-y select-none overflow-visible px-3 sm:px-0"
         onPointerDown={(e) => {
           if (disabled || busy.current) return;
           if (
