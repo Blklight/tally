@@ -3,10 +3,13 @@ import {
   DEFAULT_APPEARANCE,
   getContrastInk,
   initializeData,
+  insertAt,
+  mergeImportedData,
   normalizeAppearance,
   normalizeImportedData,
   orderByPriority,
   toggleMissing,
+  trimSeriesToTotal,
   uid,
   volumeLabel,
 } from "@/lib/store";
@@ -154,5 +157,52 @@ describe("priority", () => {
     });
     expect(data?.series[0]?.priorityVolumes).toEqual([2, 4]);
     expect(data?.items.map((item) => item.priority)).toEqual([true, false]);
+  });
+});
+
+describe("Series and import helpers", () => {
+  it("drops acquired, priority and notes beyond a reduced total", () => {
+    expect(
+      trimSeriesToTotal(
+        {
+          acquired: [1, 4, 6],
+          priorityVolumes: [2, 5],
+          volumeNotes: { 3: "ok", 5: "fora" },
+        },
+        4,
+      ),
+    ).toEqual({
+      total: 4,
+      acquired: [1, 4],
+      priorityVolumes: [2],
+      volumeNotes: { 3: "ok" },
+    });
+  });
+
+  it("inserts an entry back at its original position", () => {
+    expect(insertAt(["a", "c"], 1, "b")).toEqual(["a", "b", "c"]);
+    expect(insertAt(["a"], 10, "z")).toEqual(["a", "z"]);
+  });
+
+  it("merges imported data skipping ids that already exist", () => {
+    const current = initializeData();
+    const imported = normalizeImportedData({
+      series: [
+        { id: "dragon-ball", title: "Dragon Ball", total: 42 },
+        { id: "berserk", title: "Berserk", total: 41 },
+      ],
+      items: [{ id: "piaui", title: "Piauí 200" }],
+    });
+    if (!imported) throw new Error("import should parse");
+
+    const result = mergeImportedData(current, imported);
+
+    expect(result.imported).toBe(2);
+    expect(result.data.series.map((series) => series.id)).toEqual([
+      "dragon-ball",
+      "berserk",
+    ]);
+    expect(result.data.items.map((item) => item.id)).toEqual(["piaui"]);
+    expect(mergeImportedData(result.data, imported).imported).toBe(0);
   });
 });

@@ -1,7 +1,7 @@
 "use client";
 
 import { Ficha } from "@/components/fichas";
-import { useLocale } from "@/lib/i18n";
+import { categoryLabel, useLocale } from "@/lib/i18n";
 import type { Appearance, Category, Nomenclature } from "@/lib/store";
 import { InlineCreate } from "./inline-create";
 
@@ -26,13 +26,13 @@ export function NewFichaCard({
     appearance: Appearance,
   ) => void;
 }) {
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
 
   return (
     <Ficha
       appearance={appearance}
       big={big}
-      category="other"
+      category={categoryLabel("other", locale)}
       editContent={
         <InlineCreate
           appearance={appearance}

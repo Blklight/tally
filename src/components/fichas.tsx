@@ -153,22 +153,22 @@ export function HoldRow({
   const content = (
     <>
       <span className="hold-fill pointer-events-none absolute inset-0 origin-left bg-current/20" />
+      {/* biome-ignore lint/a11y/useSemanticElements: o gesto de segurar não cabe num <input type="checkbox"> nativo */}
       <div
         role="checkbox"
         tabIndex={0}
         aria-checked={checked}
         aria-label={label}
         className="relative flex min-h-16 w-full min-w-0 items-center gap-3 py-3 outline-none focus-visible:ring-2 focus-visible:ring-current/40"
+        onClick={(e) => {
+          if (e.detail === 0) onToggle();
+        }}
         onKeyDown={(e) => {
-          if (e.key === " " || e.key === "Enter") {
+          if ((e.key === " " || e.key === "Enter") && !e.repeat) {
             e.preventDefault();
-            begin();
+            onToggle();
           }
         }}
-        onKeyUp={(e) => {
-          if (e.key === " " || e.key === "Enter") cancel();
-        }}
-        onBlur={cancel}
       >
         <span
           className={cn(
@@ -248,6 +248,12 @@ export function HoldRow({
             fullSwipe={!!onDelete}
             height="auto"
             label={t("itemActions")}
+            messages={{
+              toggle: (count) =>
+                `${count} ${count === 1 ? t("oneAction") : t("manyActions")}`,
+              revealed: (count) => `${count} ${t("actionsRevealed")}`,
+              release: (action) => `${t("releaseTo")} ${action}`,
+            }}
             onOpenChange={(open) => {
               drawerOpen.current = open;
               if (open) cancel();
@@ -314,15 +320,19 @@ export function HoldRow({
 
 function CountUp({ value, pad = true }: { value: number; pad?: boolean }) {
   const [display, setDisplay] = useState(0);
+  const shown = useRef(0);
 
   useEffect(() => {
     let frame = 0;
+    const from = shown.current;
     const started = performance.now();
     const duration = 720;
     const tick = (now: number) => {
       const progress = Math.min(1, (now - started) / duration);
       const eased = 1 - (1 - progress) ** 3;
-      setDisplay(Math.round(value * eased));
+      const next = Math.round(from + (value - from) * eased);
+      shown.current = next;
+      setDisplay(next);
       if (progress < 1) frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);

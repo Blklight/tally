@@ -18,6 +18,7 @@ import {
   type Category,
   DEFAULT_APPEARANCE,
   type Series,
+  trimSeriesToTotal,
 } from "@/lib/store";
 import { AppearanceFields, NomenclatureField } from "./appearance-fields";
 
@@ -118,12 +119,7 @@ export function InlineEdit({
               1,
               Math.floor(Number(event.target.value) || series.total),
             );
-            onUpdate({
-              total,
-              acquired: (series.acquired ?? []).filter(
-                (volume) => volume <= total,
-              ),
-            });
+            onUpdate(trimSeriesToTotal(series, total));
           }}
           step={1}
           type="number"
@@ -133,7 +129,7 @@ export function InlineEdit({
       <AppearanceFields onChange={onAppearance} value={appearance} />
 
       <HoldAction
-        label="Excluir ficha"
+        label={t("deleteCard")}
         onComplete={() => {
           onEditingChange?.(false);
           onDelete();

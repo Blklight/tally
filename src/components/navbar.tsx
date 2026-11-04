@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  BookOpen,
   CircleHelp,
   Download,
   Languages,
@@ -13,11 +14,10 @@ import {
   Upload,
 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { useTheme } from "next-themes";
+import { useState } from "react";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Command,
   CommandDialog,
@@ -36,6 +36,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { useLocale } from "@/lib/i18n";
 
 const navButtonClassName =
@@ -267,12 +268,16 @@ function CommandMenu({
             <CommandItem onSelect={() => run(() => onModeChange("stack"))}>
               <Layers />
               {t("stackedCards")}
-              {mode === "stack" && <CommandShortcut>Ativo</CommandShortcut>}
+              {mode === "stack" && (
+                <CommandShortcut>{t("active")}</CommandShortcut>
+              )}
             </CommandItem>
             <CommandItem onSelect={() => run(() => onModeChange("list"))}>
               <List />
               {t("continuousList")}
-              {mode === "list" && <CommandShortcut>Ativo</CommandShortcut>}
+              {mode === "list" && (
+                <CommandShortcut>{t("active")}</CommandShortcut>
+              )}
             </CommandItem>
           </CommandGroup>
           <CommandSeparator />
@@ -293,6 +298,10 @@ function CommandMenu({
             <CommandItem onSelect={() => run(() => setTheme("dark"))}>
               <Moon />
               {t("dark")}
+            </CommandItem>
+            <CommandItem onSelect={() => run(() => setTheme("book"))}>
+              <BookOpen />
+              {t("book")}
             </CommandItem>
           </CommandGroup>
           <CommandSeparator />
