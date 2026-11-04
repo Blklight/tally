@@ -102,7 +102,7 @@ export function HoldRow({
       aria-checked={checked}
       aria-label={label}
       className={cn(
-        "hold-row relative flex h-auto min-h-16 w-full items-center gap-3 overflow-hidden rounded-sm border-b border-current/10 px-3 py-3 text-left font-normal whitespace-normal hover:bg-current/5",
+        "hold-row relative flex h-auto min-h-16 w-full cursor-default items-center gap-3 overflow-hidden rounded-sm border-b border-current/10 px-3 py-3 text-left font-normal whitespace-normal hover:bg-current/5",
         holding && "is-holding",
       )}
       onPointerDown={(e) => {
