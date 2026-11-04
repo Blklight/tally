@@ -2,6 +2,7 @@
 
 import { ArrowDownUp } from "lucide-react";
 import { useCallback, useMemo, useState } from "react";
+import { toast } from "sonner";
 import { StackView } from "@/components/fichas";
 import { Navbar } from "@/components/navbar";
 import { LooseItemsCard } from "@/components/tally/loose-items-card";
@@ -27,6 +28,9 @@ import {
   type Appearance,
   type Category,
   DEFAULT_APPEARANCE,
+  insertAt,
+  type LooseItem,
+  mergeImportedData,
   type Nomenclature,
   normalizeAppearance,
   normalizeImportedData,
@@ -66,11 +70,11 @@ export default function HomePage() {
         return card.series.title.toLowerCase().includes(normalized);
       }
       return (
-        "avulsos".includes(normalized) ||
+        t("looseItems").toLowerCase().includes(normalized) ||
         data.items.some((item) => item.title.toLowerCase().includes(normalized))
       );
     },
-    [data.items],
+    [data.items, t],
   );
 
   const cards = useMemo(
@@ -108,12 +112,94 @@ export default function HomePage() {
 
   const removeSeries = useCallback(
     (id: string) => {
+      const position = data.series.findIndex((series) => series.id === id);
+      const removed = data.series[position];
+      if (!removed) return;
       setData((currentData) => ({
         ...currentData,
         series: currentData.series.filter((series) => series.id !== id),
       }));
+      toast(t("deletedCard"), {
+        description: removed.title,
+        action: {
+          label: t("undo"),
+          onClick: () =>
+            setData((currentData) =>
+              currentData.series.some((series) => series.id === id)
+                ? currentData
+                : {
+                    ...currentData,
+                    series: insertAt(currentData.series, position, removed),
+                  },
+            ),
+        },
+      });
     },
-    [setData],
+    [data.series, setData, t],
+  );
+
+  const removeItem = useCallback(
+    (item: LooseItem) => {
+      const position = data.items.findIndex((entry) => entry.id === item.id);
+      if (position < 0) return;
+      setData((currentData) => ({
+        ...currentData,
+        items: currentData.items.filter((entry) => entry.id !== item.id),
+      }));
+      toast(t("deletedItem"), {
+        description: item.title,
+        action: {
+          label: t("undo"),
+          onClick: () =>
+            setData((currentData) =>
+              currentData.items.some((entry) => entry.id === item.id)
+                ? currentData
+                : {
+                    ...currentData,
+                    items: insertAt(currentData.items, position, item),
+                  },
+            ),
+        },
+      });
+    },
+    [data.items, setData, t],
+  );
+
+  const removeLooseSeriesItem = useCallback(
+    (seriesId: string, item: LooseItem) => {
+      const owner = data.series.find((series) => series.id === seriesId);
+      const position = (owner?.looseItems ?? []).findIndex(
+        (entry) => entry.id === item.id,
+      );
+      if (position < 0) return;
+      const updateLooseItems = (
+        change: (looseItems: LooseItem[]) => LooseItem[],
+      ) =>
+        setData((currentData) => ({
+          ...currentData,
+          series: currentData.series.map((series) =>
+            series.id === seriesId
+              ? { ...series, looseItems: change(series.looseItems ?? []) }
+              : series,
+          ),
+        }));
+      updateLooseItems((looseItems) =>
+        looseItems.filter((entry) => entry.id !== item.id),
+      );
+      toast(t("deletedItem"), {
+        description: item.title,
+        action: {
+          label: t("undo"),
+          onClick: () =>
+            updateLooseItems((looseItems) =>
+              looseItems.some((entry) => entry.id === item.id)
+                ? looseItems
+                : insertAt(looseItems, position, item),
+            ),
+        },
+      });
+    },
+    [data.series, setData, t],
   );
 
   const toggleVolume = useCallback(
@@ -196,40 +282,15 @@ export default function HomePage() {
     (json: string) => {
       try {
         const imported = normalizeImportedData(JSON.parse(json));
-        if (!imported)
-          return { imported: 0, error: "JSON inválido ou sem itens." };
-        let importedCount = 0;
-        setData((currentData) => {
-          const existingSeries = new Set(
-            currentData.series.map((series) => series.id),
-          );
-          const existingItems = new Set(
-            currentData.items.map((item) => item.id),
-          );
-          const series = imported.series.filter((series) => {
-            if (existingSeries.has(series.id)) return false;
-            existingSeries.add(series.id);
-            importedCount += 1;
-            return true;
-          });
-          const items = imported.items.filter((item) => {
-            if (existingItems.has(item.id)) return false;
-            existingItems.add(item.id);
-            importedCount += 1;
-            return true;
-          });
-          return {
-            ...currentData,
-            series: [...currentData.series, ...series],
-            items: [...currentData.items, ...items],
-          };
-        });
-        return { imported: importedCount };
+        if (!imported) return { imported: 0, error: t("importInvalid") };
+        const result = mergeImportedData(data, imported);
+        setData(result.data);
+        return { imported: result.imported };
       } catch {
-        return { imported: 0, error: "Não foi possível ler esse JSON." };
+        return { imported: 0, error: t("importReadError") };
       }
     },
-    [setData],
+    [data, setData, t],
   );
 
   const startAdding = useCallback(() => {
@@ -341,13 +402,7 @@ export default function HomePage() {
               onAppearanceChange={(appearance) =>
                 updateSeries(series.id, { appearance })
               }
-              onDeleteItem={(item) =>
-                updateSeries(series.id, {
-                  looseItems: (series.looseItems ?? []).filter(
-                    (currentItem) => currentItem.id !== item.id,
-                  ),
-                })
-              }
+              onDeleteItem={(item) => removeLooseSeriesItem(series.id, item)}
               onEditItem={(item, title) =>
                 updateSeries(series.id, {
                   looseItems: (series.looseItems ?? []).map((currentItem) =>
@@ -417,14 +472,7 @@ export default function HomePage() {
           big={big}
           data={data}
           onAddItem={addItem}
-          onDeleteItem={(item) =>
-            setData((currentData) => ({
-              ...currentData,
-              items: currentData.items.filter(
-                (currentItem) => currentItem.id !== item.id,
-              ),
-            }))
-          }
+          onDeleteItem={removeItem}
           onEditItem={(item, title) =>
             setData((currentData) => ({
               ...currentData,
@@ -452,6 +500,8 @@ export default function HomePage() {
       draftAppearance,
       handleCreate,
       query,
+      removeItem,
+      removeLooseSeriesItem,
       removeSeries,
       setLooseAppearance,
       sort,

@@ -1,17 +1,43 @@
-'use client';
+"use client";
 
-import React, { useEffect, useId, useLayoutEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
-import { animate, motion, useMotionValue, useReducedMotion, useTransform } from 'motion/react';
-import { HugeiconsIcon } from '@hugeicons/react';
-import { Delete02Icon } from '@hugeicons/core-free-icons';
+import { Delete02Icon } from "@hugeicons/core-free-icons";
+import { HugeiconsIcon } from "@hugeicons/react";
+import {
+  animate,
+  motion,
+  useMotionValue,
+  useReducedMotion,
+  useTransform,
+} from "motion/react";
+import React, {
+  type CSSProperties,
+  type ReactNode,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
 const HYST = 10;
 const FLICK = 110;
 const DECEL = 0.998;
 const VMAX = 1500;
 const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1];
-const SPRING_UI = { type: 'spring' as const, duration: 0.3, bounce: 0 };
-const DEFAULT_ACTIONS: SwipeAction[] = [{ id: 'delete', label: 'Delete' }];
+const SPRING_UI = { type: "spring" as const, duration: 0.3, bounce: 0 };
+const DEFAULT_ACTIONS: SwipeAction[] = [{ id: "delete", label: "Delete" }];
+
+export interface SwipeRowMessages {
+  toggle: (count: number) => string;
+  revealed: (count: number) => string;
+  release: (label: string) => string;
+}
+
+const DEFAULT_MESSAGES: SwipeRowMessages = {
+  toggle: (count) => `${count} ${count === 1 ? "action" : "actions"}`,
+  revealed: (count) => `${count} actions revealed`,
+  release: (label) => `Release to ${label}`,
+};
 
 export interface SwipeAction {
   id: string;
@@ -29,10 +55,10 @@ export interface SwipeRowProps {
   drawerColor?: string;
   rowColor?: string;
   textColor?: string;
-  height?: number | 'auto';
+  height?: number | "auto";
   radius?: number;
   actionWidth?: number;
-  direction?: 'left' | 'right';
+  direction?: "left" | "right";
   snapBounce?: number;
   resistance?: number;
   collapseMs?: number;
@@ -46,12 +72,13 @@ export interface SwipeRowProps {
   closeOnAction?: boolean;
   haptic?: boolean;
   label?: string;
+  messages?: SwipeRowMessages;
   className?: string;
   style?: CSSProperties;
 }
 
 type Sample = [number, number];
-type Phase = 'idle' | 'committing' | 'collapsing';
+type Phase = "idle" | "committing" | "collapsing";
 
 interface Grip {
   id: number;
@@ -68,9 +95,12 @@ interface Live {
   up: (e: PointerEvent) => void;
 }
 
-const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v));
-const rubber = (o: number, dim: number, c: number) => (o * dim * c) / (dim + c * Math.abs(o));
-const unrubber = (y: number, dim: number, c: number) => (y * dim) / (c * Math.max(1, dim - Math.abs(y)));
+const clamp = (v: number, lo: number, hi: number) =>
+  Math.min(hi, Math.max(lo, v));
+const rubber = (o: number, dim: number, c: number) =>
+  (o * dim * c) / (dim + c * Math.abs(o));
+const unrubber = (y: number, dim: number, c: number) =>
+  (y * dim) / (c * Math.max(1, dim - Math.abs(y)));
 const project = (v: number) => ((v / 1000) * DECEL) / (1 - DECEL);
 const velocityOf = (hist: Sample[]) => {
   if (hist.length < 2) return 0;
@@ -80,12 +110,12 @@ const velocityOf = (hist: Sample[]) => {
 };
 const onColor = (hex: string) => {
   const m = /^#?([0-9a-f]{3}|[0-9a-f]{6})$/i.exec(hex.trim());
-  if (!m) return '#ffffff';
-  const h = m[1].length === 3 ? [...m[1]].map(ch => ch + ch).join('') : m[1];
+  if (!m) return "#ffffff";
+  const h = m[1].length === 3 ? [...m[1]].map((ch) => ch + ch).join("") : m[1];
   const r = parseInt(h.slice(0, 2), 16);
   const g = parseInt(h.slice(2, 4), 16);
   const b = parseInt(h.slice(4, 6), 16);
-  return (r * 299 + g * 587 + b * 114) / 1000 >= 150 ? '#111111' : '#ffffff';
+  return (r * 299 + g * 587 + b * 114) / 1000 >= 150 ? "#111111" : "#ffffff";
 };
 const watchWindow = (live: { current: Live }) => {
   const onMove = (e: PointerEvent) => {
@@ -94,27 +124,27 @@ const watchWindow = (live: { current: Live }) => {
   const onUp = (e: PointerEvent) => {
     if (e.isTrusted) live.current.up(e);
   };
-  window.addEventListener('pointermove', onMove);
-  window.addEventListener('pointerup', onUp);
-  window.addEventListener('pointercancel', onUp);
+  window.addEventListener("pointermove", onMove);
+  window.addEventListener("pointerup", onUp);
+  window.addEventListener("pointercancel", onUp);
   return () => {
-    window.removeEventListener('pointermove', onMove);
-    window.removeEventListener('pointerup', onUp);
-    window.removeEventListener('pointercancel', onUp);
+    window.removeEventListener("pointermove", onMove);
+    window.removeEventListener("pointerup", onUp);
+    window.removeEventListener("pointercancel", onUp);
   };
 };
 
 const SwipeRow: React.FC<SwipeRowProps> = ({
   children,
   actions = DEFAULT_ACTIONS,
-  actionColor = '#e5484d',
-  drawerColor = '#3f3f46',
-  rowColor = '#27272a',
-  textColor = '#f5f5f5',
+  actionColor = "#e5484d",
+  drawerColor = "#3f3f46",
+  rowColor = "#27272a",
+  textColor = "#f5f5f5",
   height = 64,
   radius = 16,
   actionWidth = 80,
-  direction = 'left',
+  direction = "left",
   snapBounce = 0.2,
   resistance = 0.55,
   collapseMs = 200,
@@ -127,21 +157,22 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
   onCommit,
   closeOnAction = true,
   haptic = true,
-  label = 'List item',
-  className = '',
-  style
+  label = "List item",
+  messages = DEFAULT_MESSAGES,
+  className = "",
+  style,
 }) => {
   const uid = useId();
   const reduce = useReducedMotion();
-  const s = direction === 'left' ? -1 : 1;
+  const s = direction === "left" ? -1 : 1;
   const A = actionWidth;
   const n = actions.length;
   const D = n * A;
   const c = clamp(resistance, 0.05, 1);
   const primary = actions[0];
   const [openState, setOpenState] = useState(false);
-  const [phase, setPhase] = useState<Phase>('idle');
-  const [say, setSay] = useState('');
+  const [phase, setPhase] = useState<Phase>("idle");
+  const [say, setSay] = useState("");
   const open = openProp ?? openState;
 
   const root = useRef<HTMLDivElement>(null);
@@ -150,22 +181,34 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
   const grip = useRef<Grip | null>(null);
   const unwatch = useRef<(() => void) | null>(null);
   const live = useRef<Live>({} as Live);
-  const foldTimer = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const foldTimer = useRef<ReturnType<typeof setTimeout> | undefined>(
+    undefined,
+  );
   const heading = useRef<number | null>(null);
 
   const x = useMotionValue(0);
   const spread = useMotionValue(0);
   const landed = useMotionValue(0);
   const commitPoint = () => Math.max(commitAt * w.current, D + A / 2);
-  const canCommit = () => fullSwipe && n > 0 && primary?.dismiss !== false && commitPoint() <= w.current;
-  const exposed = useTransform(x, v => s * v);
-  const surfaceXf = useTransform(x, v => `translateX(${v}px)`);
-  const railXf = useTransform(exposed, (e: number) => `translateX(${-s * Math.max(0, D - e)}px)`);
-  const shift = useTransform([exposed, spread], ([e, p]: number[]) => p * Math.max(0, e - A));
-  const blockXf = useTransform(shift, v => `translateX(${s * v}px)`);
+  const canCommit = () =>
+    fullSwipe &&
+    n > 0 &&
+    primary?.dismiss !== false &&
+    commitPoint() <= w.current;
+  const exposed = useTransform(x, (v) => s * v);
+  const surfaceXf = useTransform(x, (v) => `translateX(${v}px)`);
+  const railXf = useTransform(
+    exposed,
+    (e: number) => `translateX(${-s * Math.max(0, D - e)}px)`,
+  );
+  const shift = useTransform(
+    [exposed, spread],
+    ([e, p]: number[]) => p * Math.max(0, e - A),
+  );
+  const blockXf = useTransform(shift, (v) => `translateX(${s * v}px)`);
   const glyphXf = useTransform(
     [shift, landed],
-    ([v, l]: number[]) => `translateX(${-s * l * (v - (w.current - A) / 2)}px)`
+    ([v, l]: number[]) => `translateX(${-s * l * (v - (w.current - A) / 2)}px)`,
   );
 
   const map = (raw: number) => {
@@ -191,7 +234,7 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
     const el = root.current;
     if (!el) return undefined;
     w.current = el.offsetWidth || w.current;
-    const observer = new ResizeObserver(entries => {
+    const observer = new ResizeObserver((entries) => {
       const width = entries[0]?.contentRect.width;
       if (width) w.current = width;
     });
@@ -203,7 +246,7 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
       clearTimeout(foldTimer.current);
       unwatch.current?.();
     },
-    []
+    [],
   );
 
   const setOpen = (next: boolean) => {
@@ -222,8 +265,13 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
       x,
       s * target,
       flick
-        ? { type: 'spring', duration: 0.4, bounce: snapBounce, velocity: s * clamp(v, -VMAX, VMAX) }
-        : { ...SPRING_UI, velocity: s * v }
+        ? {
+            type: "spring",
+            duration: 0.4,
+            bounce: snapBounce,
+            velocity: s * clamp(v, -VMAX, VMAX),
+          }
+        : { ...SPRING_UI, velocity: s * v },
     );
   };
   const setSpread = (on: boolean) => {
@@ -231,22 +279,22 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
     if (reduce) spread.set(on ? 1 : 0);
     else animate(spread, on ? 1 : 0, SPRING_UI);
     if (on && primary) {
-      setSay(`Release to ${primary.label}`);
+      setSay(messages.release(primary.label));
       if (haptic && grip.current?.touch) navigator.vibrate?.(8);
     }
   };
   const commit = (a: SwipeAction, viaKey: boolean, v = 0) => {
     const leap = a === primary;
-    setPhase('committing');
+    setPhase("committing");
     setSay(a.label);
     setOpen(false);
     const fold = () => {
       const el = root.current;
-      if (el && height === 'auto') {
-        el.style.setProperty('--sr-h', `${el.offsetHeight}px`);
+      if (el && height === "auto") {
+        el.style.setProperty("--sr-h", `${el.offsetHeight}px`);
         void el.offsetHeight;
       }
-      setPhase('collapsing');
+      setPhase("collapsing");
       foldTimer.current = setTimeout(() => {
         onCommit?.(a);
         a.onSelect?.();
@@ -260,7 +308,8 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
       if (viaKey) {
         x.set(s * w.current);
         fold();
-      } else animate(x, s * w.current, { duration: 0.2, ease: EASE_OUT }).then(fold);
+      } else
+        animate(x, s * w.current, { duration: 0.2, ease: EASE_OUT }).then(fold);
       return;
     }
     if (leap) {
@@ -269,16 +318,23 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
     }
     animate(x, s * w.current, { ...SPRING_UI, velocity: s * v }).then(fold);
   };
+  // biome-ignore lint/correctness/useExhaustiveDependencies: só sincroniza a animação quando `open`/`D` mudam; incluir handlers reabriria a animação a cada render
   useEffect(() => {
-    if (openProp === undefined || grip.current || phase !== 'idle') return;
+    if (openProp === undefined || grip.current || phase !== "idle") return;
     const target = open ? D : 0;
     if (heading.current === target) return;
     if (Math.abs(exposed.get() - target) > 0.5) settle(target);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open, D]);
 
   const down = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (disabled || n === 0 || phase !== 'idle' || grip.current || e.button !== 0) return;
+    if (
+      disabled ||
+      n === 0 ||
+      phase !== "idle" ||
+      grip.current ||
+      e.button !== 0
+    )
+      return;
     x.stop();
     heading.current = null;
     grip.current = {
@@ -288,7 +344,7 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
       grab: null,
       moved: false,
       hist: [],
-      touch: e.pointerType === 'touch'
+      touch: e.pointerType === "touch",
     };
     try {
       surface.current?.setPointerCapture(e.pointerId);
@@ -305,7 +361,7 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
       if (Math.abs(dx) < HYST || Math.abs(dx) < Math.abs(dy)) return;
       g.grab = s * (g.x0 + Math.sign(dx) * HYST) - inv(exposed.get());
       g.moved = true;
-      root.current?.setAttribute('data-dragging', '');
+      root.current?.setAttribute("data-dragging", "");
     }
     const ex = map(s * e.clientX - g.grab);
     x.set(s * ex);
@@ -319,7 +375,7 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
     grip.current = null;
     unwatch.current?.();
     unwatch.current = null;
-    root.current?.removeAttribute('data-dragging');
+    root.current?.removeAttribute("data-dragging");
     try {
       surface.current?.releasePointerCapture(e.pointerId);
     } catch {}
@@ -336,7 +392,8 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
       commit(primary, false, v);
       return;
     }
-    const target = Math.abs(v) >= FLICK ? (v > 0 ? D : 0) : ex + project(v) > D / 2 ? D : 0;
+    const target =
+      Math.abs(v) >= FLICK ? (v > 0 ? D : 0) : ex + project(v) > D / 2 ? D : 0;
     setSpread(false);
     setOpen(target === D);
     settle(target, v);
@@ -344,7 +401,7 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
   live.current = { move, up };
 
   const act = (a: SwipeAction, e: React.MouseEvent<HTMLButtonElement>) => {
-    if (phase !== 'idle') return;
+    if (phase !== "idle") return;
     onAction?.(a);
     if ((a === primary && a.dismiss !== false) || a.dismiss) {
       commit(a, e.detail === 0);
@@ -362,7 +419,7 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
     heading.current = D;
     x.set(s * D);
     setOpen(true);
-    setSay(`${n} actions revealed`);
+    setSay(messages.revealed(n));
   };
   const closeNow = () => {
     heading.current = 0;
@@ -370,51 +427,58 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
     setOpen(false);
   };
   const onToggleKey = (e: React.KeyboardEvent<HTMLButtonElement>) => {
-    if (disabled || phase !== 'idle' || n === 0) return;
-    const openKey = s < 0 ? 'ArrowLeft' : 'ArrowRight';
-    const closeKey = s < 0 ? 'ArrowRight' : 'ArrowLeft';
-    const toggle = e.key === 'Enter' || e.key === ' ';
+    if (disabled || phase !== "idle" || n === 0) return;
+    const openKey = s < 0 ? "ArrowLeft" : "ArrowRight";
+    const closeKey = s < 0 ? "ArrowRight" : "ArrowLeft";
+    const toggle = e.key === "Enter" || e.key === " ";
     if (e.key === openKey || (toggle && !open)) {
       e.preventDefault();
       openNow();
-    } else if (e.key === closeKey || e.key === 'Escape' || (toggle && open)) {
+    } else if (e.key === closeKey || e.key === "Escape" || (toggle && open)) {
       e.preventDefault();
       closeNow();
-    } else if ((e.key === 'Delete' || e.key === 'Backspace') && open && primary && primary.dismiss !== false && canCommit()) {
+    } else if (
+      (e.key === "Delete" || e.key === "Backspace") &&
+      open &&
+      primary &&
+      primary.dismiss !== false &&
+      canCommit()
+    ) {
       e.preventDefault();
       commit(primary, true);
     }
   };
   const onToggleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    if (e.detail !== 0 || disabled || phase !== 'idle' || n === 0) return;
+    if (e.detail !== 0 || disabled || phase !== "idle" || n === 0) return;
     if (open) closeNow();
     else openNow();
   };
 
   const railId = `${uid}-rail`;
   return (
+    // biome-ignore lint/a11y/useSemanticElements: <fieldset> quebraria o layout com overflow/altura animada da linha
     <div
       ref={root}
       role="group"
       aria-label={label}
-      className={`group relative overflow-hidden [height:var(--sr-h)] [transition:height_var(--sr-collapse)_cubic-bezier(0.23,1,0.32,1),margin-bottom_var(--sr-collapse)_cubic-bezier(0.23,1,0.32,1),opacity_var(--sr-collapse)_cubic-bezier(0.23,1,0.32,1)] data-[phase=collapsing]:h-0! data-[phase=collapsing]:mb-0! data-[phase=collapsing]:opacity-0 data-[disabled]:pointer-events-none data-[disabled]:opacity-55${className ? ` ${className}` : ''}`}
+      className={`group relative overflow-hidden [height:var(--sr-h)] [transition:height_var(--sr-collapse)_cubic-bezier(0.23,1,0.32,1),margin-bottom_var(--sr-collapse)_cubic-bezier(0.23,1,0.32,1),opacity_var(--sr-collapse)_cubic-bezier(0.23,1,0.32,1)] data-[phase=collapsing]:h-0! data-[phase=collapsing]:mb-0! data-[phase=collapsing]:opacity-0 data-[disabled]:pointer-events-none data-[disabled]:opacity-55${className ? ` ${className}` : ""}`}
       data-direction={direction}
-      data-open={open ? '' : undefined}
+      data-open={open ? "" : undefined}
       data-phase={phase}
-      data-disabled={disabled ? '' : undefined}
+      data-disabled={disabled ? "" : undefined}
       style={
         {
-          '--sr-h': height === 'auto' ? 'auto' : `${height}px`,
-          '--sr-r': `${radius}px`,
-          '--sr-a': `${A}px`,
-          '--sr-row': rowColor,
-          '--sr-text': textColor,
-          '--sr-drawer': drawerColor,
-          '--sr-on-drawer': onColor(drawerColor),
-          '--sr-action': actionColor,
-          '--sr-on-action': onColor(actionColor),
-          '--sr-collapse': `${collapseMs}ms`,
-          ...style
+          "--sr-h": height === "auto" ? "auto" : `${height}px`,
+          "--sr-r": `${radius}px`,
+          "--sr-a": `${A}px`,
+          "--sr-row": rowColor,
+          "--sr-text": textColor,
+          "--sr-drawer": drawerColor,
+          "--sr-on-drawer": onColor(drawerColor),
+          "--sr-action": actionColor,
+          "--sr-on-action": onColor(actionColor),
+          "--sr-collapse": `${collapseMs}ms`,
+          ...style,
         } as CSSProperties
       }
     >
@@ -431,11 +495,19 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
               key={a.id}
               type="button"
               className="group/action absolute top-0 grid h-full cursor-pointer touch-manipulation place-items-center border-0 p-0 [font:inherit] outline-none select-none [width:var(--sr-a)] [-webkit-touch-callout:none] [-webkit-tap-highlight-color:transparent] after:pointer-events-none after:absolute after:inset-0 after:bg-white after:opacity-0 after:content-[''] [@media(hover:hover)_and_(pointer:fine)]:after:[transition:opacity_150ms_ease] [@media(hover:hover)_and_(pointer:fine)]:hover:after:opacity-[0.08]"
-              onClick={e => act(a, e)}
+              onClick={(e) => act(a, e)}
               style={
                 s < 0
-                  ? { right: (i + 1) * A, background: a.color ?? drawerColor, color: onColor(a.color ?? drawerColor) }
-                  : { left: (i + 1) * A, background: a.color ?? drawerColor, color: onColor(a.color ?? drawerColor) }
+                  ? {
+                      right: (i + 1) * A,
+                      background: a.color ?? drawerColor,
+                      color: onColor(a.color ?? drawerColor),
+                    }
+                  : {
+                      left: (i + 1) * A,
+                      background: a.color ?? drawerColor,
+                      color: onColor(a.color ?? drawerColor),
+                    }
               }
             >
               <span className="grid justify-items-center gap-1 text-[11px] leading-none font-medium tracking-[0.01em] [transition:transform_160ms_cubic-bezier(0.23,1,0.32,1)] group-active/action:scale-[0.97] motion-reduce:group-active/action:scale-100">
@@ -453,11 +525,17 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
                 type="button"
                 className="group/action absolute top-0 grid h-full cursor-pointer touch-manipulation place-items-center border-0 bg-transparent p-0 [font:inherit] outline-none select-none [width:var(--sr-a)] [color:var(--sr-on-action)] [-webkit-touch-callout:none] [-webkit-tap-highlight-color:transparent] group-data-[direction=left]:left-0 group-data-[direction=right]:right-0 after:pointer-events-none after:absolute after:inset-0 after:bg-white after:opacity-0 after:content-[''] [@media(hover:hover)_and_(pointer:fine)]:after:[transition:opacity_150ms_ease] [@media(hover:hover)_and_(pointer:fine)]:hover:after:opacity-[0.08]"
                 style={{ transform: glyphXf }}
-                onClick={e => act(primary, e)}
+                onClick={(e) => act(primary, e)}
               >
                 <span className="grid justify-items-center gap-1 text-[11px] leading-none font-medium tracking-[0.01em] [transition:transform_160ms_cubic-bezier(0.23,1,0.32,1)] group-active/action:scale-[0.97] motion-reduce:group-active/action:scale-100">
                   <span className="inline-flex">
-                    {primary.icon ?? <HugeiconsIcon icon={Delete02Icon} size={20} strokeWidth={2} />}
+                    {primary.icon ?? (
+                      <HugeiconsIcon
+                        icon={Delete02Icon}
+                        size={20}
+                        strokeWidth={2}
+                      />
+                    )}
                   </span>
                   <span>{primary.label}</span>
                 </span>
@@ -478,11 +556,11 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
             tabIndex={disabled ? -1 : 0}
             aria-expanded={open}
             aria-controls={railId}
-            aria-keyshortcuts={s < 0 ? 'ArrowLeft' : 'ArrowRight'}
+            aria-keyshortcuts={s < 0 ? "ArrowLeft" : "ArrowRight"}
             onKeyDown={onToggleKey}
             onClick={onToggleClick}
           >
-            {n} {n === 1 ? 'action' : 'actions'}
+            {messages.toggle(n)}
           </button>
         </motion.div>
       </div>

@@ -1123,8 +1123,8 @@
 }
 
 .strike {
-  background: linear-gradient(currentColor, currentColor) no-repeat 0 55% / 0%
-    1.5px;
+  background:
+    linear-gradient(currentColor, currentColor) no-repeat 0 55% / 0% 1.5px;
   transition: background-size 380ms cubic-bezier(0.4, 0, 0.2, 1);
 }
 

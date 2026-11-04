@@ -101,7 +101,7 @@ export function LooseItemsCard({
   const items = sourceItems.filter(
     (item) =>
       !normalizedQuery ||
-      "avulsos".includes(normalizedQuery) ||
+      t("looseItems").toLowerCase().includes(normalizedQuery) ||
       item.title.toLowerCase().includes(normalizedQuery),
   );
   const sorted =
@@ -123,7 +123,7 @@ export function LooseItemsCard({
       actions={sortButton}
       appearance={cardAppearance}
       big={big}
-      category="individual-items"
+      category={categoryLabel("individual-items", locale)}
       count={missingCount}
       countLabel={t("manyMissing")}
       editContent={

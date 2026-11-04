@@ -219,6 +219,32 @@ export function normalizeImportedData(value: unknown): Data | null {
   return null;
 }
 
+export function mergeImportedData(
+  current: Data,
+  imported: Data,
+): { data: Data; imported: number } {
+  const seriesIds = new Set(current.series.map((series) => series.id));
+  const itemIds = new Set(current.items.map((item) => item.id));
+  const series = imported.series.filter((entry) => {
+    if (seriesIds.has(entry.id)) return false;
+    seriesIds.add(entry.id);
+    return true;
+  });
+  const items = imported.items.filter((entry) => {
+    if (itemIds.has(entry.id)) return false;
+    itemIds.add(entry.id);
+    return true;
+  });
+  return {
+    data: {
+      ...current,
+      series: [...current.series, ...series],
+      items: [...current.items, ...items],
+    },
+    imported: series.length + items.length,
+  };
+}
+
 function readData(): Promise<Data | null> {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, 1);
@@ -247,6 +273,28 @@ function writeData(data: Data): Promise<void> {
     };
     request.onerror = () => reject(request.error);
   });
+}
+
+export function trimSeriesToTotal(
+  series: Pick<Series, "acquired" | "priorityVolumes" | "volumeNotes">,
+  total: number,
+): Pick<Series, "total" | "acquired" | "priorityVolumes" | "volumeNotes"> {
+  const fits = (volume: number) => volume <= total;
+  return {
+    total,
+    acquired: (series.acquired ?? []).filter(fits),
+    priorityVolumes: (series.priorityVolumes ?? []).filter(fits),
+    volumeNotes: Object.fromEntries(
+      Object.entries(series.volumeNotes ?? {}).filter(([volume]) =>
+        fits(Number(volume)),
+      ),
+    ),
+  };
+}
+
+export function insertAt<T>(entries: T[], index: number, entry: T): T[] {
+  const position = Math.max(0, Math.min(index, entries.length));
+  return [...entries.slice(0, position), entry, ...entries.slice(position)];
 }
 
 export const HOLD_DURATION = 700;

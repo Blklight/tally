@@ -4,7 +4,7 @@ Template de front-end em **Next.js 16 (App Router) + React 19 + TypeScript + Tai
 
 ## Techs
 
-- **Framework:** Next.js 16 (App Router, React Compiler / `cacheComponents`), React 19
+- **Framework:** Next.js 16 (App Router, export estático), React 19
 - **Linguagem:** TypeScript 5 (`strict`, alias `@/*`)
 - **Estilo:** Tailwind v4 (via `@tailwindcss/turbopack`) + `tw-animate-css`
 - **UI:** componentes shadcn no style `base-vega`, construídos sobre **Base UI** (`@base-ui/react`)
@@ -115,9 +115,9 @@ tests/
 - Tokens de tema e animações ficam em `src/app/globals.css` (inclui as animações usadas pelos componentes, ex.: `animate-caret-blink`, `--animate-aurora`).
 - Sempre respeite light/dark (`dark:`), usando os tokens semânticos (`bg-background`, `text-muted-foreground`, ...).
 
-### Next.js 16 / `cacheComponents`
+### Next.js 16 / export estático
 
-- `next.config.ts` habilita `cacheComponents: true`. Valores instáveis (`new Date()`, `Math.random()`) **não** podem ser usados no pré-render de Client Components. Envolva trechos que dependem de estado não-determinístico em `<Suspense>` (como em `src/app/components/page.tsx`).
+- `next.config.ts` usa `output: "export"` (deploy estático). `cacheComponents` e `partialPrefetching` são incompatíveis com export e quebram o `next build` — mantenha-os desligados.
 - Consulte os guias em `node_modules/next/dist/docs/` antes de mexer em APIs do framework.
 
 ### Testes

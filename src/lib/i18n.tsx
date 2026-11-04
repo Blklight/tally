@@ -119,6 +119,16 @@ const messages = {
     priorityItem: "Item prioritário",
     itemActions: "Ações do item",
     acquiredOf: "de",
+    active: "Ativo",
+    importInvalid: "JSON inválido ou sem itens.",
+    importReadError: "Não foi possível ler esse JSON.",
+    oneAction: "ação",
+    manyActions: "ações",
+    actionsRevealed: "ações visíveis",
+    releaseTo: "Solte para",
+    deletedCard: "Ficha excluída",
+    deletedItem: "Item excluído",
+    undo: "Desfazer",
     colors: {
       white: "Branco",
       craft: "Craft",
@@ -231,6 +241,16 @@ const messages = {
     priorityItem: "Priority item",
     itemActions: "Item actions",
     acquiredOf: "of",
+    active: "Active",
+    importInvalid: "Invalid JSON or no items.",
+    importReadError: "Could not read this JSON.",
+    oneAction: "action",
+    manyActions: "actions",
+    actionsRevealed: "actions revealed",
+    releaseTo: "Release to",
+    deletedCard: "Card deleted",
+    deletedItem: "Item deleted",
+    undo: "Undo",
     colors: {
       white: "White",
       craft: "Craft",
@@ -259,7 +279,10 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const saved = window.localStorage.getItem(STORAGE_KEY);
-    if (saved === "pt-BR" || saved === "en") setLocaleState(saved);
+    if (saved === "pt-BR" || saved === "en") {
+      setLocaleState(saved);
+      document.documentElement.lang = saved;
+    }
   }, []);
 
   const setLocale = useCallback((nextLocale: Locale) => {
