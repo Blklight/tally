@@ -3,9 +3,10 @@
 import {
   Check,
   ChevronLeft,
-  MoreVertical,
   Pencil,
   Settings2,
+  Star,
+  StickyNote,
   Trash2,
 } from "lucide-react";
 import {
@@ -18,6 +19,7 @@ import {
   useRef,
   useState,
 } from "react";
+import noisyTexture from "@/assets/images/noisy.png";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -27,12 +29,6 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useLocale } from "@/lib/i18n";
 import {
   type Appearance,
@@ -42,34 +38,46 @@ import {
 } from "@/lib/store";
 import { cn } from "@/lib/utils";
 import { CornerFrame, CornerMarkers } from "./corner-frame";
+import SwipeRow, { type SwipeAction } from "./SwipeRow";
 import { ChamferButton } from "./ui/chamfer-button";
+
+const DELETE_COLOR = "#e5484d";
+const PRIORITY_COLOR = "#d97706";
+const NEUTRAL_COLOR = "#52525b";
 
 export function HoldRow({
   label,
   note,
   checked,
   onToggle,
+  priority = false,
+  onTogglePriority,
   onEdit,
+  onEditNote,
   onDelete,
-  editPrefix,
 }: {
   label: string;
-  note?: string;
+  note?: string | undefined;
   checked: boolean;
   onToggle: () => void;
-  onEdit?: (label: string) => void;
+  priority?: boolean;
+  onTogglePriority?: () => void;
+  onEdit?: (title: string) => void;
+  onEditNote?: (note: string) => void;
   onDelete?: () => void;
-  editPrefix?: string;
 }) {
+  const { t } = useLocale();
   const [holding, setHolding] = useState(false);
-  const [editOpen, setEditOpen] = useState(false);
-  const [draft, setDraft] = useState(label);
+  const [editMode, setEditMode] = useState<"title" | "note" | null>(null);
+  const [draft, setDraft] = useState("");
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const origin = useRef<{ x: number; y: number } | null>(null);
+  const drawerOpen = useRef(false);
 
   const cancel = () => {
     if (timer.current) clearTimeout(timer.current);
     timer.current = null;
+    origin.current = null;
     setHolding(false);
   };
 
@@ -96,126 +104,211 @@ export function HoldRow({
     };
   }, []);
 
-  return (
-    <div
-      role="checkbox"
-      aria-checked={checked}
-      aria-label={label}
-      className={cn(
-        "hold-row relative flex h-auto min-h-16 w-full cursor-default items-center gap-3 overflow-hidden rounded-sm border-b border-current/10 px-3 py-3 text-left font-normal whitespace-normal hover:bg-current/5",
-        holding && "is-holding",
-      )}
-      onPointerDown={(e) => {
-        if (e.button !== 0 || editOpen) return;
-        origin.current = { x: e.clientX, y: e.clientY };
-        begin();
-      }}
-      onPointerMove={(e) => {
-        if (
-          origin.current &&
-          Math.hypot(
-            e.clientX - origin.current.x,
-            e.clientY - origin.current.y,
-          ) > 10
-        )
-          cancel();
-      }}
-      onPointerUp={cancel}
-      onPointerLeave={cancel}
-      onPointerCancel={cancel}
-      onContextMenu={(e) => e.preventDefault()}
-    >
-      <span className="hold-fill absolute inset-0 origin-left bg-current/20" />
-      <span
-        className={cn(
-          "relative flex size-6 shrink-0 items-center justify-center rounded-[3px] border-[1.5px] border-current",
-          checked && "bg-current",
-        )}
+  const openEditor = (mode: "title" | "note") => {
+    setDraft(mode === "title" ? label : (note ?? ""));
+    setEditMode(mode);
+  };
+
+  const actions: SwipeAction[] = [];
+  if (onDelete) {
+    actions.push({
+      id: "delete",
+      label: t("delete"),
+      icon: <Trash2 className="size-5" />,
+      color: DELETE_COLOR,
+      onSelect: onDelete,
+    });
+  }
+  if (onTogglePriority) {
+    actions.push({
+      id: "priority",
+      label: priority ? t("removePriority") : t("priority"),
+      icon: <Star className={cn("size-5", priority && "fill-current")} />,
+      color: PRIORITY_COLOR,
+      dismiss: false,
+      onSelect: onTogglePriority,
+    });
+  }
+  if (onEdit) {
+    actions.push({
+      id: "edit",
+      label: t("edit"),
+      icon: <Pencil className="size-5" />,
+      color: NEUTRAL_COLOR,
+      dismiss: false,
+      onSelect: () => openEditor("title"),
+    });
+  }
+  if (onEditNote) {
+    actions.push({
+      id: "note",
+      label: note ? t("editNote") : t("addNote"),
+      icon: <StickyNote className="size-5" />,
+      color: NEUTRAL_COLOR,
+      dismiss: false,
+      onSelect: () => openEditor("note"),
+    });
+  }
+
+  const content = (
+    <>
+      <span className="hold-fill pointer-events-none absolute inset-0 origin-left bg-current/20" />
+      <div
+        role="checkbox"
+        tabIndex={0}
+        aria-checked={checked}
+        aria-label={label}
+        className="relative flex min-h-16 w-full min-w-0 items-center gap-3 py-3 outline-none focus-visible:ring-2 focus-visible:ring-current/40"
+        onKeyDown={(e) => {
+          if (e.key === " " || e.key === "Enter") {
+            e.preventDefault();
+            begin();
+          }
+        }}
+        onKeyUp={(e) => {
+          if (e.key === " " || e.key === "Enter") cancel();
+        }}
+        onBlur={cancel}
       >
-        {checked && <Check className="check-pop size-4 text-paper" />}
-      </span>
-      <span
-        className={cn(
-          "relative min-w-0 flex-1 break-words text-sm",
-          checked && "opacity-50",
-        )}
-      >
-        <span className={cn("strike", checked && "is-struck")}>{label}</span>
-        {note && <span className="mt-1 block text-xs opacity-60">{note}</span>}
-      </span>
-      {(onEdit || onDelete) && (
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            aria-label="Ações do item"
-            className="relative flex size-8 shrink-0 items-center justify-center rounded-sm"
-            onClick={(e) => e.stopPropagation()}
-            onPointerDown={(e) => {
-              e.stopPropagation();
-              cancel();
-            }}
-            type="button"
-          >
-            <MoreVertical />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            onPointerDown={(event) => event.stopPropagation()}
-          >
-            {onEdit && (
-              <DropdownMenuItem
-                onClick={(event) => {
-                  event.stopPropagation();
-                  setDraft(label);
-                  setEditOpen(true);
-                }}
-              >
-                <Pencil /> Editar
-              </DropdownMenuItem>
-            )}
-            {onDelete && (
-              <DropdownMenuItem onSelect={onDelete}>Excluir</DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      )}
-      <Dialog onOpenChange={setEditOpen} open={editOpen}>
-        <DialogContent className="max-w-sm">
-          <DialogHeader>
-            <DialogTitle>Editar item</DialogTitle>
-          </DialogHeader>
-          <Input
-            autoFocus
-            onChange={(event) => setDraft(event.target.value)}
-            value={draft}
+        <span
+          className={cn(
+            "relative flex size-6 shrink-0 items-center justify-center rounded-[3px] border-[1.5px] border-current",
+            checked && "bg-current",
+          )}
+        >
+          {checked && <Check className="check-pop size-4 text-paper" />}
+        </span>
+        <span
+          className={cn(
+            "relative min-w-0 flex-1 break-words text-left text-sm",
+            checked && "opacity-50",
+          )}
+        >
+          <span className={cn("strike", checked && "is-struck")}>{label}</span>
+          {note && (
+            <span className="mt-1 block text-xs opacity-60">{note}</span>
+          )}
+        </span>
+        {priority && (
+          <Star
+            aria-label={t("priorityItem")}
+            className="relative size-4 shrink-0 fill-current"
+            role="img"
           />
-          <DialogFooter>
-            <Button
-              onClick={() => setEditOpen(false)}
-              type="button"
-              variant="ghost"
-            >
-              Cancelar
-            </Button>
-            <Button
-              onClick={() => {
-                onEdit?.(
-                  editPrefix && draft.startsWith(editPrefix)
-                    ? draft
-                        .slice(editPrefix.length)
-                        .replace(/^\s*—\s*/, "")
-                        .trim()
-                    : draft.trim(),
-                );
-                setEditOpen(false);
-              }}
-              type="button"
-            >
-              Salvar
-            </Button>
-          </DialogFooter>
+        )}
+      </div>
+    </>
+  );
+
+  const saveEdit = () => {
+    const value = draft.trim();
+    if (editMode === "title") {
+      if (!value) return;
+      onEdit?.(value);
+    } else {
+      onEditNote?.(value);
+    }
+    setEditMode(null);
+  };
+
+  return (
+    <>
+      <div
+        className={cn(
+          "hold-row w-full cursor-default",
+          holding && "is-holding",
+        )}
+        onPointerDown={(e) => {
+          if (e.button !== 0 || editMode || drawerOpen.current) return;
+          if ((e.target as HTMLElement).closest("button")) return;
+          origin.current = { x: e.clientX, y: e.clientY };
+          begin();
+        }}
+        onPointerMove={(e) => {
+          if (
+            origin.current &&
+            Math.hypot(
+              e.clientX - origin.current.x,
+              e.clientY - origin.current.y,
+            ) > 10
+          )
+            cancel();
+        }}
+        onPointerUp={cancel}
+        onPointerLeave={cancel}
+        onPointerCancel={cancel}
+        onContextMenu={(e) => e.preventDefault()}
+      >
+        {actions.length > 0 ? (
+          <SwipeRow
+            actionColor={onDelete ? DELETE_COLOR : PRIORITY_COLOR}
+            actions={actions}
+            className="border-b border-current/10"
+            drawerColor={NEUTRAL_COLOR}
+            fullSwipe={!!onDelete}
+            height="auto"
+            label={t("itemActions")}
+            onOpenChange={(open) => {
+              drawerOpen.current = open;
+              if (open) cancel();
+            }}
+            radius={2}
+            rowColor={`url(${noisyTexture.src}), var(--paper)`}
+            textColor="inherit"
+          >
+            {content}
+          </SwipeRow>
+        ) : (
+          <div className="relative flex border-b border-current/10 px-4">
+            {content}
+          </div>
+        )}
+      </div>
+      <Dialog
+        onOpenChange={(open) => {
+          if (!open) setEditMode(null);
+        }}
+        open={editMode !== null}
+      >
+        <DialogContent className="max-w-sm">
+          <form
+            className="grid gap-4"
+            onSubmit={(event) => {
+              event.preventDefault();
+              saveEdit();
+            }}
+          >
+            <DialogHeader>
+              <DialogTitle>
+                {editMode === "note" ? t("editNote") : t("editItem")}
+              </DialogTitle>
+            </DialogHeader>
+            <Input
+              aria-label={editMode === "note" ? t("editNote") : t("title")}
+              autoFocus
+              onChange={(event) => setDraft(event.target.value)}
+              placeholder={editMode === "note" ? t("notePlaceholder") : ""}
+              value={draft}
+            />
+            <DialogFooter>
+              <Button
+                onClick={() => setEditMode(null)}
+                type="button"
+                variant="ghost"
+              >
+                {t("cancel")}
+              </Button>
+              <Button
+                disabled={editMode === "title" && !draft.trim()}
+                type="submit"
+              >
+                {t("save")}
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
-    </div>
+    </>
   );
 }
 
