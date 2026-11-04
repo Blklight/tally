@@ -1,4 +1,4 @@
-const CACHE_NAME = "tally-v1";
+const CACHE_NAME = "tally-v2";
 const APP_SHELL = [
   "./",
   "./manifest.webmanifest",
@@ -28,27 +28,48 @@ self.addEventListener("activate", (event) => {
   self.clients.claim();
 });
 
+const isSameOrigin = (request) =>
+  new URL(request.url).origin === self.location.origin;
+
+const isImmutableAsset = (request) =>
+  new URL(request.url).pathname.includes("/_next/static/");
+
+const store = (request, response) => {
+  if (response.ok && isSameOrigin(request)) {
+    const copy = response.clone();
+    caches.open(CACHE_NAME).then((cache) => cache.put(request, copy));
+  }
+  return response;
+};
+
 self.addEventListener("fetch", (event) => {
-  if (event.request.method !== "GET") return;
+  const { request } = event;
+  if (request.method !== "GET" || !isSameOrigin(request)) return;
+
+  if (isImmutableAsset(request)) {
+    event.respondWith(
+      caches
+        .match(request)
+        .then(
+          (cached) =>
+            cached ||
+            fetch(request).then((response) => store(request, response)),
+        ),
+    );
+    return;
+  }
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const network = fetch(event.request)
-        .then((response) => {
-          if (
-            response.ok &&
-            new URL(event.request.url).origin === self.location.origin
-          ) {
-            const copy = response.clone();
-            caches
-              .open(CACHE_NAME)
-              .then((cache) => cache.put(event.request, copy));
-          }
-          return response;
-        })
-        .catch(() => cached);
-
-      return cached || network;
-    }),
+    fetch(request)
+      .then((response) => store(request, response))
+      .catch(async () => {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        if (request.mode === "navigate") {
+          const shell = await caches.match("./");
+          if (shell) return shell;
+        }
+        return Response.error();
+      }),
   );
 });
