@@ -465,6 +465,12 @@
   background-attachment: local;
 }
 
+.toaster [data-sonner-toast].tally-toast {
+  background-color: var(--normal-bg);
+  background-image: url("../assets/images/noisy.png");
+  font-family: var(--font-mono);
+}
+
 .texturization-background::after {
   content: "";
   position: absolute;

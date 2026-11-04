@@ -2,10 +2,10 @@ import { GeistPixelCircle, GeistPixelSquare } from "geist/font/pixel";
 import type { Metadata, Viewport } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import type { ReactNode } from "react";
+import { AppToaster } from "@/components/app-toaster";
 import { PwaRegister } from "@/components/pwa-register";
 import { QueryProvider } from "@/components/query-provider";
 import { ThemeProvider } from "@/components/theme-provider";
-import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import "./globals.css";
@@ -71,7 +71,7 @@ export default function RootLayout({
               <TooltipProvider>
                 <LayoutBase>{children}</LayoutBase>
               </TooltipProvider>
-              <Toaster />
+              <AppToaster />
             </QueryProvider>
           </LocaleProvider>
         </ThemeProvider>
