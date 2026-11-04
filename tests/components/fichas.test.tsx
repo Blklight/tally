@@ -114,4 +114,20 @@ describe("HoldRow actions", () => {
     fireEvent.click(screen.getByRole("button", { name: "Salvar" }));
     expect(editNote).toHaveBeenCalledWith("1ª edição");
   });
+
+  it("titles the note dialog as a new note when the item has none", () => {
+    render(
+      <HoldRow
+        checked={false}
+        label="Berserk - Vol. 4"
+        onEditNote={vi.fn()}
+        onToggle={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByText("Adicionar nota"));
+    expect(
+      screen.getByRole("heading", { name: "Adicionar nota" }),
+    ).toBeInTheDocument();
+  });
 });

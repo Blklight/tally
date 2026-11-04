@@ -9,6 +9,7 @@ import {
   List,
   Moon,
   Plus,
+  Search,
   Sparkles,
   Sun,
   Upload,
@@ -16,6 +17,7 @@ import {
 import Link from "next/link";
 import { useTheme } from "next-themes";
 import { useState } from "react";
+import { toast } from "sonner";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
 import {
@@ -172,6 +174,11 @@ export function Navbar({
                   setImportError(result.error);
                   return;
                 }
+                toast.success(
+                  result.imported === 0
+                    ? t("nothingImported")
+                    : `${result.imported} ${result.imported === 1 ? t("importedOne") : t("importedCount")}`,
+                );
                 setImportText("");
                 setImportOpen(false);
               }}
@@ -237,16 +244,19 @@ function CommandMenu({
           <CommandEmpty>{t("noCommands")}</CommandEmpty>
           {query && (
             <CommandGroup heading={t("commandSearch")}>
-              <CommandItem disabled>
-                <span className="text-xs text-muted-foreground">{query}</span>
+              <CommandItem onSelect={() => onCommandOpenChange(false)}>
+                <Search />
+                {t("showFiltered")}
+                <CommandShortcut>{query}</CommandShortcut>
               </CommandItem>
             </CommandGroup>
           )}
           <CommandGroup heading={t("commandOverview")}>
             <CommandItem disabled>
               <span className="font-mono text-xs">
-                {String(cardCount).padStart(2, "0")} {t("cards")} ·{" "}
-                {missingCount} {t("missing")}
+                {String(cardCount).padStart(2, "0")}{" "}
+                {cardCount === 1 ? t("card") : t("cards")} · {missingCount}{" "}
+                {t("missing")}
               </span>
             </CommandItem>
           </CommandGroup>

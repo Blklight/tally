@@ -21,6 +21,7 @@ export function TallyToolbar({
     <div className="relative z-30 flex shrink-0 justify-center gap-2 px-0 py-1">
       <Button
         aria-label={t("previousCard")}
+        data-card-nav=""
         className="size-8 rounded-none border-0 bg-transparent p-0 shadow-none"
         onClick={onPrevious}
         size="icon"
@@ -30,6 +31,7 @@ export function TallyToolbar({
       </Button>
       <Button
         aria-label={t("nextCard")}
+        data-card-nav=""
         className="size-8 rounded-none border-0 bg-transparent p-0 shadow-none"
         onClick={onNext}
         size="icon"

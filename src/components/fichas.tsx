@@ -286,7 +286,11 @@ export function HoldRow({
           >
             <DialogHeader>
               <DialogTitle>
-                {editMode === "note" ? t("editNote") : t("editItem")}
+                {editMode === "title"
+                  ? t("editItem")
+                  : note
+                    ? t("editNote")
+                    : t("addNote")}
               </DialogTitle>
             </DialogHeader>
             <Input
@@ -813,8 +817,10 @@ export function StackView<T extends { id: string }>({
 
   useEffect(() => {
     const key = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
       if (
-        (e.target as HTMLElement).closest(
+        !target.closest("[data-card-nav]") &&
+        target.closest(
           "input, textarea, button, [role='dialog'], [role='combobox']",
         )
       ) {

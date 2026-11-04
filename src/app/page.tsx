@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDownUp } from "lucide-react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { StackView } from "@/components/fichas";
 import { Navbar } from "@/components/navbar";
@@ -40,12 +40,28 @@ import {
   useData,
 } from "@/lib/store";
 
+type ViewMode = "stack" | "list";
+const VIEW_MODE_KEY = "tally-view-mode";
+const UNDO_TOAST_MS = 8000;
+
 export default function HomePage() {
   const { t } = useLocale();
   const [data, setData, loaded] = useData();
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortMode>("order");
-  const [mode, setMode] = useState<"stack" | "list">("stack");
+  const [mode, setModeState] = useState<ViewMode>("stack");
+  const setMode = useCallback((nextMode: ViewMode) => {
+    setModeState(nextMode);
+    try {
+      window.localStorage.setItem(VIEW_MODE_KEY, nextMode);
+    } catch {}
+  }, []);
+  useEffect(() => {
+    try {
+      const saved = window.localStorage.getItem(VIEW_MODE_KEY);
+      if (saved === "stack" || saved === "list") setModeState(saved);
+    } catch {}
+  }, []);
   const [index, setIndex] = useState(0);
   const [navigation, setNavigation] = useState({ direction: 1, token: 0 });
   const [adding, setAdding] = useState(false);
@@ -120,6 +136,7 @@ export default function HomePage() {
         series: currentData.series.filter((series) => series.id !== id),
       }));
       toast(t("deletedCard"), {
+        duration: UNDO_TOAST_MS,
         description: removed.title,
         action: {
           label: t("undo"),
@@ -147,6 +164,7 @@ export default function HomePage() {
         items: currentData.items.filter((entry) => entry.id !== item.id),
       }));
       toast(t("deletedItem"), {
+        duration: UNDO_TOAST_MS,
         description: item.title,
         action: {
           label: t("undo"),
@@ -187,6 +205,7 @@ export default function HomePage() {
         looseItems.filter((entry) => entry.id !== item.id),
       );
       toast(t("deletedItem"), {
+        duration: UNDO_TOAST_MS,
         description: item.title,
         action: {
           label: t("undo"),
