@@ -1,6 +1,8 @@
 "use client";
 
+import { Minus, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -9,9 +11,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useLocale } from "@/lib/i18n";
+import { categoryLabel, nomenclatureLabel, useLocale } from "@/lib/i18n";
 import {
   type Appearance,
+  CATEGORIES,
+  type Category,
   getContrastInk,
   type Nomenclature,
   normalizeAppearance,
@@ -88,12 +92,16 @@ export function NomenclatureField({
   value: Nomenclature;
   onChange: (value: Nomenclature) => void;
 }) {
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
 
   return (
     <div className="space-y-2">
       <Label>{t("nomenclature")}</Label>
       <Select
+        items={[
+          { value: "volume", label: nomenclatureLabel("volume", locale) },
+          { value: "issue", label: nomenclatureLabel("issue", locale) },
+        ]}
         onValueChange={(next) => onChange(next as Nomenclature)}
         value={value}
       >
@@ -101,10 +109,135 @@ export function NomenclatureField({
           <SelectValue />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="volume">Volume</SelectItem>
-          <SelectItem value="issue">{t("issue")}</SelectItem>
+          <SelectItem value="volume">
+            {nomenclatureLabel("volume", locale)}
+          </SelectItem>
+          <SelectItem value="issue">
+            {nomenclatureLabel("issue", locale)}
+          </SelectItem>
         </SelectContent>
       </Select>
+    </div>
+  );
+}
+
+export function defaultNomenclatureFor(category: Category): Nomenclature {
+  return category === "comic" || category === "magazine" ? "issue" : "volume";
+}
+
+export function CategoryNomenclatureFields({
+  category,
+  nomenclature,
+  onChange,
+}: {
+  category: Category;
+  nomenclature: Nomenclature;
+  onChange: (patch: {
+    category?: Category;
+    nomenclature: Nomenclature;
+  }) => void;
+}) {
+  const { locale, t } = useLocale();
+
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 [&>*]:min-w-0 [&_button]:w-full">
+      <div className="min-w-0 space-y-2">
+        <Label>{t("category")}</Label>
+        <Select
+          onValueChange={(next) => {
+            const nextCategory = next as Category;
+            onChange({
+              category: nextCategory,
+              nomenclature: defaultNomenclatureFor(nextCategory),
+            });
+          }}
+          items={CATEGORIES.map((item) => ({
+            value: item,
+            label: categoryLabel(item, locale),
+          }))}
+          value={category}
+        >
+          <SelectTrigger aria-label={t("category")}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {CATEGORIES.map((item) => (
+              <SelectItem key={item} value={item}>
+                {categoryLabel(item, locale)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="min-w-0">
+        <NomenclatureField
+          onChange={(next) => onChange({ nomenclature: next })}
+          value={nomenclature}
+        />
+      </div>
+    </div>
+  );
+}
+
+export function TotalField({
+  id,
+  value,
+  nomenclature,
+  onValueChange,
+  onCommit,
+}: {
+  id: string;
+  value: string;
+  nomenclature: Nomenclature;
+  onValueChange: (value: string) => void;
+  onCommit?: (total: number) => void;
+}) {
+  const { t } = useLocale();
+  const step = (delta: number) => {
+    const next = Math.max(1, (Math.floor(Number(value)) || 1) + delta);
+    onValueChange(String(next));
+    onCommit?.(next);
+  };
+
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={id}>
+        {t("total")} {nomenclature === "issue" ? t("issue") : t("volume")}
+      </Label>
+      <div className="flex items-center gap-2">
+        <Button
+          aria-label={t("decreaseTotal")}
+          onClick={() => step(-1)}
+          size="icon"
+          type="button"
+          variant="outline"
+        >
+          <Minus />
+        </Button>
+        <Input
+          className="text-center"
+          id={id}
+          min={1}
+          onBlur={(event) =>
+            onCommit?.(Math.max(1, Math.floor(Number(event.target.value)) || 1))
+          }
+          onChange={(event) => onValueChange(event.target.value)}
+          required
+          step={1}
+          type="number"
+          value={value}
+        />
+        <Button
+          aria-label={t("increaseTotal")}
+          onClick={() => step(1)}
+          size="icon"
+          type="button"
+          variant="outline"
+        >
+          <Plus />
+        </Button>
+      </div>
     </div>
   );
 }

@@ -1,26 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import { HoldAction } from "@/components/fichas";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useLocale } from "@/lib/i18n";
 import {
   type Appearance,
-  CATEGORIES,
-  type Category,
   DEFAULT_APPEARANCE,
   type Series,
   trimSeriesToTotal,
 } from "@/lib/store";
-import { AppearanceFields, NomenclatureField } from "./appearance-fields";
+import {
+  AppearanceFields,
+  CategoryNomenclatureFields,
+  TotalField,
+} from "./appearance-fields";
 
 export function InlineEdit({
   series,
@@ -39,29 +35,30 @@ export function InlineEdit({
 }) {
   const { t } = useLocale();
   const appearance = series.appearance ?? DEFAULT_APPEARANCE;
+  const nomenclature = series.nomenclature ?? "volume";
+  const [total, setTotal] = useState(String(series.total));
+
+  const finish = () => {
+    onEditingChange?.(false);
+    onClose();
+  };
+
+  const commitTotal = (next: number) => {
+    setTotal(String(next));
+    if (next !== series.total) onUpdate(trimSeriesToTotal(series, next));
+  };
 
   return (
     <div
       className="flex min-h-full flex-col gap-4 pb-10"
       onKeyDown={(event) => {
-        if (event.key === "Escape") {
-          onEditingChange?.(false);
-          onClose();
-        }
+        if (event.key === "Escape") finish();
       }}
       onPointerDown={(event) => event.stopPropagation()}
     >
       <div className="flex items-center justify-between border-b border-current/20 pb-3">
         <h3 className="font-display text-xl">{t("editCard")}</h3>
-        <Button
-          onClick={() => {
-            onEditingChange?.(false);
-            onClose();
-          }}
-          size="sm"
-          type="button"
-          variant="ghost"
-        >
+        <Button onClick={finish} size="sm" type="button" variant="ghost">
           {t("finish")}
         </Button>
       </div>
@@ -72,69 +69,38 @@ export function InlineEdit({
           defaultValue={series.title}
           id="inline-title"
           onBlur={(event) => {
-            if (event.target.value.trim()) {
-              onUpdate({ title: event.target.value.trim() });
-            }
+            const title = event.target.value.trim();
+            if (title && title !== series.title) onUpdate({ title });
           }}
+          placeholder="Ex: Dragon Ball"
         />
       </div>
 
-      <div className="space-y-2">
-        <Label>{t("category")}</Label>
-        <Select
-          onValueChange={(category) =>
-            onUpdate({ category: category as Category })
-          }
-          value={series.category}
-        >
-          <SelectTrigger aria-label={t("category")}>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {CATEGORIES.map((category) => (
-              <SelectItem key={category} value={category}>
-                {category}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <NomenclatureField
-        onChange={(nomenclature) => onUpdate({ nomenclature })}
-        value={series.nomenclature ?? "volume"}
+      <CategoryNomenclatureFields
+        category={series.category}
+        nomenclature={nomenclature}
+        onChange={onUpdate}
       />
 
-      <div className="space-y-2">
-        <Label htmlFor="inline-total">
-          {t("total")}{" "}
-          {series.nomenclature === "issue" ? t("issue") : t("volume")}
-        </Label>
-        <Input
-          defaultValue={series.total}
-          id="inline-total"
-          min={1}
-          onBlur={(event) => {
-            const total = Math.max(
-              1,
-              Math.floor(Number(event.target.value) || series.total),
-            );
-            onUpdate(trimSeriesToTotal(series, total));
-          }}
-          step={1}
-          type="number"
-        />
-      </div>
+      <TotalField
+        id="inline-total"
+        nomenclature={nomenclature}
+        onCommit={commitTotal}
+        onValueChange={setTotal}
+        value={total}
+      />
 
       <AppearanceFields onChange={onAppearance} value={appearance} />
 
-      <HoldAction
-        label={t("deleteCard")}
-        onComplete={() => {
-          onEditingChange?.(false);
-          onDelete();
-        }}
-      />
+      <div className="mt-auto grid">
+        <HoldAction
+          label={t("deleteCard")}
+          onComplete={() => {
+            onEditingChange?.(false);
+            onDelete();
+          }}
+        />
+      </div>
     </div>
   );
 }
