@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { StackView } from "@/components/fichas";
+import { FichaSkeleton, StackView } from "@/components/fichas";
 import { Navbar } from "@/components/navbar";
 import { LooseItemsCard } from "@/components/tally/loose-items-card";
 import { NewFichaCard } from "@/components/tally/new-ficha-card";
@@ -552,9 +552,7 @@ export default function HomePage() {
         query={query}
       />
       {!loaded ? (
-        <p className="py-12 text-center text-sm text-muted-foreground">
-          {t("opening")}
-        </p>
+        <FichaSkeleton label={t("opening")} />
       ) : cards.length === 0 ? (
         <p className="py-12 text-center text-sm text-muted-foreground">
           {t("noCardsFound")}

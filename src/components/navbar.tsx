@@ -1,36 +1,12 @@
 "use client";
 
-import {
-  BookOpen,
-  CircleHelp,
-  Download,
-  Languages,
-  Layers,
-  List,
-  Moon,
-  Plus,
-  Search,
-  Sparkles,
-  Sun,
-  Upload,
-} from "lucide-react";
+import { Plus, Sparkles } from "lucide-react";
+import dynamic from "next/dynamic";
 import Link from "next/link";
-import { useTheme } from "next-themes";
 import { useState } from "react";
 import { toast } from "sonner";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
-import {
-  Command,
-  CommandDialog,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-  CommandSeparator,
-  CommandShortcut,
-} from "@/components/ui/command";
 import {
   Dialog,
   DialogContent,
@@ -40,6 +16,11 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocale } from "@/lib/i18n";
+
+const CommandMenu = dynamic(
+  () => import("./command-menu").then((module) => module.CommandMenu),
+  { ssr: false },
+);
 
 const navButtonClassName =
   "size-12 shrink-0 cursor-pointer rounded-none border-0 bg-clip-border p-0 text-[#252525] outline-none hover:bg-[#252525] hover:text-[#eaeaea] focus-visible:ring-2 focus-visible:ring-ring active:not-aria-[haspopup]:translate-y-0 dark:text-[#eaeaea] dark:hover:bg-[#eaeaea] dark:hover:text-[#252525] [&_svg]:size-4.5";
@@ -69,6 +50,7 @@ export function Navbar({
 }: NavbarProps) {
   const { t } = useLocale();
   const [commandOpen, setCommandOpen] = useState(false);
+  const [commandRequested, setCommandRequested] = useState(false);
   const [helpOpen, setHelpOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState("");
@@ -100,7 +82,12 @@ export function Navbar({
           <Button
             aria-label={t("commandMenu")}
             className={navButtonClassName}
-            onClick={() => setCommandOpen(true)}
+            onClick={() => {
+              setCommandRequested(true);
+              setCommandOpen(true);
+            }}
+            onFocus={() => setCommandRequested(true)}
+            onPointerEnter={() => setCommandRequested(true)}
             title={t("commandMenu")}
             variant="ghost"
           >
@@ -109,27 +96,29 @@ export function Navbar({
         </div>
       </div>
 
-      <CommandMenu
-        cardCount={cardCount}
-        commandOpen={commandOpen}
-        missingCount={missingCount}
-        mode={mode}
-        onCommandOpenChange={setCommandOpen}
-        onExport={onExport}
-        onHelp={() => {
-          setCommandOpen(false);
-          setHelpOpen(true);
-        }}
-        onImportOpen={() => {
-          setCommandOpen(false);
-          setImportError("");
-          setImportOpen(true);
-        }}
-        onModeChange={onModeChange}
-        onQueryChange={onQueryChange}
-        onStartAdding={onStartAdding}
-        query={query}
-      />
+      {commandRequested && (
+        <CommandMenu
+          cardCount={cardCount}
+          commandOpen={commandOpen}
+          missingCount={missingCount}
+          mode={mode}
+          onCommandOpenChange={setCommandOpen}
+          onExport={onExport}
+          onHelp={() => {
+            setCommandOpen(false);
+            setHelpOpen(true);
+          }}
+          onImportOpen={() => {
+            setCommandOpen(false);
+            setImportError("");
+            setImportOpen(true);
+          }}
+          onModeChange={onModeChange}
+          onQueryChange={onQueryChange}
+          onStartAdding={onStartAdding}
+          query={query}
+        />
+      )}
 
       <Dialog onOpenChange={setHelpOpen} open={helpOpen}>
         <DialogContent>
@@ -189,140 +178,5 @@ export function Navbar({
         </DialogContent>
       </Dialog>
     </header>
-  );
-}
-
-function CommandMenu({
-  cardCount,
-  commandOpen,
-  missingCount,
-  mode,
-  onCommandOpenChange,
-  onExport,
-  onHelp,
-  onImportOpen,
-  onModeChange,
-  onQueryChange,
-  onStartAdding,
-  query,
-}: {
-  cardCount: number;
-  commandOpen: boolean;
-  missingCount: number;
-  mode: "stack" | "list";
-  onCommandOpenChange: (open: boolean) => void;
-  onExport: () => void;
-  onHelp: () => void;
-  onImportOpen: () => void;
-  onModeChange: (mode: "stack" | "list") => void;
-  onQueryChange: (query: string) => void;
-  onStartAdding: () => void;
-  query: string;
-}) {
-  const { locale, setLocale, t } = useLocale();
-  const { setTheme } = useTheme();
-
-  const run = (action: () => void) => {
-    action();
-    onCommandOpenChange(false);
-  };
-
-  return (
-    <CommandDialog
-      description={t("commandDescription")}
-      onOpenChange={onCommandOpenChange}
-      open={commandOpen}
-      title={t("commandMenu")}
-    >
-      <Command shouldFilter={false}>
-        <CommandInput
-          onValueChange={onQueryChange}
-          placeholder={t("commandPlaceholder")}
-          value={query}
-        />
-        <CommandList>
-          <CommandEmpty>{t("noCommands")}</CommandEmpty>
-          {query && (
-            <CommandGroup heading={t("commandSearch")}>
-              <CommandItem onSelect={() => onCommandOpenChange(false)}>
-                <Search />
-                {t("showFiltered")}
-                <CommandShortcut>{query}</CommandShortcut>
-              </CommandItem>
-            </CommandGroup>
-          )}
-          <CommandGroup heading={t("commandOverview")}>
-            <CommandItem disabled>
-              <span className="font-mono text-xs">
-                {String(cardCount).padStart(2, "0")}{" "}
-                {cardCount === 1 ? t("card") : t("cards")} · {missingCount}{" "}
-                {t("missing")}
-              </span>
-            </CommandItem>
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading={t("commandActions")}>
-            <CommandItem onSelect={() => run(onStartAdding)}>
-              <Plus />
-              {t("newCard")}
-              <CommandShortcut>N</CommandShortcut>
-            </CommandItem>
-            <CommandItem onSelect={() => run(onExport)}>
-              <Download />
-              {t("exportData")}
-            </CommandItem>
-            <CommandItem onSelect={onImportOpen}>
-              <Upload />
-              {t("importData")}
-            </CommandItem>
-            <CommandItem onSelect={() => run(() => onModeChange("stack"))}>
-              <Layers />
-              {t("stackedCards")}
-              {mode === "stack" && (
-                <CommandShortcut>{t("active")}</CommandShortcut>
-              )}
-            </CommandItem>
-            <CommandItem onSelect={() => run(() => onModeChange("list"))}>
-              <List />
-              {t("continuousList")}
-              {mode === "list" && (
-                <CommandShortcut>{t("active")}</CommandShortcut>
-              )}
-            </CommandItem>
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading={t("commandPreferences")}>
-            <CommandItem
-              onSelect={() =>
-                run(() => setLocale(locale === "pt-BR" ? "en" : "pt-BR"))
-              }
-            >
-              <Languages />
-              {t("language")}:{" "}
-              {locale === "pt-BR" ? t("portuguese") : t("english")}
-            </CommandItem>
-            <CommandItem onSelect={() => run(() => setTheme("light"))}>
-              <Sun />
-              {t("light")}
-            </CommandItem>
-            <CommandItem onSelect={() => run(() => setTheme("dark"))}>
-              <Moon />
-              {t("dark")}
-            </CommandItem>
-            <CommandItem onSelect={() => run(() => setTheme("book"))}>
-              <BookOpen />
-              {t("book")}
-            </CommandItem>
-          </CommandGroup>
-          <CommandSeparator />
-          <CommandGroup heading={t("commandHelp")}>
-            <CommandItem onSelect={onHelp}>
-              <CircleHelp />
-              {t("help")}
-            </CommandItem>
-          </CommandGroup>
-        </CommandList>
-      </Command>
-    </CommandDialog>
   );
 }
