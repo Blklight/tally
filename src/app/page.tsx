@@ -319,6 +319,32 @@ export default function HomePage() {
     setIndex(0);
   }, []);
 
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (
+        event.key.toLowerCase() !== "n" ||
+        event.repeat ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey
+      ) {
+        return;
+      }
+      const target = event.target as HTMLElement | null;
+      if (
+        target?.closest(
+          "input, textarea, select, [contenteditable='true'], [role='dialog']",
+        )
+      ) {
+        return;
+      }
+      event.preventDefault();
+      startAdding();
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [startAdding]);
+
   const handleCreate = useCallback(
     (
       title: string,
