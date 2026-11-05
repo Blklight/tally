@@ -93,22 +93,28 @@ export function InlineCreate({
 
       <div className="space-y-2">
         <Label>{t("cardType")}</Label>
-        <div className="grid grid-cols-2 gap-2">
-          <Button
-            onClick={() => setCardType("collection")}
-            type="button"
-            variant={cardType === "collection" ? "default" : "outline"}
-          >
-            {t("collectionCard")}
-          </Button>
-          <Button
-            onClick={() => setCardType("loose")}
-            type="button"
-            variant={cardType === "loose" ? "default" : "outline"}
-          >
-            {t("looseCard")}
-          </Button>
-        </div>
+        <fieldset
+          aria-label={t("cardType")}
+          className="grid min-w-0 grid-cols-2 gap-1 rounded-md border border-border p-1"
+        >
+          {(
+            [
+              ["collection", t("collectionCard")],
+              ["loose", t("looseCard")],
+            ] as const
+          ).map(([value, label]) => (
+            <Button
+              aria-pressed={cardType === value}
+              className="h-8"
+              key={value}
+              onClick={() => setCardType(value)}
+              type="button"
+              variant={cardType === value ? "default" : "ghost"}
+            >
+              {label}
+            </Button>
+          ))}
+        </fieldset>
         {cardType === "loose" && (
           <p className="text-xs text-muted-foreground">
             {t("looseCardDescription")}

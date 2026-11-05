@@ -1103,6 +1103,43 @@
   box-shadow: var(--shadow-paper);
 }
 
+.flip-scene[data-paper] {
+  --background: var(--paper);
+  --foreground: var(--paper-ink);
+  --primary: var(--paper-ink);
+  --primary-foreground: var(--paper);
+  --secondary: color-mix(in oklab, var(--paper-ink) 10%, var(--paper));
+  --secondary-foreground: var(--paper-ink);
+  --muted: color-mix(in oklab, var(--paper-ink) 10%, var(--paper));
+  --muted-foreground: color-mix(in oklab, var(--paper-ink) 65%, var(--paper));
+  --accent: color-mix(in oklab, var(--paper-ink) 12%, var(--paper));
+  --accent-foreground: var(--paper-ink);
+  --border: color-mix(in oklab, var(--paper-ink) 35%, var(--paper));
+  --input: color-mix(in oklab, var(--paper-ink) 35%, var(--paper));
+  --ring: color-mix(in oklab, var(--paper-ink) 55%, var(--paper));
+}
+
+.flip-scene[data-paper]
+  :is(
+    [data-slot="input"],
+    [data-slot="textarea"],
+    [data-slot="select-trigger"]
+  ) {
+  background-color: color-mix(in oklab, var(--paper-ink) 6%, var(--paper));
+  color: var(--paper-ink);
+}
+
+.flip-scene[data-paper]
+  :is([data-slot="input"], [data-slot="textarea"])::placeholder {
+  color: color-mix(in oklab, var(--paper-ink) 45%, var(--paper));
+}
+
+.flip-scene[data-paper] [data-slot="button"][aria-pressed="false"] {
+  background-color: transparent;
+  border-color: var(--border);
+  color: var(--paper-ink);
+}
+
 .ficha::before,
 .ficha-form::before {
   content: "";
