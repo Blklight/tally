@@ -69,6 +69,24 @@ export function getContrastInk(color: string): InkColor {
   return luminance > 0.58 ? "graphite" : "light";
 }
 
+export type SortCriterion = "order" | "missing";
+export type SortDirection = "asc" | "desc";
+export interface SortPreference {
+  criterion: SortCriterion;
+  direction: SortDirection;
+}
+export const DEFAULT_SORT: SortPreference = {
+  criterion: "order",
+  direction: "asc",
+};
+
+export function normalizeSort(sort?: Partial<SortPreference>): SortPreference {
+  return {
+    criterion: sort?.criterion === "missing" ? "missing" : "order",
+    direction: sort?.direction === "desc" ? "desc" : "asc",
+  };
+}
+
 export interface Series {
   id: string;
   title: string;
@@ -82,6 +100,7 @@ export interface Series {
   looseItems?: LooseItem[];
   volumeNotes?: Record<number, string>;
   priorityVolumes?: number[];
+  sort?: SortPreference;
 }
 
 export interface LooseItem {
@@ -117,10 +136,28 @@ export function orderByPriority<T>(
   ];
 }
 
+export function sortEntries<T>(
+  entries: T[],
+  sort: SortPreference,
+  isDone: (entry: T) => boolean,
+  isPriority: (entry: T) => boolean,
+): T[] {
+  const directed = sort.direction === "desc" ? [...entries].reverse() : entries;
+  const grouped =
+    sort.criterion === "missing"
+      ? [
+          ...directed.filter((entry) => !isDone(entry)),
+          ...directed.filter((entry) => isDone(entry)),
+        ]
+      : directed;
+  return orderByPriority(grouped, isPriority);
+}
+
 export interface Data {
   series: Series[];
   items: LooseItem[];
   looseAppearance?: Appearance;
+  looseSort?: SortPreference;
   initialized?: boolean;
 }
 
@@ -166,6 +203,7 @@ function normalizeSeries(
       )
       .sort((a, b) => a - b),
     looseItems: (series.looseItems ?? []).map(normalizeLooseItem),
+    sort: normalizeSort(series.sort),
   };
 }
 
@@ -173,12 +211,14 @@ function normalizeData(data: {
   series?: Array<Partial<Series> & { missing?: number[] }>;
   items?: Array<Partial<LooseItem>>;
   looseAppearance?: Partial<Appearance>;
+  looseSort?: Partial<SortPreference>;
   initialized?: boolean;
 }): Data {
   return {
     series: (data.series ?? []).map(normalizeSeries),
     items: (data.items ?? []).map(normalizeLooseItem),
     looseAppearance: normalizeAppearance(data.looseAppearance),
+    looseSort: normalizeSort(data.looseSort),
     initialized: data.initialized ?? false,
   };
 }
@@ -334,6 +374,7 @@ export function initializeData(existing: Data = empty): Data {
       : [dragonBall, ...existing.series]
     ).map(normalizeSeries),
     looseAppearance: normalizeAppearance(existing.looseAppearance),
+    looseSort: normalizeSort(existing.looseSort),
   };
 }
 

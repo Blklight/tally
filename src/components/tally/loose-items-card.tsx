@@ -1,7 +1,7 @@
 "use client";
 
 import { BookOpen, Plus } from "lucide-react";
-import { type ReactNode, useState } from "react";
+import { useState } from "react";
 import { Ficha, HoldRow } from "@/components/fichas";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,10 +19,11 @@ import {
   type Data,
   DEFAULT_APPEARANCE,
   type LooseItem,
-  orderByPriority,
+  type SortPreference,
+  sortEntries,
 } from "@/lib/store";
 import { AppearanceFields } from "./appearance-fields";
-import type { SortMode } from "./types";
+import { SortMenu } from "./sort-menu";
 
 function LooseItemsEdit({
   appearance,
@@ -64,7 +65,7 @@ export function LooseItemsCard({
   data,
   big,
   sort,
-  sortButton,
+  onSortChange,
   query,
   onToggleItem,
   onAddItem,
@@ -78,8 +79,8 @@ export function LooseItemsCard({
 }: {
   data: Data;
   big?: boolean;
-  sort: SortMode;
-  sortButton: ReactNode;
+  sort: SortPreference;
+  onSortChange: (sort: SortPreference) => void;
   query: string;
   onToggleItem: (item: LooseItem) => void;
   onAddItem: (title: string, category: Category) => void;
@@ -104,15 +105,10 @@ export function LooseItemsCard({
       t("looseItems").toLowerCase().includes(normalizedQuery) ||
       item.title.toLowerCase().includes(normalizedQuery),
   );
-  const sorted =
-    sort === "missing"
-      ? [
-          ...items.filter((item) => !item.found),
-          ...items.filter((item) => item.found),
-        ]
-      : items;
-  const ordered = orderByPriority(
-    sorted,
+  const ordered = sortEntries(
+    items,
+    sort,
+    (item) => !!item.found,
     (item) => !!item.priority && !item.found,
   );
 
@@ -120,7 +116,7 @@ export function LooseItemsCard({
 
   return (
     <Ficha
-      actions={sortButton}
+      actions={<SortMenu onChange={onSortChange} value={sort} />}
       appearance={cardAppearance}
       big={big}
       category={categoryLabel("individual-items", locale)}

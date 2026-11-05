@@ -1,6 +1,5 @@
 "use client";
 
-import { ArrowDownUp } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { StackView } from "@/components/fichas";
@@ -9,13 +8,7 @@ import { LooseItemsCard } from "@/components/tally/loose-items-card";
 import { NewFichaCard } from "@/components/tally/new-ficha-card";
 import { SeriesCard } from "@/components/tally/series-card";
 import { TallyToolbar } from "@/components/tally/tally-toolbar";
-import {
-  type Card,
-  LOOSE_ID,
-  NEW_ID,
-  type SortMode,
-} from "@/components/tally/types";
-import { Button } from "@/components/ui/button";
+import { type Card, LOOSE_ID, NEW_ID } from "@/components/tally/types";
 import {
   Carousel,
   type CarouselApi,
@@ -34,7 +27,9 @@ import {
   type Nomenclature,
   normalizeAppearance,
   normalizeImportedData,
+  normalizeSort,
   type Series,
+  type SortPreference,
   toggleMissing,
   uid,
   useData,
@@ -48,7 +43,6 @@ export default function HomePage() {
   const { t } = useLocale();
   const [data, setData, loaded] = useData();
   const [query, setQuery] = useState("");
-  const [sort, setSort] = useState<SortMode>("order");
   const [mode, setModeState] = useState<ViewMode>("stack");
   const setMode = useCallback((nextMode: ViewMode) => {
     setModeState(nextMode);
@@ -285,6 +279,13 @@ export default function HomePage() {
     [setData],
   );
 
+  const setLooseSort = useCallback(
+    (looseSort: SortPreference) => {
+      setData((currentData) => ({ ...currentData, looseSort }));
+    },
+    [setData],
+  );
+
   const exportData = useCallback(() => {
     const blob = new Blob([JSON.stringify(data, null, 2)], {
       type: "application/json",
@@ -345,26 +346,6 @@ export default function HomePage() {
       setIndex(0);
     },
     [setData],
-  );
-
-  const sortButton = useMemo(
-    () => (
-      <Button
-        aria-label={t("missingFirst")}
-        className="h-7 px-2 text-xs text-inherit hover:bg-current/10 hover:text-inherit"
-        onClick={() =>
-          setSort((currentSort) =>
-            currentSort === "order" ? "missing" : "order",
-          )
-        }
-        size="sm"
-        variant="ghost"
-      >
-        <ArrowDownUp className="size-3.5" />
-        {sort === "order" ? t("inOrder") : t("missingFirst")}
-      </Button>
-    ),
-    [sort, t],
   );
 
   const renderCard = useCallback(
@@ -449,9 +430,9 @@ export default function HomePage() {
                   ),
                 })
               }
+              onSortChange={(sort) => updateSeries(series.id, { sort })}
               query={query}
-              sort={sort}
-              sortButton={sortButton}
+              sort={normalizeSort(series.sort)}
               title={series.title}
             />
           );
@@ -479,9 +460,8 @@ export default function HomePage() {
             }}
             onToggleVolume={(volume) => toggleVolume(series.id, volume)}
             onUpdate={(patch) => updateSeries(series.id, patch)}
+            onSortChange={(sort) => updateSeries(series.id, { sort })}
             series={series}
-            sort={sort}
-            sortButton={sortButton}
           />
         );
       }
@@ -505,9 +485,9 @@ export default function HomePage() {
           onAppearanceChange={setLooseAppearance}
           onTogglePriority={(item) => togglePriority(item.id)}
           onToggleItem={(item) => toggleItem(item.id)}
+          onSortChange={setLooseSort}
           query={query}
-          sort={sort}
-          sortButton={sortButton}
+          sort={normalizeSort(data.looseSort)}
         />
       );
     },
@@ -523,8 +503,7 @@ export default function HomePage() {
       removeLooseSeriesItem,
       removeSeries,
       setLooseAppearance,
-      sort,
-      sortButton,
+      setLooseSort,
       toggleItem,
       toggleVolume,
       updateSeries,
