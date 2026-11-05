@@ -1,22 +1,22 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { Ficha, HoldRow } from "@/components/fichas";
 import { categoryLabel, useLocale } from "@/lib/i18n";
 import {
   type Appearance,
-  orderByPriority,
+  normalizeSort,
   type Series,
+  type SortPreference,
+  sortEntries,
   volumeLabel,
 } from "@/lib/store";
 import { InlineEdit } from "./inline-edit";
-import type { SortMode } from "./types";
+import { SortMenu } from "./sort-menu";
 
 export function SeriesCard({
   series,
   big,
-  sort,
-  sortButton,
+  onSortChange,
   onUpdate,
   onAppearance,
   onDelete,
@@ -26,8 +26,7 @@ export function SeriesCard({
 }: {
   series: Series;
   big?: boolean;
-  sort: SortMode;
-  sortButton: ReactNode;
+  onSortChange: (sort: SortPreference) => void;
   onUpdate: (patch: Partial<Series>) => void;
   onAppearance: (appearance: Appearance) => void;
   onDelete: () => void;
@@ -37,15 +36,11 @@ export function SeriesCard({
 }) {
   const { locale, t } = useLocale();
   const volumes = Array.from({ length: series.total }, (_, index) => index + 1);
-  const sorted =
-    sort === "missing"
-      ? [
-          ...volumes.filter((volume) => !series.acquired?.includes(volume)),
-          ...volumes.filter((volume) => series.acquired?.includes(volume)),
-        ]
-      : volumes;
-  const ordered = orderByPriority(
-    sorted,
+  const sort = normalizeSort(series.sort);
+  const ordered = sortEntries(
+    volumes,
+    sort,
+    (volume) => !!series.acquired?.includes(volume),
     (volume) =>
       !!series.priorityVolumes?.includes(volume) &&
       !series.acquired?.includes(volume),
@@ -65,7 +60,9 @@ export function SeriesCard({
 
   return (
     <Ficha
-      actions={sortButton}
+      actions={
+        <SortMenu onChange={onSortChange} total={series.total} value={sort} />
+      }
       appearance={series.appearance}
       big={big}
       category={`${categoryLabel(series.category, locale)} / ${unit}`}

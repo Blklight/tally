@@ -7,7 +7,9 @@ import {
   mergeImportedData,
   normalizeAppearance,
   normalizeImportedData,
+  normalizeSort,
   orderByPriority,
+  sortEntries,
   toggleMissing,
   trimSeriesToTotal,
   uid,
@@ -204,5 +206,71 @@ describe("Series and import helpers", () => {
     ]);
     expect(result.data.items.map((item) => item.id)).toEqual(["piaui"]);
     expect(mergeImportedData(result.data, imported).imported).toBe(0);
+  });
+});
+
+describe("Sorting inside a card", () => {
+  const acquired = [2, 4];
+  const priority = [1, 4];
+  const sortVolumes = (
+    criterion: "order" | "missing",
+    direction: "asc" | "desc",
+  ) =>
+    sortEntries(
+      [1, 2, 3, 4, 5],
+      { criterion, direction },
+      (volume) => acquired.includes(volume),
+      (volume) => priority.includes(volume) && !acquired.includes(volume),
+    );
+
+  it("lists volumes ascending or descending, always with pending priorities first", () => {
+    expect(sortVolumes("order", "asc")).toEqual([1, 2, 3, 4, 5]);
+    expect(sortVolumes("order", "desc")).toEqual([1, 5, 4, 3, 2]);
+  });
+
+  it("combines missing first with either direction", () => {
+    expect(sortVolumes("missing", "asc")).toEqual([1, 3, 5, 2, 4]);
+    expect(sortVolumes("missing", "desc")).toEqual([1, 5, 3, 4, 2]);
+  });
+
+  it("does not mutate the source list", () => {
+    const volumes = [1, 2, 3];
+    sortEntries(
+      volumes,
+      { criterion: "order", direction: "desc" },
+      () => false,
+      () => false,
+    );
+    expect(volumes).toEqual([1, 2, 3]);
+  });
+
+  it("falls back to ascending order for missing or invalid preferences", () => {
+    expect(normalizeSort()).toEqual({ criterion: "order", direction: "asc" });
+    expect(normalizeSort({ criterion: "x", direction: "y" } as never)).toEqual({
+      criterion: "order",
+      direction: "asc",
+    });
+  });
+
+  it("keeps each card's sort preference through normalization", () => {
+    const data = normalizeImportedData({
+      series: [
+        {
+          id: "db",
+          title: "Dragon Ball",
+          total: 42,
+          sort: { criterion: "missing", direction: "desc" },
+        },
+        { id: "op", title: "One Piece", total: 3 },
+      ],
+      items: [],
+      looseSort: { criterion: "order", direction: "desc" },
+    });
+
+    expect(data?.series.map((series) => series.sort)).toEqual([
+      { criterion: "missing", direction: "desc" },
+      { criterion: "order", direction: "asc" },
+    ]);
+    expect(data?.looseSort).toEqual({ criterion: "order", direction: "desc" });
   });
 });
