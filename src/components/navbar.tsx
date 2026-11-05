@@ -1,10 +1,11 @@
 "use client";
 
-import { Plus, Sparkles } from "lucide-react";
+import { CircleHelp, Plus, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
+import { HelpDialog } from "@/components/help-dialog";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
 import {
@@ -80,6 +81,16 @@ export function Navbar({
 
           <AnimatedThemeToggler className={navButtonClassName} />
           <Button
+            aria-label={t("help")}
+            className={navButtonClassName}
+            onClick={() => setHelpOpen(true)}
+            size="icon"
+            title={t("help")}
+            variant="ghost"
+          >
+            <CircleHelp />
+          </Button>
+          <Button
             aria-label={t("commandMenu")}
             className={navButtonClassName}
             onClick={() => {
@@ -120,21 +131,7 @@ export function Navbar({
         />
       )}
 
-      <Dialog onOpenChange={setHelpOpen} open={helpOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("helpTitle")}</DialogTitle>
-            <DialogDescription>{t("helpIntro")}</DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-3 text-sm text-muted-foreground">
-            <p>{t("helpCreate")}</p>
-            <p>{t("helpCheck")}</p>
-            <p>{t("helpViews")}</p>
-            <p>{t("helpNavigation")}</p>
-            <p>{t("helpGestures")}</p>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <HelpDialog onOpenChange={setHelpOpen} open={helpOpen} />
 
       <Dialog onOpenChange={setImportOpen} open={importOpen}>
         <DialogContent className="max-w-lg">

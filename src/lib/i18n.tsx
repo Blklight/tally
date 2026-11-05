@@ -42,17 +42,44 @@ const messages = {
     import: "Importar",
     help: "Ajuda",
     helpTitle: "Como usar o Tally",
-    helpIntro: "Organize suas coleções e acompanhe o que já foi adquirido.",
-    helpCreate:
-      "Use Nova ficha para criar uma coleção ou abrir uma ficha de avulsos.",
-    helpCheck:
-      "Marque os itens conforme você os adquire. O progresso é atualizado automaticamente.",
-    helpViews:
-      "Alterne entre fichas empilhadas e lista contínua no menu de visualização.",
-    helpNavigation:
-      "Use as setas para navegar entre fichas e voltar para a ficha anterior.",
-    helpGestures:
-      "No mobile, deslize para a esquerda ou direita para trocar de ficha. No desktop, você também pode arrastar a ficha horizontalmente com o mouse ou trackpad.",
+    helpIntro:
+      "Cada coleção é uma ficha. Marque o que já tem e veja o que falta.",
+    helpStartTitle: "Começar",
+    helpStartCreate:
+      "Toque em + para criar uma ficha. Escolha Coleção numerada para séries com total (mangás, HQs) ou Itens avulsos para uma lista livre.",
+    helpStartLoose:
+      "A ficha de Avulsos fica sempre no fim do fichário, para itens que não pertencem a uma série.",
+    helpCheckTitle: "Marcar itens",
+    helpCheckHold:
+      "Na capa, toque em Ver itens para virar a ficha. Pressione e segure um item até a barra encher para marcá-lo ou desmarcá-lo.",
+    helpCheckProgress:
+      "O progresso e a contagem de faltantes na capa se atualizam sozinhos.",
+    helpItemTitle: "Ações do item",
+    helpItemSwipe:
+      "Deslize um item para a esquerda para ver as ações: prioridade (fica no topo com uma estrela), editar, nota e excluir.",
+    helpItemFull:
+      "Um deslize longo executa a primeira ação de uma vez. Se excluir algo sem querer, use Desfazer no aviso que aparece.",
+    helpOrganizeTitle: "Organizar fichas",
+    helpOrganizeSort:
+      "Cada ficha guarda sua própria ordenação: por ordem ou faltantes primeiro, crescente ou decrescente.",
+    helpOrganizeEdit:
+      "Use o lápis na capa para mudar título, total e cor do papel, ou para excluir a ficha.",
+    helpNavTitle: "Navegar",
+    helpNavMove:
+      "Troque de ficha pelas setas abaixo do fichário, deslizando a ficha para os lados ou arrastando com o mouse.",
+    helpNavCommands:
+      "Em Comandos (✨) você filtra fichas pelo nome, alterna entre fichas empilhadas e lista contínua e muda tema e idioma.",
+    helpDataTitle: "Seus dados",
+    helpDataLocal:
+      "Tudo fica salvo apenas neste navegador. Limpar os dados do site apaga suas fichas.",
+    helpDataBackup:
+      "Use Exportar dados em Comandos para guardar um backup em JSON. Importar ignora itens repetidos.",
+    helpKeysTitle: "Atalhos de teclado",
+    keyNewCard: "Nova ficha",
+    keySpace: "Espaço",
+    keyChangeCard: "Trocar de ficha",
+    keyToggleItem: "Marcar item em foco",
+    keyItemActions: "Abrir ações do item",
     view: "Visualização",
     stackedCards: "Fichas empilhadas",
     continuousList: "Lista contínua",
@@ -177,17 +204,44 @@ const messages = {
     import: "Import",
     help: "Help",
     helpTitle: "How to use Tally",
-    helpIntro: "Organize your collections and track what you have acquired.",
-    helpCreate:
-      "Use New card to create a collection or open the loose-items card.",
-    helpCheck:
-      "Mark items as you acquire them. Progress updates automatically.",
-    helpViews:
-      "Switch between stacked cards and the continuous list from the view menu.",
-    helpNavigation:
-      "Use the arrows to move between cards and return to the previous card.",
-    helpGestures:
-      "On mobile, swipe left or right to change cards. On desktop, drag the card horizontally with your mouse or trackpad.",
+    helpIntro:
+      "Each collection is a card. Check what you own and see what's missing.",
+    helpStartTitle: "Getting started",
+    helpStartCreate:
+      "Tap + to create a card. Pick Numbered collection for series with a total (manga, comics) or Loose items for a free-form list.",
+    helpStartLoose:
+      "The Loose items card always sits at the end of the binder, for things that don't belong to a series.",
+    helpCheckTitle: "Checking items",
+    helpCheckHold:
+      "On the cover, tap View items to flip the card. Press and hold an item until the bar fills to check or uncheck it.",
+    helpCheckProgress:
+      "Progress and the missing count on the cover update on their own.",
+    helpItemTitle: "Item actions",
+    helpItemSwipe:
+      "Swipe an item to the left to see its actions: priority (pinned to the top with a star), edit, note and delete.",
+    helpItemFull:
+      "A long swipe runs the first action right away. If you delete something by mistake, use Undo on the notice that appears.",
+    helpOrganizeTitle: "Organizing cards",
+    helpOrganizeSort:
+      "Each card keeps its own sort: in order or missing first, ascending or descending.",
+    helpOrganizeEdit:
+      "Use the pencil on the cover to change title, total and paper color, or to delete the card.",
+    helpNavTitle: "Getting around",
+    helpNavMove:
+      "Change cards with the arrows below the binder, by swiping the card sideways or dragging it with the mouse.",
+    helpNavCommands:
+      "In Commands (✨) you can filter cards by name, switch between stacked cards and continuous list, and change theme and language.",
+    helpDataTitle: "Your data",
+    helpDataLocal:
+      "Everything is stored only in this browser. Clearing site data deletes your cards.",
+    helpDataBackup:
+      "Use Export data in Commands to keep a JSON backup. Import skips duplicate items.",
+    helpKeysTitle: "Keyboard shortcuts",
+    keyNewCard: "New card",
+    keySpace: "Space",
+    keyChangeCard: "Change card",
+    keyToggleItem: "Check focused item",
+    keyItemActions: "Open item actions",
     view: "View",
     stackedCards: "Stacked cards",
     continuousList: "Continuous list",
