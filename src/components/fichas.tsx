@@ -760,6 +760,41 @@ export function Ficha({
   );
 }
 
+export function FichaSkeleton({ label }: { label: string }) {
+  const paperStyle = {
+    "--paper": DEFAULT_APPEARANCE.paper,
+  } as CSSProperties;
+  return (
+    <div className="flex min-h-0 flex-1 flex-col pt-2">
+      <div className="relative mx-auto mb-6 min-h-0 w-full max-w-md flex-1 px-3 sm:px-0">
+        <div
+          className="absolute inset-y-0 left-3 right-3 sm:inset-x-0"
+          style={{
+            filter:
+              "drop-shadow(2px 3px 4px color-mix(in oklab, var(--foreground) 16%, transparent)) drop-shadow(5px 8px 14px color-mix(in oklab, var(--foreground) 10%, transparent))",
+          }}
+        >
+          <div
+            style={paperStyle}
+            data-paper={DEFAULT_APPEARANCE.paper}
+            data-ink={DEFAULT_APPEARANCE.ink}
+            className="flip-scene h-full w-full"
+          >
+            <section
+              aria-busy="true"
+              className="ficha relative flex h-full flex-col items-center justify-center overflow-hidden rounded-2xl bg-paper p-6 pb-7 text-paper-ink sm:p-8 background-texture"
+            >
+              <span className="animate-pulse text-sm uppercase opacity-60">
+                {label}
+              </span>
+            </section>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function StackView<T extends { id: string }>({
   cards,
   index,

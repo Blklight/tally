@@ -25,7 +25,7 @@ const jetBrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "Tally — seu fichário de coleções",
   description: "Organize séries, coleções e itens avulsos em fichas de papel.",
-  icons: { icon: "/favicon.png", apple: "/icon-512.png" },
+  icons: { icon: "/favicon.png", apple: "/apple-touch-icon.png" },
   manifest: "/manifest.webmanifest",
   openGraph: {
     title: "Tally — seu fichário de coleções",

@@ -1145,7 +1145,7 @@
   content: "";
   position: absolute;
   inset: 0;
-  background-image: url("/assets/paper-grain.png");
+  background-image: url("/assets/paper-grain.webp");
   opacity: 0.09;
   mix-blend-mode: multiply;
   pointer-events: none;

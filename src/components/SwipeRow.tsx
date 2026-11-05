@@ -510,7 +510,7 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
                     }
               }
             >
-              <span className="grid justify-items-center gap-1 text-[11px] leading-none font-medium tracking-[0.01em] [transition:transform_160ms_cubic-bezier(0.23,1,0.32,1)] group-active/action:scale-[0.97] motion-reduce:group-active/action:scale-100">
+              <span className="grid justify-items-center gap-1 text-xs leading-none font-medium tracking-[0.01em] [transition:transform_160ms_cubic-bezier(0.23,1,0.32,1)] group-active/action:scale-[0.97] motion-reduce:group-active/action:scale-100">
                 {a.icon ? <span className="inline-flex">{a.icon}</span> : null}
                 <span>{a.label}</span>
               </span>
@@ -527,7 +527,7 @@ const SwipeRow: React.FC<SwipeRowProps> = ({
                 style={{ transform: glyphXf }}
                 onClick={(e) => act(primary, e)}
               >
-                <span className="grid justify-items-center gap-1 text-[11px] leading-none font-medium tracking-[0.01em] [transition:transform_160ms_cubic-bezier(0.23,1,0.32,1)] group-active/action:scale-[0.97] motion-reduce:group-active/action:scale-100">
+                <span className="grid justify-items-center gap-1 text-xs leading-none font-medium tracking-[0.01em] [transition:transform_160ms_cubic-bezier(0.23,1,0.32,1)] group-active/action:scale-[0.97] motion-reduce:group-active/action:scale-100">
                   <span className="inline-flex">
                     {primary.icon ?? (
                       <HugeiconsIcon
