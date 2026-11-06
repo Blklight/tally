@@ -1190,7 +1190,7 @@
   }
 }
 
-.ping-pong.is-overflowing .ping-pong-track {
+.ping-pong.is-overflowing.is-visible .ping-pong-track {
   animation: ping-pong var(--pp-duration, 6s) ease-in-out infinite alternate;
 }
 

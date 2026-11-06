@@ -1,11 +1,39 @@
 "use client";
 
-import { type CSSProperties, useLayoutEffect, useRef, useState } from "react";
+import {
+  type CSSProperties,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { cn } from "@/lib/utils";
 
 const SPEED = 40;
 const TRAVEL_SHARE = 0.6;
 const MIN_DURATION = 3;
+
+type VisibilityListener = (visible: boolean) => void;
+const listeners = new WeakMap<Element, VisibilityListener>();
+let sharedObserver: IntersectionObserver | null = null;
+
+function observeVisibility(element: Element, listener: VisibilityListener) {
+  if (typeof IntersectionObserver === "undefined") {
+    listener(true);
+    return () => undefined;
+  }
+  sharedObserver ??= new IntersectionObserver((entries) => {
+    for (const entry of entries) {
+      listeners.get(entry.target)?.(entry.isIntersecting);
+    }
+  });
+  listeners.set(element, listener);
+  sharedObserver.observe(element);
+  return () => {
+    listeners.delete(element);
+    sharedObserver?.unobserve(element);
+  };
+}
 
 export function PingPongText({
   children,
@@ -17,6 +45,8 @@ export function PingPongText({
   const outer = useRef<HTMLSpanElement>(null);
   const track = useRef<HTMLSpanElement>(null);
   const [shift, setShift] = useState(0);
+  const [visible, setVisible] = useState(false);
+  const overflowing = shift > 0;
 
   useLayoutEffect(() => {
     const box = outer.current;
@@ -32,7 +62,12 @@ export function PingPongText({
     return () => observer.disconnect();
   }, []);
 
-  const overflowing = shift > 0;
+  useEffect(() => {
+    const box = outer.current;
+    if (!overflowing || !box) return;
+    return observeVisibility(box, setVisible);
+  }, [overflowing]);
+
   const style = overflowing
     ? ({
         "--pp-shift": `-${shift}px`,
@@ -45,6 +80,7 @@ export function PingPongText({
       className={cn(
         "ping-pong block overflow-hidden whitespace-nowrap",
         overflowing && "is-overflowing",
+        overflowing && visible && "is-visible",
         className,
       )}
       data-overflowing={overflowing || undefined}

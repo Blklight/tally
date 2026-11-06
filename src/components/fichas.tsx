@@ -542,12 +542,14 @@ export function Ficha({
 }) {
   const { t } = useLocale();
   const [flipped, setFlipped] = useState(false);
+  const [backMounted, setBackMounted] = useState(false);
   const [editing, setEditing] = useState(startEditing ?? false);
   useEffect(() => setEditing(startEditing ?? false), [startEditing]);
   const frontBtnRef = useRef<HTMLButtonElement>(null);
   const backBtnRef = useRef<HTMLButtonElement>(null);
 
   const flip = () => {
+    setBackMounted(true);
     setFlipped((f) => {
       const next = !f;
       // Ao virar, transferir o foco suavemente para o botão da nova face
@@ -773,7 +775,7 @@ export function Ficha({
               className="relative flex min-h-0 flex-1 flex-col mb-5 p-2"
             >
               <div className="scrollbar-none relative min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6">
-                {children}
+                {backMounted ? children : null}
               </div>
             </CornerFrame>
           </Fillet>

@@ -1,5 +1,6 @@
 "use client";
 
+import { memo, type RefObject, useRef } from "react";
 import { Ficha, HoldRow } from "@/components/fichas";
 import { categoryLabel, useLocale } from "@/lib/i18n";
 import {
@@ -12,6 +13,40 @@ import {
 } from "@/lib/store";
 import { InlineEdit } from "./inline-edit";
 import { SortMenu } from "./sort-menu";
+
+type VolumeHandlers = {
+  onToggleVolume: (volume: number) => void;
+  onTogglePriority: (volume: number) => void;
+  onEditNote: (volume: number, note: string) => void;
+};
+
+const VolumeRow = memo(function VolumeRow({
+  volume,
+  label,
+  note,
+  checked,
+  priority,
+  handlers,
+}: {
+  volume: number;
+  label: string;
+  note: string | undefined;
+  checked: boolean;
+  priority: boolean;
+  handlers: RefObject<VolumeHandlers>;
+}) {
+  return (
+    <HoldRow
+      checked={checked}
+      label={label}
+      note={note}
+      onEditNote={(value) => handlers.current.onEditNote(volume, value)}
+      onToggle={() => handlers.current.onToggleVolume(volume)}
+      onTogglePriority={() => handlers.current.onTogglePriority(volume)}
+      priority={priority}
+    />
+  );
+});
 
 export function SeriesCard({
   series,
@@ -35,15 +70,21 @@ export function SeriesCard({
   onEditNote: (volume: number, note: string) => void;
 }) {
   const { locale, t } = useLocale();
+  const handlers = useRef<VolumeHandlers>({
+    onToggleVolume,
+    onTogglePriority,
+    onEditNote,
+  });
+  handlers.current = { onToggleVolume, onTogglePriority, onEditNote };
   const volumes = Array.from({ length: series.total }, (_, index) => index + 1);
+  const acquired = new Set(series.acquired);
+  const priorities = new Set(series.priorityVolumes);
   const sort = normalizeSort(series.sort);
   const ordered = sortEntries(
     volumes,
     sort,
-    (volume) => !!series.acquired?.includes(volume),
-    (volume) =>
-      !!series.priorityVolumes?.includes(volume) &&
-      !series.acquired?.includes(volume),
+    (volume) => acquired.has(volume),
+    (volume) => priorities.has(volume) && !acquired.has(volume),
   );
 
   const acquiredCount = series.acquired?.length ?? 0;
@@ -83,15 +124,14 @@ export function SeriesCard({
       title={series.title}
     >
       {ordered.map((volume) => (
-        <HoldRow
-          checked={series.acquired?.includes(volume) ?? false}
+        <VolumeRow
+          checked={acquired.has(volume)}
+          handlers={handlers}
           key={volume}
           label={volumeLabel(series, volume)}
           note={series.volumeNotes?.[volume]}
-          onEditNote={(note) => onEditNote(volume, note)}
-          onTogglePriority={() => onTogglePriority(volume)}
-          priority={series.priorityVolumes?.includes(volume) ?? false}
-          onToggle={() => onToggleVolume(volume)}
+          priority={priorities.has(volume)}
+          volume={volume}
         />
       ))}
     </Ficha>
