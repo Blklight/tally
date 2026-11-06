@@ -820,7 +820,7 @@ export function FichaSkeleton({ label }: { label: string }) {
   } as CSSProperties;
   return (
     <div className="flex min-h-0 flex-1 flex-col pt-2">
-      <div className="relative mx-auto mb-6 min-h-0 w-full max-w-md flex-1 px-3 sm:px-0">
+      <div className="relative mx-auto mb-8 min-h-0 w-full max-w-md flex-1 px-3 sm:px-0">
         <div
           className="absolute inset-y-0 left-3 right-8 sm:inset-x-0"
           style={{
@@ -998,7 +998,7 @@ export function StackView<T extends { id: string }>({
   return (
     <div className="flex min-h-0 flex-1 flex-col pt-2">
       <div
-        className="relative mx-auto mb-6 min-h-0 w-full max-w-md flex-1 touch-pan-y select-none overflow-visible px-3 sm:px-0"
+        className="relative mx-auto mb-8 min-h-0 w-full max-w-md flex-1 touch-pan-y select-none overflow-visible px-3 sm:px-0"
         onPointerDown={(e) => {
           if (disabled || busy.current) return;
           if (

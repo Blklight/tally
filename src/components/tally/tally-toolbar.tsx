@@ -6,7 +6,7 @@ import { useLocale } from "@/lib/i18n";
 import { cn } from "@/lib/utils";
 
 const navClassName =
-  "chamfer chamfer-sm h-11 w-20 rounded-none border-0 bg-[#252525] p-0 text-[#eaeaea] shadow-none hover:bg-[#252525]/85 hover:text-[#eaeaea] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring active:not-aria-[haspopup]:translate-y-0 dark:bg-[#eaeaea] dark:text-[#252525] dark:hover:bg-[#eaeaea]/85 dark:hover:text-[#252525]";
+  "chamfer chamfer-sm h-10 w-24 rounded-none border-0 bg-[#252525] p-0 text-[#eaeaea] shadow-none hover:bg-[#252525]/85 hover:text-[#eaeaea] focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring active:not-aria-[haspopup]:translate-y-0 dark:bg-[#eaeaea] dark:text-[#252525] dark:hover:bg-[#eaeaea]/85 dark:hover:text-[#252525]";
 
 export function TallyToolbar({
   canNavigate,
