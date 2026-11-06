@@ -10,6 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 import {
+  Children,
   type CSSProperties,
   cloneElement,
   isValidElement,
@@ -41,11 +42,13 @@ import { cn } from "@/lib/utils";
 import { CornerFrame, CornerMarkers } from "./corner-frame";
 import SwipeRow, { type SwipeAction } from "./SwipeRow";
 import { PingPongText } from "./tally/ping-pong-text";
+import { useProgressiveCount } from "./tally/use-progressive-count";
 import { ChamferButton } from "./ui/chamfer-button";
 
 const DELETE_COLOR = "#e5484d";
 const PRIORITY_COLOR = "#d97706";
 const NEUTRAL_COLOR = "#52525b";
+const FLIP_DURATION = 700;
 
 export function HoldRow({
   label,
@@ -542,27 +545,33 @@ export function Ficha({
 }) {
   const { t } = useLocale();
   const [flipped, setFlipped] = useState(false);
-  const [backMounted, setBackMounted] = useState(false);
+  const backRows = Children.toArray(children);
+  const mountedRows = useProgressiveCount(backRows.length);
   const [editing, setEditing] = useState(startEditing ?? false);
   useEffect(() => setEditing(startEditing ?? false), [startEditing]);
   const frontBtnRef = useRef<HTMLButtonElement>(null);
   const backBtnRef = useRef<HTMLButtonElement>(null);
 
-  const flip = () => {
-    setBackMounted(true);
-    setFlipped((f) => {
-      const next = !f;
-      // Ao virar, transferir o foco suavemente para o botão da nova face
-      setTimeout(() => {
-        if (next) {
-          backBtnRef.current?.focus();
-        } else {
-          frontBtnRef.current?.focus();
-        }
-      }, 50);
-      return next;
-    });
-  };
+  const [settledFlipped, setSettledFlipped] = useState(false);
+  const focusAfterFlip = useRef(false);
+
+  useEffect(() => {
+    if (flipped === settledFlipped) return;
+    // O verso só troca de `inert` depois do giro: com centenas de linhas, isso recalcula o estilo de todas.
+    const id = setTimeout(() => {
+      focusAfterFlip.current = true;
+      setSettledFlipped(flipped);
+    }, FLIP_DURATION);
+    return () => clearTimeout(id);
+  }, [flipped, settledFlipped]);
+
+  useEffect(() => {
+    if (!focusAfterFlip.current) return;
+    focusAfterFlip.current = false;
+    (settledFlipped ? backBtnRef : frontBtnRef).current?.focus();
+  }, [settledFlipped]);
+
+  const flip = () => setFlipped((f) => !f);
 
   const resolvedCountLabel = countLabel ?? t("manyMissing");
   const settings = (
@@ -749,7 +758,7 @@ export function Ficha({
         <div
           className="flip-face flip-back absolute inset-0 rounded-2xl"
           aria-hidden={!flipped}
-          inert={!flipped ? true : undefined}
+          inert={!settledFlipped ? true : undefined}
         >
           <Fillet corner="bl" className={face}>
             <header className="relative mb-2 shrink-0">
@@ -775,7 +784,7 @@ export function Ficha({
               className="relative flex min-h-0 flex-1 flex-col mb-5 p-2"
             >
               <div className="scrollbar-none relative min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6">
-                {backMounted ? children : null}
+                {backRows.slice(0, mountedRows)}
               </div>
             </CornerFrame>
           </Fillet>
@@ -985,10 +994,7 @@ export function StackView<T extends { id: string }>({
               key={c.id}
               aria-hidden={!isTop}
               inert={!isTop ? true : undefined}
-              className={cn(
-                "absolute inset-y-0 left-3 right-3 sm:inset-x-0",
-                !isTop && "pointer-events-none",
-              )}
+              className="absolute inset-y-0 left-3 right-3 sm:inset-x-0"
               style={{
                 zIndex: z,
                 transform,

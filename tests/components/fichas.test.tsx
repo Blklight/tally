@@ -1,6 +1,6 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { HoldRow } from "@/components/fichas";
+import { Ficha, HoldRow } from "@/components/fichas";
 import { HOLD_DURATION } from "@/lib/store";
 
 afterEach(() => vi.useRealTimers());
@@ -155,5 +155,31 @@ describe("HoldRow actions", () => {
     expect(
       screen.getByRole("heading", { name: "Adicionar nota" }),
     ).toBeInTheDocument();
+  });
+});
+
+describe("Ficha flip", () => {
+  it("mounts the back rows ahead of time and hands focus over once the flip settles", () => {
+    vi.useFakeTimers();
+    render(
+      <Ficha big category="Mangá / Volumes" onEdit={vi.fn()} title="Berserk">
+        <HoldRow checked={false} label="Berserk - Vol. 1" onToggle={vi.fn()} />
+      </Ficha>,
+    );
+
+    act(() => vi.advanceTimersByTime(100));
+    const row = screen.getByRole("checkbox", {
+      hidden: true,
+      name: "Berserk - Vol. 1",
+    });
+    expect(row.closest("[inert]")).not.toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Ver itens" }));
+    act(() => vi.advanceTimersByTime(699));
+    expect(row.closest("[inert]")).not.toBeNull();
+
+    act(() => vi.advanceTimersByTime(1));
+    expect(row.closest("[inert]")).toBeNull();
+    expect(screen.getByRole("button", { name: /Capa/ })).toHaveFocus();
   });
 });
