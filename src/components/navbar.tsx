@@ -81,18 +81,6 @@ export function Navbar({
         </Link>
 
         <div className="ml-auto flex h-full items-center">
-          {!install.installed && (install.canPrompt || install.ios) && (
-            <Button
-              aria-label={t("installApp")}
-              className={navButtonClassName}
-              onClick={startInstall}
-              size="icon"
-              title={t("installApp")}
-              variant="ghost"
-            >
-              <ArrowDownToLine />
-            </Button>
-          )}
           <Button
             aria-label={t("newCard")}
             className={navButtonClassName}
@@ -104,17 +92,6 @@ export function Navbar({
             <Plus />
           </Button>
 
-          <AnimatedThemeToggler className={navButtonClassName} />
-          <Button
-            aria-label={t("help")}
-            className={navButtonClassName}
-            onClick={() => setHelpOpen(true)}
-            size="icon"
-            title={t("help")}
-            variant="ghost"
-          >
-            <CircleHelp />
-          </Button>
           <Button
             aria-label={t("commandMenu")}
             className={navButtonClassName}
@@ -128,6 +105,29 @@ export function Navbar({
             variant="ghost"
           >
             <Sparkles />
+          </Button>
+          <AnimatedThemeToggler className={navButtonClassName} />
+          {!install.installed && (install.canPrompt || install.ios) && (
+            <Button
+              aria-label={t("installApp")}
+              className={navButtonClassName}
+              onClick={startInstall}
+              size="icon"
+              title={t("installApp")}
+              variant="ghost"
+            >
+              <ArrowDownToLine />
+            </Button>
+          )}
+          <Button
+            aria-label={t("help")}
+            className={navButtonClassName}
+            onClick={() => setHelpOpen(true)}
+            size="icon"
+            title={t("help")}
+            variant="ghost"
+          >
+            <CircleHelp />
           </Button>
         </div>
       </div>
