@@ -14,6 +14,7 @@ import {
   type CSSProperties,
   cloneElement,
   isValidElement,
+  memo,
   type ReactNode,
   useEffect,
   useLayoutEffect,
@@ -49,8 +50,11 @@ const DELETE_COLOR = "#e5484d";
 const PRIORITY_COLOR = "#d97706";
 const NEUTRAL_COLOR = "#52525b";
 const FLIP_DURATION = 700;
+const TOUCH_HOLD_DELAY = 150;
 const FLY_DURATION = 260;
 const SETTLE_DURATION = 320;
+const VELOCITY_WINDOW = 100;
+const FLICK_VELOCITY = 0.3;
 
 export function HoldRow({
   label,
@@ -81,7 +85,11 @@ export function HoldRow({
   const origin = useRef<{ x: number; y: number } | null>(null);
   const drawerOpen = useRef(false);
 
+  const pending = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const cancel = () => {
+    if (pending.current) clearTimeout(pending.current);
+    pending.current = null;
     if (timer.current) clearTimeout(timer.current);
     timer.current = null;
     origin.current = null;
@@ -107,6 +115,7 @@ export function HoldRow({
 
   useEffect(() => {
     return () => {
+      if (pending.current) clearTimeout(pending.current);
       if (timer.current) clearTimeout(timer.current);
     };
   }, []);
@@ -231,7 +240,16 @@ export function HoldRow({
           if (e.button !== 0 || editMode || drawerOpen.current) return;
           if ((e.target as HTMLElement).closest("button")) return;
           origin.current = { x: e.clientX, y: e.clientY };
-          begin();
+          if (e.pointerType !== "touch") {
+            begin();
+            return;
+          }
+          // No toque, espera o dedo parar: se for rolagem, o pointermove/pointercancel cancela antes de a barra começar.
+          if (pending.current) clearTimeout(pending.current);
+          pending.current = setTimeout(() => {
+            pending.current = null;
+            begin();
+          }, TOUCH_HOLD_DELAY);
         }}
         onPointerMove={(e) => {
           if (
@@ -239,7 +257,7 @@ export function HoldRow({
             Math.hypot(
               e.clientX - origin.current.x,
               e.clientY - origin.current.y,
-            ) > 10
+            ) > (e.pointerType === "touch" ? 6 : 10)
           )
             cancel();
         }}
@@ -802,9 +820,9 @@ export function FichaSkeleton({ label }: { label: string }) {
   } as CSSProperties;
   return (
     <div className="flex min-h-0 flex-1 flex-col pt-2">
-      <div className="relative mx-auto mb-6 min-h-0 w-full max-w-md flex-1 px-3 sm:px-0">
+      <div className="relative mx-auto mb-8 min-h-0 w-full max-w-md flex-1 px-3 sm:px-0">
         <div
-          className="absolute inset-y-0 left-3 right-3 sm:inset-x-0"
+          className="absolute inset-y-0 left-3 right-8 sm:inset-x-0"
           style={{
             filter:
               "drop-shadow(2px 3px 4px color-mix(in oklab, var(--foreground) 16%, transparent)) drop-shadow(5px 8px 14px color-mix(in oklab, var(--foreground) 10%, transparent))",
@@ -830,6 +848,16 @@ export function FichaSkeleton({ label }: { label: string }) {
     </div>
   );
 }
+
+const StackLayer = memo(function StackLayer<T>({
+  card,
+  render,
+}: {
+  card: T;
+  render: (card: T) => ReactNode;
+}) {
+  return render(card);
+}) as <T>(props: { card: T; render: (card: T) => ReactNode }) => ReactNode;
 
 export function StackView<T extends { id: string }>({
   cards,
@@ -860,6 +888,8 @@ export function StackView<T extends { id: string }>({
     id: number;
   } | null>(null);
   const busy = useRef(false);
+  const samples = useRef<Array<[number, number]>>([]);
+  const suppressClick = useRef(false);
   const n = cards.length;
   const width = () =>
     typeof window === "undefined" ? 400 : Math.min(window.innerWidth, 448);
@@ -922,14 +952,29 @@ export function StackView<T extends { id: string }>({
   if (!current) return null;
 
   // Mantemos o comportamento de swipe seguro sem quebrar ou trocar os cards de trás
-  const end = (commit: boolean) => {
+  const end = (commit: boolean, releasedAt: number) => {
     const s = start.current;
     start.current = null;
     setDragging(false);
     if (!s || s.axis !== "x") return;
-    const v = Math.abs(dx) / Math.max(1, Date.now() - s.t);
-    if (commit && (Math.abs(dx) > 60 || (Math.abs(dx) > 25 && v > 0.4))) {
-      go(1, dx < 0 ? -1 : 1);
+    suppressClick.current = true;
+    setTimeout(() => {
+      suppressClick.current = false;
+    }, 0);
+    const recent = samples.current.filter(
+      ([t]) => releasedAt - t <= VELOCITY_WINDOW,
+    );
+    const distance = samples.current.at(-1)?.[1] ?? dx;
+    const [t0, x0] = recent[0] ?? [releasedAt, distance];
+    const [t1, x1] = recent.at(-1) ?? [releasedAt, distance];
+    const velocity = recent.length > 1 ? (x1 - x0) / Math.max(1, t1 - t0) : 0;
+    const far = Math.abs(distance) > Math.max(40, width() * 0.12);
+    const flick =
+      Math.abs(distance) > 16 &&
+      Math.abs(velocity) > FLICK_VELOCITY &&
+      Math.sign(velocity) === Math.sign(distance);
+    if (commit && (far || flick)) {
+      go(1, distance < 0 ? -1 : 1);
     } else {
       setDx(0);
     }
@@ -953,12 +998,12 @@ export function StackView<T extends { id: string }>({
   return (
     <div className="flex min-h-0 flex-1 flex-col pt-2">
       <div
-        className="relative mx-auto mb-6 min-h-0 w-full max-w-md flex-1 touch-pan-y select-none overflow-visible px-3 sm:px-0"
+        className="relative mx-auto mb-8 min-h-0 w-full max-w-md flex-1 touch-pan-y select-none overflow-visible px-3 sm:px-0"
         onPointerDown={(e) => {
           if (disabled || busy.current) return;
           if (
             (e.target as HTMLElement).closest(
-              "input, textarea, button, select, [role='combobox'], [role='option'], form, .hold-row",
+              "input, textarea, select, [role='combobox'], [role='option'], [role='dialog'], form, .hold-row",
             )
           ) {
             return;
@@ -970,6 +1015,13 @@ export function StackView<T extends { id: string }>({
             axis: null,
             id: e.pointerId,
           };
+          samples.current = [];
+        }}
+        onClickCapture={(e) => {
+          if (!suppressClick.current) return;
+          suppressClick.current = false;
+          e.preventDefault();
+          e.stopPropagation();
         }}
         onPointerMove={(e) => {
           const s = start.current;
@@ -987,10 +1039,17 @@ export function StackView<T extends { id: string }>({
               }
             }
           }
-          if (s.axis === "x") setDx(x);
+          if (s.axis === "x") {
+            const now = e.timeStamp;
+            samples.current = [
+              ...samples.current.filter(([t]) => now - t <= VELOCITY_WINDOW),
+              [now, x],
+            ];
+            setDx(x);
+          }
         }}
-        onPointerUp={() => end(true)}
-        onPointerCancel={() => end(false)}
+        onPointerUp={(e) => end(true, e.timeStamp)}
+        onPointerCancel={(e) => end(false, e.timeStamp)}
       >
         {rendered.map((c) => {
           const isSettling = c === settling;
@@ -1012,7 +1071,7 @@ export function StackView<T extends { id: string }>({
               key={c.id}
               aria-hidden={!isTop}
               inert={!isTop ? true : undefined}
-              className="absolute inset-y-0 left-3 right-3 sm:inset-x-0"
+              className="absolute inset-y-0 left-3 right-8 sm:inset-x-0"
               style={{
                 zIndex: z,
                 transform,
@@ -1023,7 +1082,7 @@ export function StackView<T extends { id: string }>({
                 transition: dragging ? "none" : ease,
               }}
             >
-              {render(c)}
+              <StackLayer card={c} render={render} />
             </div>
           );
         })}

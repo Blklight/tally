@@ -222,3 +222,124 @@ describe("StackView", () => {
     expect(screen.queryByText("ficha A")).toBeNull();
   });
 });
+
+describe("HoldRow on touch", () => {
+  it("ignores a touch that turns into a scroll before the hold starts", () => {
+    vi.useFakeTimers();
+    const toggle = vi.fn();
+    render(<HoldRow checked={false} label="Ed. 1" onToggle={toggle} />);
+    const row = screen.getByRole("checkbox", { name: "Ed. 1" });
+    const holdRow = row.closest(".hold-row") as HTMLElement;
+
+    fireEvent.pointerDown(row, {
+      button: 0,
+      clientX: 10,
+      clientY: 10,
+      pointerType: "touch",
+    });
+    act(() => vi.advanceTimersByTime(80));
+    fireEvent.pointerMove(row, {
+      clientX: 10,
+      clientY: 18,
+      pointerType: "touch",
+    });
+    act(() => vi.advanceTimersByTime(2000));
+
+    expect(holdRow).not.toHaveClass("is-holding");
+    expect(toggle).not.toHaveBeenCalled();
+  });
+
+  it("starts the hold after a short pause and toggles once it completes", () => {
+    vi.useFakeTimers();
+    const toggle = vi.fn();
+    render(<HoldRow checked={false} label="Ed. 2" onToggle={toggle} />);
+    const row = screen.getByRole("checkbox", { name: "Ed. 2" });
+    const holdRow = row.closest(".hold-row") as HTMLElement;
+
+    fireEvent.pointerDown(row, {
+      button: 0,
+      clientX: 10,
+      clientY: 10,
+      pointerType: "touch",
+    });
+    act(() => vi.advanceTimersByTime(149));
+    expect(holdRow).not.toHaveClass("is-holding");
+    act(() => vi.advanceTimersByTime(1));
+    expect(holdRow).toHaveClass("is-holding");
+    act(() => vi.advanceTimersByTime(HOLD_DURATION));
+    expect(toggle).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("StackView swipe", () => {
+  const cards = ["A", "B", "C"].map((id) => ({ id }));
+
+  function Stack({ onCover }: { onCover?: () => void }) {
+    const [index, setIndex] = useState(0);
+    return (
+      <StackView
+        cards={cards}
+        index={index}
+        render={(card) => (
+          <button onClick={onCover} type="button">
+            capa {card.id}
+          </button>
+        )}
+        setIndex={setIndex}
+      />
+    );
+  }
+
+  function swipe(from: HTMLElement, steps: Array<[number, number]>) {
+    const box = from.closest(".touch-pan-y") as HTMLElement;
+    box.setPointerCapture = () => undefined;
+    fireEvent.pointerDown(from, { clientX: 200, clientY: 100, pointerId: 1 });
+    for (const [ms, x] of steps) {
+      act(() => vi.advanceTimersByTime(ms));
+      fireEvent.pointerMove(box, {
+        clientX: 200 + x,
+        clientY: 100,
+        pointerId: 1,
+      });
+    }
+    fireEvent.pointerUp(box, { pointerId: 1 });
+    fireEvent.click(from);
+  }
+
+  it("pages on a short, fast flick that starts on a button without firing it", () => {
+    vi.useFakeTimers();
+    const onCover = vi.fn();
+    render(<Stack onCover={onCover} />);
+
+    swipe(screen.getByRole("button", { name: "capa A" }), [
+      [400, -10],
+      [16, -20],
+      [16, -30],
+    ]);
+    act(() => vi.advanceTimersByTime(600));
+
+    expect(onCover).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "capa B" })).toBeVisible();
+    expect(screen.getByText("capa A").closest("[aria-hidden]")).toHaveAttribute(
+      "aria-hidden",
+      "true",
+    );
+  });
+
+  it("snaps back on a slow, short drag", () => {
+    vi.useFakeTimers();
+    render(<Stack />);
+
+    swipe(screen.getByRole("button", { name: "capa A" }), [
+      [100, -10],
+      [200, -20],
+      [200, -30],
+    ]);
+    act(() => vi.advanceTimersByTime(600));
+
+    expect(screen.getByText("capa A").closest("[aria-hidden]")).toHaveAttribute(
+      "aria-hidden",
+      "false",
+    );
+  });
+});

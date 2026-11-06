@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ArrowDownToLine,
   BookOpen,
   CircleHelp,
   Download,
@@ -36,6 +37,7 @@ export function CommandMenu({
   onExport,
   onHelp,
   onImportOpen,
+  onInstall,
   onModeChange,
   onQueryChange,
   onStartAdding,
@@ -49,6 +51,7 @@ export function CommandMenu({
   onExport: () => void;
   onHelp: () => void;
   onImportOpen: () => void;
+  onInstall?: (() => void) | undefined;
   onModeChange: (mode: "stack" | "list") => void;
   onQueryChange: (query: string) => void;
   onStartAdding: () => void;
@@ -110,6 +113,12 @@ export function CommandMenu({
               <Upload />
               {t("importData")}
             </CommandItem>
+            {onInstall && (
+              <CommandItem onSelect={onInstall}>
+                <ArrowDownToLine />
+                {t("installApp")}
+              </CommandItem>
+            )}
             <CommandItem onSelect={() => run(() => onModeChange("stack"))}>
               <Layers />
               {t("stackedCards")}

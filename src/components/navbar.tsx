@@ -1,11 +1,12 @@
 "use client";
 
-import { CircleHelp, Plus, Sparkles } from "lucide-react";
+import { ArrowDownToLine, CircleHelp, Plus, Sparkles } from "lucide-react";
 import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useState } from "react";
 import { toast } from "sonner";
 import { HelpDialog } from "@/components/help-dialog";
+import { InstallDialog } from "@/components/install-dialog";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 import { Button } from "@/components/ui/button";
 import {
@@ -17,6 +18,7 @@ import {
 } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { useLocale } from "@/lib/i18n";
+import { useInstallPrompt } from "@/lib/use-install-prompt";
 
 const CommandMenu = dynamic(
   () => import("./command-menu").then((module) => module.CommandMenu),
@@ -56,6 +58,17 @@ export function Navbar({
   const [importOpen, setImportOpen] = useState(false);
   const [importText, setImportText] = useState("");
   const [importError, setImportError] = useState("");
+  const [installOpen, setInstallOpen] = useState(false);
+  const install = useInstallPrompt();
+
+  const startInstall = async () => {
+    setCommandOpen(false);
+    if (install.canPrompt) {
+      if (await install.prompt()) toast.success(t("installDone"));
+      return;
+    }
+    setInstallOpen(true);
+  };
 
   return (
     <header className="background-header background-texture rounded-b-xs px-0">
@@ -79,17 +92,6 @@ export function Navbar({
             <Plus />
           </Button>
 
-          <AnimatedThemeToggler className={navButtonClassName} />
-          <Button
-            aria-label={t("help")}
-            className={navButtonClassName}
-            onClick={() => setHelpOpen(true)}
-            size="icon"
-            title={t("help")}
-            variant="ghost"
-          >
-            <CircleHelp />
-          </Button>
           <Button
             aria-label={t("commandMenu")}
             className={navButtonClassName}
@@ -103,6 +105,29 @@ export function Navbar({
             variant="ghost"
           >
             <Sparkles />
+          </Button>
+          <AnimatedThemeToggler className={navButtonClassName} />
+          {!install.installed && (install.canPrompt || install.ios) && (
+            <Button
+              aria-label={t("installApp")}
+              className={navButtonClassName}
+              onClick={startInstall}
+              size="icon"
+              title={t("installApp")}
+              variant="ghost"
+            >
+              <ArrowDownToLine />
+            </Button>
+          )}
+          <Button
+            aria-label={t("help")}
+            className={navButtonClassName}
+            onClick={() => setHelpOpen(true)}
+            size="icon"
+            title={t("help")}
+            variant="ghost"
+          >
+            <CircleHelp />
           </Button>
         </div>
       </div>
@@ -119,6 +144,7 @@ export function Navbar({
             setCommandOpen(false);
             setHelpOpen(true);
           }}
+          onInstall={install.installed ? undefined : startInstall}
           onImportOpen={() => {
             setCommandOpen(false);
             setImportError("");
@@ -132,6 +158,11 @@ export function Navbar({
       )}
 
       <HelpDialog onOpenChange={setHelpOpen} open={helpOpen} />
+      <InstallDialog
+        ios={install.ios}
+        onOpenChange={setInstallOpen}
+        open={installOpen}
+      />
 
       <Dialog onOpenChange={setImportOpen} open={importOpen}>
         <DialogContent className="max-w-lg">
