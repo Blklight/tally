@@ -27,6 +27,7 @@ export const metadata: Metadata = {
   description: "Organize séries, coleções e itens avulsos em fichas de papel.",
   icons: { icon: "/favicon.png", apple: "/apple-touch-icon.png" },
   manifest: "/manifest.webmanifest",
+  appleWebApp: { capable: true, title: "Tally", statusBarStyle: "default" },
   openGraph: {
     title: "Tally — seu fichário de coleções",
     description:

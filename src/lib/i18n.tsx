@@ -36,6 +36,16 @@ const messages = {
     commandHelp: "Ajuda",
     noCommands: "Nenhum comando encontrado.",
     exportData: "Exportar dados",
+    installApp: "Instalar app",
+    installTitle: "Instalar o Tally",
+    installIntro:
+      "Instalado, o Tally abre em tela cheia pelo ícone na tela inicial e funciona sem internet.",
+    installIosStep1: "Toque em Compartilhar na barra do Safari.",
+    installIosStep2: "Escolha Adicionar à Tela de Início.",
+    installIosStep3: "Toque em Adicionar.",
+    installOtherStep1: "Abra o menu do navegador.",
+    installOtherStep2: "Escolha Instalar app ou Adicionar à tela inicial.",
+    installDone: "Tally instalado",
     importData: "Importar dados",
     importDataDescription:
       "Cole um JSON exportado pelo Tally. Itens repetidos serão ignorados.",
@@ -198,6 +208,16 @@ const messages = {
     commandHelp: "Help",
     noCommands: "No commands found.",
     exportData: "Export data",
+    installApp: "Install app",
+    installTitle: "Install Tally",
+    installIntro:
+      "Once installed, Tally opens full screen from its home screen icon and works offline.",
+    installIosStep1: "Tap Share in Safari's toolbar.",
+    installIosStep2: "Choose Add to Home Screen.",
+    installIosStep3: "Tap Add.",
+    installOtherStep1: "Open the browser menu.",
+    installOtherStep2: "Choose Install app or Add to Home screen.",
+    installDone: "Tally installed",
     importData: "Import data",
     importDataDescription:
       "Paste JSON exported by Tally. Duplicate items will be ignored.",

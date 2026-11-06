@@ -1,8 +1,9 @@
-const CACHE_NAME = "tally-v2";
+const CACHE_NAME = "tally-v3";
 const APP_SHELL = [
   "./",
   "./manifest.webmanifest",
   "./favicon.png",
+  "./icon-192.png",
   "./icon-512.png",
 ];
 
