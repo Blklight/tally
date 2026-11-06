@@ -49,6 +49,8 @@ const DELETE_COLOR = "#e5484d";
 const PRIORITY_COLOR = "#d97706";
 const NEUTRAL_COLOR = "#52525b";
 const FLIP_DURATION = 700;
+const FLY_DURATION = 260;
+const SETTLE_DURATION = 320;
 
 export function HoldRow({
   label,
@@ -849,6 +851,7 @@ export function StackView<T extends { id: string }>({
   const [fly, setFly] = useState<{ id: string; dir: number; d: number } | null>(
     null,
   );
+  const [leaving, setLeaving] = useState<string | null>(null);
   const start = useRef<{
     x: number;
     y: number;
@@ -873,9 +876,16 @@ export function StackView<T extends { id: string }>({
       setIndex(nextIndex);
       setFly(null);
       setDx(0);
+      setLeaving(from.id);
       busy.current = false;
-    }, 260);
+    }, FLY_DURATION);
   };
+
+  useEffect(() => {
+    if (!leaving) return;
+    const id = setTimeout(() => setLeaving(null), SETTLE_DURATION);
+    return () => clearTimeout(id);
+  }, [leaving]);
 
   const goRef = useRef(go);
   useEffect(() => {
@@ -930,6 +940,13 @@ export function StackView<T extends { id: string }>({
   const layers = Array.from({ length: depth }, (_, o) =>
     o === 0 ? cards[index] : cards[(index + o * targetStep + n) % n],
   ).filter((card): card is T => Boolean(card));
+  // Com mais fichas que camadas visíveis, a que saiu não volta para `layers`; ela segue montada até assentar no fundo.
+  const settling =
+    leaving && !layers.some((card) => card.id === leaving)
+      ? cards.find((card) => card.id === leaving)
+      : undefined;
+  const rendered = [...layers].reverse();
+  if (settling) rendered.push(settling);
   const ease =
     "transform 300ms cubic-bezier(.22,.8,.3,1), filter 300ms, opacity 300ms";
 
@@ -975,15 +992,16 @@ export function StackView<T extends { id: string }>({
         onPointerUp={() => end(true)}
         onPointerCancel={() => end(false)}
       >
-        {[...layers].reverse().map((c) => {
-          const o = layers.indexOf(c);
+        {rendered.map((c) => {
+          const isSettling = c === settling;
+          const o = isSettling ? depth - 1 : layers.indexOf(c);
           const isFly = fly?.id === c.id;
           const isTop = o === 0 && !isFly;
           // while dragging, cards behind rise toward the front
           const p = fly ? 1 : Math.min(1, Math.abs(dx) / width());
           const d = Math.max(0, o - p);
           let transform = `translate(${d * 10}px, ${d * 10}px)`;
-          let z = 10 - o;
+          let z = isSettling ? 10 - depth : 10 - o;
           if (isTop) transform = `translateX(${dx}px) rotate(${dx / 40}deg)`;
           if (isFly) {
             transform = `translateX(${fly.dir * width() * 1.15}px) rotate(${fly.dir * 12}deg)`;

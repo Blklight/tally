@@ -1,6 +1,7 @@
 import { act, fireEvent, render, screen } from "@testing-library/react";
+import { useState } from "react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { Ficha, HoldRow } from "@/components/fichas";
+import { Ficha, HoldRow, StackView } from "@/components/fichas";
 import { HOLD_DURATION } from "@/lib/store";
 
 afterEach(() => vi.useRealTimers());
@@ -181,5 +182,43 @@ describe("Ficha flip", () => {
     act(() => vi.advanceTimersByTime(1));
     expect(row.closest("[inert]")).toBeNull();
     expect(screen.getByRole("button", { name: /Capa/ })).toHaveFocus();
+  });
+});
+
+describe("StackView", () => {
+  const cards = ["A", "B", "C", "D"].map((id) => ({ id }));
+
+  function Stack() {
+    const [index, setIndex] = useState(0);
+    return (
+      <StackView
+        cards={cards}
+        index={index}
+        render={(card) => <p>ficha {card.id}</p>}
+        setIndex={setIndex}
+      />
+    );
+  }
+
+  it("keeps the outgoing card until it settles behind the stack when it is not a visible layer", () => {
+    vi.useFakeTimers();
+    render(<Stack />);
+    expect(screen.queryByText("ficha D")).toBeNull();
+
+    fireEvent.keyDown(document.body, { key: "ArrowRight" });
+    act(() => vi.advanceTimersByTime(260));
+
+    expect(screen.getByText("ficha D")).toBeInTheDocument();
+    const settling = screen.getByText("ficha A").parentElement as HTMLElement;
+    expect(settling).toHaveAttribute("aria-hidden", "true");
+    expect(settling.style.transform).toBe("translate(20px, 20px)");
+    expect(Number(settling.style.zIndex)).toBeLessThan(
+      Number(
+        (screen.getByText("ficha D").parentElement as HTMLElement).style.zIndex,
+      ),
+    );
+
+    act(() => vi.advanceTimersByTime(320));
+    expect(screen.queryByText("ficha A")).toBeNull();
   });
 });
