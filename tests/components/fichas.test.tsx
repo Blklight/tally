@@ -115,6 +115,32 @@ describe("HoldRow actions", () => {
     expect(editNote).toHaveBeenCalledWith("1ª edição");
   });
 
+  it("edits long notes in a multi-line field and saves them with Enter", () => {
+    const editNote = vi.fn();
+
+    render(
+      <HoldRow
+        checked={false}
+        label="Playboy Brasil - Ed. 464"
+        note="Belezas da Praia - janeiro de 2014"
+        onEditNote={editNote}
+        onToggle={vi.fn()}
+      />,
+    );
+
+    fireEvent.click(screen.getByText("Editar nota"));
+    const field = screen.getByRole("textbox", { name: "Editar nota" });
+    expect(field.tagName).toBe("TEXTAREA");
+
+    fireEvent.change(field, {
+      target: { value: "Kate Moss\njaneiro de 2014" },
+    });
+    expect(field).toHaveValue("Kate Moss janeiro de 2014");
+
+    fireEvent.keyDown(field, { key: "Enter" });
+    expect(editNote).toHaveBeenCalledWith("Kate Moss janeiro de 2014");
+  });
+
   it("titles the note dialog as a new note when the item has none", () => {
     render(
       <HoldRow

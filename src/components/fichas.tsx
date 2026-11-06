@@ -29,6 +29,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useLocale } from "@/lib/i18n";
 import {
   type Appearance,
@@ -39,6 +40,7 @@ import {
 import { cn } from "@/lib/utils";
 import { CornerFrame, CornerMarkers } from "./corner-frame";
 import SwipeRow, { type SwipeAction } from "./SwipeRow";
+import { PingPongText } from "./tally/ping-pong-text";
 import { ChamferButton } from "./ui/chamfer-button";
 
 const DELETE_COLOR = "#e5484d";
@@ -186,7 +188,9 @@ export function HoldRow({
         >
           <span className={cn("strike", checked && "is-struck")}>{label}</span>
           {note && (
-            <span className="mt-1 block text-xs opacity-60">{note}</span>
+            <PingPongText className="mt-1 text-xs opacity-60">
+              {note}
+            </PingPongText>
           )}
         </span>
         {priority && (
@@ -293,13 +297,32 @@ export function HoldRow({
                     : t("addNote")}
               </DialogTitle>
             </DialogHeader>
-            <Input
-              aria-label={editMode === "note" ? t("editNote") : t("title")}
-              autoFocus
-              onChange={(event) => setDraft(event.target.value)}
-              placeholder={editMode === "note" ? t("notePlaceholder") : ""}
-              value={draft}
-            />
+            {editMode === "note" ? (
+              <Textarea
+                aria-label={t("editNote")}
+                autoFocus
+                className="max-h-48 resize-none"
+                onChange={(event) =>
+                  setDraft(event.target.value.replace(/\s*\n\s*/g, " "))
+                }
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.nativeEvent.isComposing) {
+                    event.preventDefault();
+                    event.currentTarget.form?.requestSubmit();
+                  }
+                }}
+                placeholder={t("notePlaceholder")}
+                rows={2}
+                value={draft}
+              />
+            ) : (
+              <Input
+                aria-label={t("title")}
+                autoFocus
+                onChange={(event) => setDraft(event.target.value)}
+                value={draft}
+              />
+            )}
             <DialogFooter>
               <Button
                 onClick={() => setEditMode(null)}

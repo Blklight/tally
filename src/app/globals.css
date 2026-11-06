@@ -1190,7 +1190,33 @@
   }
 }
 
+.ping-pong.is-overflowing .ping-pong-track {
+  animation: ping-pong var(--pp-duration, 6s) ease-in-out infinite alternate;
+}
+
+.ping-pong.is-overflowing:hover .ping-pong-track {
+  animation-play-state: paused;
+}
+
+@keyframes ping-pong {
+  0%,
+  20% {
+    transform: translateX(0);
+  }
+  80%,
+  100% {
+    transform: translateX(var(--pp-shift, 0));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
+  .ping-pong.is-overflowing {
+    text-overflow: ellipsis;
+  }
+  .ping-pong.is-overflowing .ping-pong-track {
+    display: inline;
+    animation: none;
+  }
   .is-holding .hold-fill {
     transition: none;
   }
