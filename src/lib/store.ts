@@ -353,26 +353,10 @@ export function initializeData(existing: Data = empty): Data {
       looseAppearance: normalizeAppearance(existing.looseAppearance),
     });
 
-  const hasDragonBall = existing.series.some(
-    (s) => s.title.trim().toLowerCase() === "dragon ball",
-  );
-
-  const dragonBall: Series = {
-    id: "dragon-ball",
-    title: "Dragon Ball",
-    category: "manga",
-    total: 42,
-    acquired: [29, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42],
-    nomenclature: "volume",
-    appearance: { paper: "craft", ink: "graphite" },
-  };
   return {
     ...existing,
     initialized: true,
-    series: (hasDragonBall
-      ? existing.series
-      : [dragonBall, ...existing.series]
-    ).map(normalizeSeries),
+    series: existing.series.map(normalizeSeries),
     looseAppearance: normalizeAppearance(existing.looseAppearance),
     looseSort: normalizeSort(existing.looseSort),
   };

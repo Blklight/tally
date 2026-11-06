@@ -10,6 +10,7 @@ import {
   Trash2,
 } from "lucide-react";
 import {
+  Children,
   type CSSProperties,
   cloneElement,
   isValidElement,
@@ -29,6 +30,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useLocale } from "@/lib/i18n";
 import {
   type Appearance,
@@ -39,11 +41,16 @@ import {
 import { cn } from "@/lib/utils";
 import { CornerFrame, CornerMarkers } from "./corner-frame";
 import SwipeRow, { type SwipeAction } from "./SwipeRow";
+import { PingPongText } from "./tally/ping-pong-text";
+import { useProgressiveCount } from "./tally/use-progressive-count";
 import { ChamferButton } from "./ui/chamfer-button";
 
 const DELETE_COLOR = "#e5484d";
 const PRIORITY_COLOR = "#d97706";
 const NEUTRAL_COLOR = "#52525b";
+const FLIP_DURATION = 700;
+const FLY_DURATION = 260;
+const SETTLE_DURATION = 320;
 
 export function HoldRow({
   label,
@@ -186,7 +193,9 @@ export function HoldRow({
         >
           <span className={cn("strike", checked && "is-struck")}>{label}</span>
           {note && (
-            <span className="mt-1 block text-xs opacity-60">{note}</span>
+            <PingPongText className="mt-1 text-xs opacity-60">
+              {note}
+            </PingPongText>
           )}
         </span>
         {priority && (
@@ -293,13 +302,32 @@ export function HoldRow({
                     : t("addNote")}
               </DialogTitle>
             </DialogHeader>
-            <Input
-              aria-label={editMode === "note" ? t("editNote") : t("title")}
-              autoFocus
-              onChange={(event) => setDraft(event.target.value)}
-              placeholder={editMode === "note" ? t("notePlaceholder") : ""}
-              value={draft}
-            />
+            {editMode === "note" ? (
+              <Textarea
+                aria-label={t("editNote")}
+                autoFocus
+                className="max-h-48 resize-none"
+                onChange={(event) =>
+                  setDraft(event.target.value.replace(/\s*\n\s*/g, " "))
+                }
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" && !event.nativeEvent.isComposing) {
+                    event.preventDefault();
+                    event.currentTarget.form?.requestSubmit();
+                  }
+                }}
+                placeholder={t("notePlaceholder")}
+                rows={2}
+                value={draft}
+              />
+            ) : (
+              <Input
+                aria-label={t("title")}
+                autoFocus
+                onChange={(event) => setDraft(event.target.value)}
+                value={draft}
+              />
+            )}
             <DialogFooter>
               <Button
                 onClick={() => setEditMode(null)}
@@ -519,25 +547,33 @@ export function Ficha({
 }) {
   const { t } = useLocale();
   const [flipped, setFlipped] = useState(false);
+  const backRows = Children.toArray(children);
+  const mountedRows = useProgressiveCount(backRows.length);
   const [editing, setEditing] = useState(startEditing ?? false);
   useEffect(() => setEditing(startEditing ?? false), [startEditing]);
   const frontBtnRef = useRef<HTMLButtonElement>(null);
   const backBtnRef = useRef<HTMLButtonElement>(null);
 
-  const flip = () => {
-    setFlipped((f) => {
-      const next = !f;
-      // Ao virar, transferir o foco suavemente para o botão da nova face
-      setTimeout(() => {
-        if (next) {
-          backBtnRef.current?.focus();
-        } else {
-          frontBtnRef.current?.focus();
-        }
-      }, 50);
-      return next;
-    });
-  };
+  const [settledFlipped, setSettledFlipped] = useState(false);
+  const focusAfterFlip = useRef(false);
+
+  useEffect(() => {
+    if (flipped === settledFlipped) return;
+    // O verso só troca de `inert` depois do giro: com centenas de linhas, isso recalcula o estilo de todas.
+    const id = setTimeout(() => {
+      focusAfterFlip.current = true;
+      setSettledFlipped(flipped);
+    }, FLIP_DURATION);
+    return () => clearTimeout(id);
+  }, [flipped, settledFlipped]);
+
+  useEffect(() => {
+    if (!focusAfterFlip.current) return;
+    focusAfterFlip.current = false;
+    (settledFlipped ? backBtnRef : frontBtnRef).current?.focus();
+  }, [settledFlipped]);
+
+  const flip = () => setFlipped((f) => !f);
 
   const resolvedCountLabel = countLabel ?? t("manyMissing");
   const settings = (
@@ -724,7 +760,7 @@ export function Ficha({
         <div
           className="flip-face flip-back absolute inset-0 rounded-2xl"
           aria-hidden={!flipped}
-          inert={!flipped ? true : undefined}
+          inert={!settledFlipped ? true : undefined}
         >
           <Fillet corner="bl" className={face}>
             <header className="relative mb-2 shrink-0">
@@ -750,7 +786,7 @@ export function Ficha({
               className="relative flex min-h-0 flex-1 flex-col mb-5 p-2"
             >
               <div className="scrollbar-none relative min-h-0 flex-1 overflow-y-auto overscroll-contain pb-6">
-                {children}
+                {backRows.slice(0, mountedRows)}
               </div>
             </CornerFrame>
           </Fillet>
@@ -815,6 +851,7 @@ export function StackView<T extends { id: string }>({
   const [fly, setFly] = useState<{ id: string; dir: number; d: number } | null>(
     null,
   );
+  const [leaving, setLeaving] = useState<string | null>(null);
   const start = useRef<{
     x: number;
     y: number;
@@ -839,9 +876,16 @@ export function StackView<T extends { id: string }>({
       setIndex(nextIndex);
       setFly(null);
       setDx(0);
+      setLeaving(from.id);
       busy.current = false;
-    }, 260);
+    }, FLY_DURATION);
   };
+
+  useEffect(() => {
+    if (!leaving) return;
+    const id = setTimeout(() => setLeaving(null), SETTLE_DURATION);
+    return () => clearTimeout(id);
+  }, [leaving]);
 
   const goRef = useRef(go);
   useEffect(() => {
@@ -896,6 +940,13 @@ export function StackView<T extends { id: string }>({
   const layers = Array.from({ length: depth }, (_, o) =>
     o === 0 ? cards[index] : cards[(index + o * targetStep + n) % n],
   ).filter((card): card is T => Boolean(card));
+  // Com mais fichas que camadas visíveis, a que saiu não volta para `layers`; ela segue montada até assentar no fundo.
+  const settling =
+    leaving && !layers.some((card) => card.id === leaving)
+      ? cards.find((card) => card.id === leaving)
+      : undefined;
+  const rendered = [...layers].reverse();
+  if (settling) rendered.push(settling);
   const ease =
     "transform 300ms cubic-bezier(.22,.8,.3,1), filter 300ms, opacity 300ms";
 
@@ -941,15 +992,16 @@ export function StackView<T extends { id: string }>({
         onPointerUp={() => end(true)}
         onPointerCancel={() => end(false)}
       >
-        {[...layers].reverse().map((c) => {
-          const o = layers.indexOf(c);
+        {rendered.map((c) => {
+          const isSettling = c === settling;
+          const o = isSettling ? depth - 1 : layers.indexOf(c);
           const isFly = fly?.id === c.id;
           const isTop = o === 0 && !isFly;
           // while dragging, cards behind rise toward the front
           const p = fly ? 1 : Math.min(1, Math.abs(dx) / width());
           const d = Math.max(0, o - p);
           let transform = `translate(${d * 10}px, ${d * 10}px)`;
-          let z = 10 - o;
+          let z = isSettling ? 10 - depth : 10 - o;
           if (isTop) transform = `translateX(${dx}px) rotate(${dx / 40}deg)`;
           if (isFly) {
             transform = `translateX(${fly.dir * width() * 1.15}px) rotate(${fly.dir * 12}deg)`;
@@ -960,10 +1012,7 @@ export function StackView<T extends { id: string }>({
               key={c.id}
               aria-hidden={!isTop}
               inert={!isTop ? true : undefined}
-              className={cn(
-                "absolute inset-y-0 left-3 right-3 sm:inset-x-0",
-                !isTop && "pointer-events-none",
-              )}
+              className="absolute inset-y-0 left-3 right-3 sm:inset-x-0"
               style={{
                 zIndex: z,
                 transform,
