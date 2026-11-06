@@ -141,6 +141,7 @@ export function Navbar({
           </DialogHeader>
           <Textarea
             aria-label={t("importData")}
+            className="max-h-[40svh] overflow-y-auto"
             onChange={(event) => setImportText(event.target.value)}
             placeholder='{"series": [], "items": []}'
             rows={10}
