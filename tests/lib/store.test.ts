@@ -17,19 +17,12 @@ import {
 } from "@/lib/store";
 
 describe("Collection rules", () => {
-  it("initializes Dragon Ball with 42 volumes and the expected acquired list", () => {
-    const dragonBall = initializeData().series.find(
-      (series) => series.title === "Dragon Ball",
-    );
+  it("initializes with an empty collection", () => {
+    const initialized = initializeData();
 
-    expect(dragonBall?.total).toBe(42);
-    expect(dragonBall?.acquired).toEqual([
-      29, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42,
-    ]);
-    expect(dragonBall?.appearance).toEqual({
-      paper: "#d7bc8b",
-      ink: "graphite",
-    });
+    expect(initialized.initialized).toBe(true);
+    expect(initialized.series).toEqual([]);
+    expect(initialized.items).toEqual([]);
   });
 
   it("preserves existing loose items and does not re-add deleted defaults", () => {
@@ -44,7 +37,7 @@ describe("Collection rules", () => {
     expect(initializeData({ ...initialized, series: [] }).series).toEqual([]);
   });
 
-  it("does not duplicate or overwrite an existing Dragon Ball series", () => {
+  it("keeps an existing series and converts its legacy missing list", () => {
     const series = {
       id: "existing",
       title: "Dragon Ball",
@@ -187,7 +180,18 @@ describe("Series and import helpers", () => {
   });
 
   it("merges imported data skipping ids that already exist", () => {
-    const current = initializeData();
+    const current = initializeData({
+      series: [
+        {
+          id: "dragon-ball",
+          title: "Dragon Ball",
+          category: "manga",
+          total: 42,
+          acquired: [],
+        },
+      ],
+      items: [],
+    });
     const imported = normalizeImportedData({
       series: [
         { id: "dragon-ball", title: "Dragon Ball", total: 42 },
