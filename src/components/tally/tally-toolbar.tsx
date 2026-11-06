@@ -18,26 +18,26 @@ export function TallyToolbar({
   if (!canNavigate) return null;
 
   return (
-    <div className="relative z-30 flex shrink-0 justify-center gap-2 px-0 py-1">
+    <div className="relative z-30 flex shrink-0 justify-center gap-6 px-0 pb-[max(0.25rem,env(safe-area-inset-bottom))]">
       <Button
         aria-label={t("previousCard")}
         data-card-nav=""
-        className="size-8 rounded-none border-0 bg-transparent p-0 shadow-none"
+        className="size-11 rounded-none border-0 bg-transparent p-0 shadow-none"
         onClick={onPrevious}
         size="icon"
         variant="ghost"
       >
-        <ChevronLeft />
+        <ChevronLeft className="size-6" />
       </Button>
       <Button
         aria-label={t("nextCard")}
         data-card-nav=""
-        className="size-8 rounded-none border-0 bg-transparent p-0 shadow-none"
+        className="size-11 rounded-none border-0 bg-transparent p-0 shadow-none"
         onClick={onNext}
         size="icon"
         variant="ghost"
       >
-        <ChevronRight />
+        <ChevronRight className="size-6" />
       </Button>
     </div>
   );
